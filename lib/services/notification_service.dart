@@ -79,6 +79,7 @@ class NotificationService extends GetxService {
 
   static Future<void> _scheduleDailyReminder() async {
     await _notifications.cancelAll();
+    print('NotificationService: Canceled all existing notifications');
 
     // Check if exact alarms are available on Android
     final androidPlugin = _notifications
@@ -89,6 +90,7 @@ class NotificationService extends GetxService {
     if (androidPlugin != null) {
       try {
         canScheduleExactNotifications = await androidPlugin.canScheduleExactNotifications() ?? false;
+        print('NotificationService: Can schedule exact notifications: $canScheduleExactNotifications');
       } catch (e) {
         print('Error checking exact alarm permission: $e');
         canScheduleExactNotifications = false;
@@ -110,34 +112,44 @@ class NotificationService extends GetxService {
       ),
     );
 
+    final scheduledTime = _getNext11AM();
+    print('NotificationService: Scheduling notification for: $scheduledTime');
+    print('NotificationService: Current time: ${tz.TZDateTime.now(tz.local)}');
+
     try {
       if (canScheduleExactNotifications) {
         await _notifications.zonedSchedule(
           0,
           'Daily Photo Reminder',
           'Don\'t forget to capture today\'s moment! 📸',
-          _getNext11AM(),
+          scheduledTime,
           notificationDetails,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
         );
+        print('NotificationService: Successfully scheduled exact notification');
       } else {
         // Fall back to inexact scheduling
         await _notifications.zonedSchedule(
           0,
           'Daily Photo Reminder',
           'Don\'t forget to capture today\'s moment! 📸',
-          _getNext11AM(),
+          scheduledTime,
           notificationDetails,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
         );
-        print('Using inexact notifications - exact alarms not permitted');
+        print('NotificationService: Successfully scheduled inexact notification');
       }
+      
+      // Test immediate notification
+      print('NotificationService: Sending test immediate notification');
+      await _sendImmediateNotification();
+      
     } catch (e) {
       print('Error scheduling notification: $e');
       // App can still function without notifications
