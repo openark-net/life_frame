@@ -2,10 +2,18 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../controllers/photo_journal_controller.dart';
+import '../services/photo_stitching_service.dart';
 import 'simple_camera_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? stitchedPhotoPath;
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +21,10 @@ class HomeScreen extends StatelessWidget {
 
     return CupertinoPageScaffold(
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Obx(() {
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Obx(() {
             if (controller.isLoading) {
               return const Center(child: CupertinoActivityIndicator());
             }
@@ -180,7 +189,57 @@ class HomeScreen extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                if (controller.hasTodayPhoto)
+                if (controller.hasTodayPhoto) ...[
+                  CupertinoButton.filled(
+                    onPressed: () async {
+                      if (controller.todayBackPhoto.isEmpty || controller.todayFrontPhoto.isEmpty) {
+                        Get.snackbar(
+                          'Error',
+                          'Both front and back photos are required for stitching',
+                          snackPosition: SnackPosition.TOP,
+                          backgroundColor: CupertinoColors.systemRed,
+                          colorText: CupertinoColors.white,
+                        );
+                        return;
+                      }
+
+                      final stitchingService = PhotoStitchingService();
+                      final now = DateTime.now();
+                      final formattedDate = '${now.day}/${now.month}/${now.year}';
+                      
+                      final stitchedPath = await stitchingService.stitchPhotos(
+                        backPhotoPath: controller.todayBackPhoto,
+                        frontPhotoPath: controller.todayFrontPhoto,
+                        dateText: formattedDate,
+                        locationText: 'Victoria, BC',
+                      );
+
+                      if (stitchedPath != null) {
+                        setState(() {
+                          stitchedPhotoPath = stitchedPath;
+                        });
+                        Get.snackbar(
+                          'Success',
+                          'Photos stitched successfully!',
+                          snackPosition: SnackPosition.TOP,
+                          backgroundColor: CupertinoColors.systemGreen,
+                          colorText: CupertinoColors.white,
+                        );
+                      } else {
+                        Get.snackbar(
+                          'Error',
+                          'Failed to stitch photos',
+                          snackPosition: SnackPosition.TOP,
+                          backgroundColor: CupertinoColors.systemRed,
+                          colorText: CupertinoColors.white,
+                        );
+                      }
+                    },
+                    child: const Text('Stitch Today\'s Photos'),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
                   CupertinoButton(
                     onPressed: () async {
                       final success = await controller.deleteTodayEntry();
@@ -196,6 +255,7 @@ class HomeScreen extends StatelessWidget {
                     },
                     child: const Text('Delete Today\'s Entry'),
                   ),
+                ],
 
                 // Display captured photos section
                 if (controller.todayBackPhoto.isNotEmpty || controller.todayFrontPhoto.isNotEmpty) ...[
@@ -306,9 +366,51 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ],
+
+                // Display stitched photo section
+                if (stitchedPhotoPath != null) ...[
+                  const SizedBox(height: 30),
+                  Text(
+                    'Stitched Photo:',
+                    style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: CupertinoColors.separator,
+                        width: 0.5,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        File(stitchedPhotoPath!),
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: 200,
+                            color: CupertinoColors.systemGrey6,
+                            child: const Center(
+                              child: Icon(
+                                CupertinoIcons.photo,
+                                size: 40,
+                                color: CupertinoColors.systemGrey3,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ],
             );
-          }),
+            }),
+          ),
         ),
       ),
     );
