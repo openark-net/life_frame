@@ -30,10 +30,10 @@ class HomeScreen extends StatelessWidget {
                       onTapUp: (_) => navController.cancelLongPressTimer(),
                       onTapCancel: () => navController.cancelLongPressTimer(),
                       child: Text(
-                        'Life Frame',
+                        'Life Frame 📸',
                         style: TextStyle(
                           fontFamily: 'PeaceSans',
-                          fontSize: 48,
+                          fontSize: 38,
                           fontWeight: FontWeight.bold,
                           color: CupertinoTheme.of(context).primaryColor,
                         ),

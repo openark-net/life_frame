@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'services/storage_service.dart';
+import 'services/notification_service.dart';
 import 'controllers/photo_journal_controller.dart';
 import 'controllers/navigation_controller.dart';
 import 'screens/root_screen.dart';
@@ -15,6 +16,11 @@ void main() async {
   });
   Get.put(PhotoJournalController());
   Get.put(NavigationController());
+  await Get.putAsync(() async {
+    final notificationService = NotificationService();
+    await notificationService.onInit();
+    return notificationService;
+  });
 
   runApp(const MyApp());
 }
