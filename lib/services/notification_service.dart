@@ -146,7 +146,7 @@ class NotificationService extends GetxService {
 
   static tz.TZDateTime _getNext11AM() {
     final now = tz.TZDateTime.now(tz.local);
-    var next11AM = tz.TZDateTime(tz.local, now.year, now.month, now.day, 11, 0);
+    var next11AM = tz.TZDateTime(tz.local, now.year, now.month, now.day, 16, 36);
     
     if (next11AM.isBefore(now)) {
       next11AM = next11AM.add(const Duration(days: 1));
