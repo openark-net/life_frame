@@ -45,9 +45,13 @@ class PhotoStitchingService {
 
       final savedPath = await _saveImageToFile(stitchedImage);
 
+      // Clean up memory
       backImage.dispose();
       frontImage.dispose();
       stitchedImage.dispose();
+
+      // Delete original photos to save space
+      await _deleteOriginalPhotos(backPhotoPath, frontPhotoPath);
 
       return savedPath;
     } catch (e) {
@@ -227,8 +231,9 @@ class PhotoStitchingService {
 
     final bytes = byteData.buffer.asUint8List();
     final directory = await getApplicationDocumentsDirectory();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final filePath = '${directory.path}/stitched_photo_$timestamp.png';
+    final now = DateTime.now();
+    final dateString = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final filePath = '${directory.path}/life_frame_$dateString.png';
 
     final file = File(filePath);
     await file.writeAsBytes(bytes);
@@ -236,6 +241,25 @@ class PhotoStitchingService {
     await Gal.putImage('$filePath', album: 'LifeFrame');
 
     return filePath;
+  }
+
+  Future<void> _deleteOriginalPhotos(String backPhotoPath, String frontPhotoPath) async {
+    try {
+      final backFile = File(backPhotoPath);
+      final frontFile = File(frontPhotoPath);
+
+      if (await backFile.exists()) {
+        await backFile.delete();
+        print('Deleted original back photo: $backPhotoPath');
+      }
+
+      if (await frontFile.exists()) {
+        await frontFile.delete();
+        print('Deleted original front photo: $frontPhotoPath');
+      }
+    } catch (e) {
+      print('Error deleting original photos: $e');
+    }
   }
 
   Future<bool> deleteStitchedPhoto(String filePath) async {
@@ -256,7 +280,7 @@ class PhotoStitchingService {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final files = directory.listSync()
-          .where((file) => file.path.contains('stitched_photo_'))
+          .where((file) => file.path.contains('life_frame_'))
           .map((file) => file.path)
           .toList();
 
