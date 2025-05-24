@@ -1,0 +1,221 @@
+import 'dart:io';
+import 'package:get/get.dart';
+import '../models/daily_entry.dart';
+import '../services/storage_service.dart';
+
+class PhotoJournalController extends GetxController {
+  final StorageService _storageService = Get.find<StorageService>();
+
+  final RxBool _hasTodayPhoto = false.obs;
+  final RxBool _isLoading = false.obs;
+  final Rx<DailyEntry?> _todayEntry = Rx<DailyEntry?>(null);
+  final RxList<DailyEntry> _allEntries = <DailyEntry>[].obs;
+  final RxInt _totalPhotosCount = 0.obs;
+  final RxString _currentDate = ''.obs;
+
+  bool get hasTodayPhoto => _hasTodayPhoto.value;
+  bool get isLoading => _isLoading.value;
+  DailyEntry? get todayEntry => _todayEntry.value;
+  List<DailyEntry> get allEntries => _allEntries;
+  int get totalPhotosCount => _totalPhotosCount.value;
+  String get currentDate => _currentDate.value;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _updateCurrentDate();
+    _checkTodayPhoto();
+    _loadAllEntries();
+    _startDateUpdateTimer();
+  }
+
+  void _updateCurrentDate() {
+    _currentDate.value = DailyEntry.getTodayKey();
+  }
+
+  void _startDateUpdateTimer() {
+    ever(_currentDate, (String date) {
+      _checkTodayPhoto();
+    });
+
+    Stream.periodic(const Duration(minutes: 1)).listen((_) {
+      final newDate = DailyEntry.getTodayKey();
+      if (newDate != _currentDate.value) {
+        _updateCurrentDate();
+      }
+    });
+  }
+
+  Future<void> _checkTodayPhoto() async {
+    try {
+      _isLoading.value = true;
+      final hasPhoto = await _storageService.hasTodayPhoto();
+      _hasTodayPhoto.value = hasPhoto;
+
+      if (hasPhoto) {
+        _todayEntry.value = await _storageService.getTodayEntry();
+      } else {
+        _todayEntry.value = null;
+      }
+    } catch (e) {
+      print('PhotoJournalController: Error checking today photo: $e');
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> _loadAllEntries() async {
+    try {
+      final entries = await _storageService.getAllEntries();
+      _allEntries.value = entries;
+      _totalPhotosCount.value = entries.length;
+    } catch (e) {
+      print('PhotoJournalController: Error loading all entries: $e');
+    }
+  }
+
+  Future<bool> savePhotoEntry({
+    required String photoPath,
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      _isLoading.value = true;
+
+      final now = DateTime.now();
+      final entry = DailyEntry(
+        date: DailyEntry.formatDate(now),
+        photoPath: photoPath,
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: now,
+      );
+
+      final success = await _storageService.saveDailyEntry(entry);
+
+      if (success) {
+        _hasTodayPhoto.value = true;
+        _todayEntry.value = entry;
+        await _loadAllEntries();
+      }
+
+      return success;
+    } catch (e) {
+      print('PhotoJournalController: Error saving photo entry: $e');
+      return false;
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<String> getPhotoSavePath() async {
+    final photosDir = await _storageService.getPhotosDirectoryPath();
+    final fileName = _storageService.generatePhotoFileName();
+    return '$photosDir/$fileName';
+  }
+
+  Future<bool> deleteEntry(String date) async {
+    try {
+      _isLoading.value = true;
+      final success = await _storageService.deleteDailyEntry(date);
+
+      if (success) {
+        if (date == DailyEntry.getTodayKey()) {
+          _hasTodayPhoto.value = false;
+          _todayEntry.value = null;
+        }
+        await _loadAllEntries();
+      }
+
+      return success;
+    } catch (e) {
+      print('PhotoJournalController: Error deleting entry: $e');
+      return false;
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<bool> deleteTodayEntry() async {
+    final today = DailyEntry.getTodayKey();
+    return await deleteEntry(today);
+  }
+
+  Future<DailyEntry?> getEntryForDate(String date) async {
+    return await _storageService.getDailyEntry(date);
+  }
+
+  bool hasEntryForDate(String date) {
+    return _allEntries.any((entry) => entry.date == date);
+  }
+
+  List<DailyEntry> getEntriesForMonth(int year, int month) {
+    final monthStr = month.toString().padLeft(2, '0');
+    final yearMonthPrefix = '$year-$monthStr';
+
+    return _allEntries
+        .where((entry) => entry.date.startsWith(yearMonthPrefix))
+        .toList();
+  }
+
+  List<DailyEntry> getEntriesForYear(int year) {
+    final yearPrefix = '$year-';
+
+    return _allEntries
+        .where((entry) => entry.date.startsWith(yearPrefix))
+        .toList();
+  }
+
+  int getStreak() {
+    if (_allEntries.isEmpty) return 0;
+
+    final sortedEntries = List<DailyEntry>.from(_allEntries)
+      ..sort((a, b) => b.date.compareTo(a.date));
+
+    int streak = 0;
+    DateTime checkDate = DateTime.now();
+
+    for (final entry in sortedEntries) {
+      final entryDate = DateTime.parse('${entry.date}T00:00:00');
+      final expectedDate = DateTime(
+        checkDate.year,
+        checkDate.month,
+        checkDate.day,
+      );
+
+      if (entryDate.isAtSameMomentAs(expectedDate)) {
+        streak++;
+        checkDate = checkDate.subtract(const Duration(days: 1));
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  Future<void> refreshData() async {
+    await _checkTodayPhoto();
+    await _loadAllEntries();
+  }
+
+  Future<void> clearAllData() async {
+    try {
+      _isLoading.value = true;
+      await _storageService.clearAllData();
+      _hasTodayPhoto.value = false;
+      _todayEntry.value = null;
+      _allEntries.clear();
+      _totalPhotosCount.value = 0;
+    } catch (e) {
+      print('PhotoJournalController: Error clearing all data: $e');
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  bool isPhotoFileValid(String photoPath) {
+    final file = File(photoPath);
+    return file.existsSync();
+  }
+}
