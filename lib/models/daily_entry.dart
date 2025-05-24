@@ -4,6 +4,7 @@ class DailyEntry {
   final double latitude;
   final double longitude;
   final DateTime timestamp;
+  final String? stitchedPhotoPath; // Optional stitched photo path
 
   DailyEntry({
     required this.date,
@@ -11,6 +12,7 @@ class DailyEntry {
     required this.latitude,
     required this.longitude,
     required this.timestamp,
+    this.stitchedPhotoPath,
   });
 
   Map<String, dynamic> toJson() {
@@ -20,6 +22,7 @@ class DailyEntry {
       'latitude': latitude,
       'longitude': longitude,
       'timestamp': timestamp.toIso8601String(),
+      'stitchedPhotoPath': stitchedPhotoPath,
     };
   }
 
@@ -30,6 +33,7 @@ class DailyEntry {
       latitude: json['latitude'],
       longitude: json['longitude'],
       timestamp: DateTime.parse(json['timestamp']),
+      stitchedPhotoPath: json['stitchedPhotoPath'],
     );
   }
 
@@ -53,6 +57,24 @@ class DailyEntry {
     return 'DailyEntry(date: $date, photoPath: $photoPath, lat: $latitude, lng: $longitude, timestamp: $timestamp)';
   }
 
+  DailyEntry copyWith({
+    String? date,
+    String? photoPath,
+    double? latitude,
+    double? longitude,
+    DateTime? timestamp,
+    String? stitchedPhotoPath,
+  }) {
+    return DailyEntry(
+      date: date ?? this.date,
+      photoPath: photoPath ?? this.photoPath,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      timestamp: timestamp ?? this.timestamp,
+      stitchedPhotoPath: stitchedPhotoPath ?? this.stitchedPhotoPath,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -61,7 +83,8 @@ class DailyEntry {
         other.photoPath == photoPath &&
         other.latitude == latitude &&
         other.longitude == longitude &&
-        other.timestamp == timestamp;
+        other.timestamp == timestamp &&
+        other.stitchedPhotoPath == stitchedPhotoPath;
   }
 
   @override
@@ -70,6 +93,7 @@ class DailyEntry {
         photoPath.hashCode ^
         latitude.hashCode ^
         longitude.hashCode ^
-        timestamp.hashCode;
+        timestamp.hashCode ^
+        stitchedPhotoPath.hashCode;
   }
 }

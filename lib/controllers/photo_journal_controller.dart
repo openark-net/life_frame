@@ -279,4 +279,33 @@ class PhotoJournalController extends GetxController {
     final file = File(photoPath);
     return file.existsSync();
   }
+
+  Future<bool> updateTodayEntryWithStitchedPhoto(String stitchedPhotoPath) async {
+    try {
+      _isLoading.value = true;
+      
+      final currentEntry = _todayEntry.value;
+      if (currentEntry == null) {
+        return false;
+      }
+
+      final updatedEntry = currentEntry.copyWith(
+        stitchedPhotoPath: stitchedPhotoPath,
+      );
+
+      final success = await _storageService.saveDailyEntry(updatedEntry);
+      
+      if (success) {
+        _todayEntry.value = updatedEntry;
+        await _loadAllEntries();
+      }
+
+      return success;
+    } catch (e) {
+      print('PhotoJournalController: Error updating entry with stitched photo: $e');
+      return false;
+    } finally {
+      _isLoading.value = false;
+    }
+  }
 }

@@ -8,6 +8,7 @@ class PhotoStitchingService {
   static const double frontPhotoScaleFactor = 0.25;
   static const double padding = 16.0;
   static const double textPadding = 8.0;
+  static const double frontPhotoRadius = 12.0;
 
   Future<String?> stitchPhotos({
     required String backPhotoPath,
@@ -47,7 +48,12 @@ class PhotoStitchingService {
     try {
       final file = File(filePath);
       final bytes = await file.readAsBytes();
-      final codec = await ui.instantiateImageCodec(bytes);
+      final codec = await ui.instantiateImageCodec(
+        bytes,
+        allowUpscaling: false,
+        targetWidth: null,
+        targetHeight: null,
+      );
       final frame = await codec.getNextFrame();
       return frame.image;
     } catch (e) {
@@ -104,7 +110,8 @@ class PhotoStitchingService {
 
   void _drawFrontImage(Canvas canvas, ui.Image frontImage, Size targetSize) {
     final paint = Paint()
-      ..filterQuality = FilterQuality.high;
+      ..filterQuality = FilterQuality.high
+      ..isAntiAlias = true;
     
     final srcRect = Rect.fromLTWH(
       0,
@@ -120,14 +127,20 @@ class PhotoStitchingService {
       targetSize.height,
     );
     
+    final rrect = RRect.fromRectAndRadius(dstRect, const Radius.circular(frontPhotoRadius));
+    
+    canvas.save();
+    canvas.clipRRect(rrect);
     canvas.drawImageRect(frontImage, srcRect, dstRect, paint);
+    canvas.restore();
     
     final borderPaint = Paint()
       ..color = const Color(0xFFFFFFFF)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 3.0
+      ..isAntiAlias = true;
     
-    canvas.drawRect(dstRect, borderPaint);
+    canvas.drawRRect(rrect, borderPaint);
   }
 
   void _drawTextOverlay(
@@ -140,12 +153,18 @@ class PhotoStitchingService {
   }) {
     const textStyle = TextStyle(
       color: Color(0xFFFFFFFF),
-      fontSize: 16.0,
+      fontSize: 20.0,
       fontWeight: FontWeight.w600,
+      fontFamily: 'Peace Sans',
       shadows: [
         Shadow(
           offset: Offset(1.0, 1.0),
-          blurRadius: 3.0,
+          blurRadius: 4.0,
+          color: Color(0x80000000),
+        ),
+        Shadow(
+          offset: Offset(-1.0, -1.0),
+          blurRadius: 4.0,
           color: Color(0x80000000),
         ),
       ],
@@ -198,6 +217,7 @@ class PhotoStitchingService {
     
     return filePath;
   }
+
 
   Future<bool> deleteStitchedPhoto(String filePath) async {
     try {

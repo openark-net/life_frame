@@ -218,6 +218,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         setState(() {
                           stitchedPhotoPath = stitchedPath;
                         });
+
+                        // Update the DailyEntry with stitched photo path
+                        await controller.updateTodayEntryWithStitchedPhoto(stitchedPath);
+                        
                         Get.snackbar(
                           'Success',
                           'Photos stitched successfully!',
