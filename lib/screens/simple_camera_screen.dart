@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:camera/camera.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class SimpleCameraScreen extends StatefulWidget {
   const SimpleCameraScreen({super.key});
@@ -9,92 +10,36 @@ class SimpleCameraScreen extends StatefulWidget {
 }
 
 class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
-  CameraController? _controller;
-  bool _isInitialized = false;
-  bool _isCapturing = false;
-  List<CameraDescription> _cameras = [];
-  int _currentCameraIndex = 0;
+  final ImagePicker _picker = ImagePicker();
   List<String> _capturedPhotos = [];
+  bool _isCapturing = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeCamera();
-  }
-
-  Future<void> _initializeCamera() async {
-    try {
-      _cameras = await availableCameras();
-      if (_cameras.isEmpty) return;
-
-      // Start with back camera (index 0 is usually back camera)
-      _currentCameraIndex = 0;
-      
-      _controller = CameraController(
-        _cameras[_currentCameraIndex],
-        ResolutionPreset.medium,
-        enableAudio: false,
-      );
-
-      await _controller!.initialize();
-      
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-      }
-    } catch (e) {
-      print('Error initializing camera: $e');
-    }
-  }
-
-  Future<void> _switchCamera() async {
-    if (_cameras.length < 2) return;
-
-    setState(() {
-      _isInitialized = false;
-    });
-
-    try {
-      await _controller?.dispose();
-      
-      _currentCameraIndex = (_currentCameraIndex + 1) % _cameras.length;
-      
-      _controller = CameraController(
-        _cameras[_currentCameraIndex],
-        ResolutionPreset.medium,
-        enableAudio: false,
-      );
-
-      await _controller!.initialize();
-      
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-      }
-    } catch (e) {
-      print('Error switching camera: $e');
-    }
-  }
-
-  Future<void> _capturePhoto() async {
-    if (_controller == null || !_controller!.value.isInitialized || _isCapturing) return;
+  Future<void> _capturePhoto({required bool isBackCamera}) async {
+    if (_isCapturing) return;
 
     setState(() {
       _isCapturing = true;
     });
 
     try {
-      final XFile photo = await _controller!.takePicture();
-      
-      setState(() {
-        _capturedPhotos.add(photo.path);
-        _isCapturing = false;
-      });
-      
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: isBackCamera
+            ? CameraDevice.rear
+            : CameraDevice.front,
+        imageQuality: 85, // Slightly reduce quality to make images less sharp
+        maxWidth: 1920,   // Limit resolution
+        maxHeight: 1920,
+      );
+
+      if (photo != null) {
+        setState(() {
+          _capturedPhotos.add(photo.path);
+        });
+      }
     } catch (e) {
       print('Error taking picture: $e');
+    } finally {
       setState(() {
         _isCapturing = false;
       });
@@ -115,186 +60,177 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
+  void _retakePhoto(int index) {
+    setState(() {
+      _capturedPhotos.removeAt(index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isBackCamera = _cameras.isNotEmpty && 
-        _cameras[_currentCameraIndex].lensDirection == CameraLensDirection.back;
-    
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text(isBackCamera ? 'Back Camera' : 'Front Camera'),
+        middle: const Text('Take Photos'),
         leading: CupertinoNavigationBarBackButton(
           onPressed: () => Navigator.of(context).pop(),
         ),
         trailing: _capturedPhotos.length >= 2
             ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _finishCapture,
-                child: const Text('Done'),
-              )
+          padding: EdgeInsets.zero,
+          onPressed: _finishCapture,
+          child: const Text('Done'),
+        )
             : null,
       ),
       child: SafeArea(
-        child: Stack(
-          children: [
-            if (_isInitialized && _controller != null)
-              Positioned.fill(
-                child: CameraPreview(_controller!),
-              )
-            else
-              const Center(
-                child: CupertinoActivityIndicator(),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              // Instructions
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemGrey6,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _getInstructionText(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-            
-            // Bottom controls
-            Positioned(
-              bottom: 50,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Switch camera button
-                  if (_cameras.length > 1)
-                    CupertinoButton(
-                      onPressed: _switchCamera,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          color: CupertinoColors.black,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          CupertinoIcons.switch_camera,
-                          color: CupertinoColors.white,
-                          size: 25,
-                        ),
-                      ),
-                    )
-                  else
-                    const SizedBox(width: 50),
-                  
-                  // Capture button
-                  GestureDetector(
-                    onTap: _isCapturing ? null : _capturePhoto,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _isCapturing ? CupertinoColors.systemGrey : CupertinoColors.white,
-                        border: Border.all(
-                          color: CupertinoColors.systemGrey2,
-                          width: 4,
-                        ),
-                      ),
-                      child: _isCapturing
-                          ? const CupertinoActivityIndicator()
-                          : const Icon(
-                              CupertinoIcons.camera,
-                              size: 40,
-                              color: CupertinoColors.black,
-                            ),
+
+              const SizedBox(height: 30),
+
+              // Photo previews and capture buttons
+              Expanded(
+                child: Column(
+                  children: [
+                    // Back photo section
+                    _buildPhotoSection(
+                      title: 'Back Camera Photo',
+                      photoIndex: 0,
+                      onCapture: () => _capturePhoto(isBackCamera: true),
+                      isBackCamera: true,
                     ),
-                  ),
-                  
-                  // Photo count
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: const BoxDecoration(
-                      color: CupertinoColors.black,
-                      shape: BoxShape.circle,
+
+                    const SizedBox(height: 30),
+
+                    // Front photo section
+                    _buildPhotoSection(
+                      title: 'Front Camera Photo (Selfie)',
+                      photoIndex: 1,
+                      onCapture: () => _capturePhoto(isBackCamera: false),
+                      isBackCamera: false,
                     ),
-                    child: Center(
-                      child: Text(
-                        '${_capturedPhotos.length}',
-                        style: const TextStyle(
-                          color: CupertinoColors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhotoSection({
+    required String title,
+    required int photoIndex,
+    required VoidCallback onCapture,
+    required bool isBackCamera,
+  }) {
+    final bool hasPhoto = _capturedPhotos.length > photoIndex;
+    final bool canCapture = photoIndex == 0 || _capturedPhotos.isNotEmpty;
+
+    return Expanded(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: hasPhoto
+                ? CupertinoColors.systemGreen
+                : CupertinoColors.systemGrey4,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            
-            // Instructions
-            if (_capturedPhotos.isEmpty)
-              const Positioned(
-                top: 20,
-                left: 20,
-                right: 20,
-                child: Text(
-                  'Take your back camera photo first',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CupertinoColors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    shadows: [
-                      Shadow(
-                        color: CupertinoColors.black,
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
+
+            const SizedBox(height: 16),
+
+            Expanded(
+              child: hasPhoto
+                  ? ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.file(
+                  File(_capturedPhotos[photoIndex]),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
                 ),
               )
-            else if (_capturedPhotos.length == 1)
-              const Positioned(
-                top: 20,
-                left: 20,
-                right: 20,
-                child: Text(
-                  'Switch to front camera and take your selfie',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CupertinoColors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    shadows: [
-                      Shadow(
-                        color: CupertinoColors.black,
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
+                  : Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemGrey6,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              )
-            else
-              const Positioned(
-                top: 20,
-                left: 20,
-                right: 20,
-                child: Text(
-                  'Both photos captured! Tap Done to finish',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CupertinoColors.systemGreen,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    shadows: [
-                      Shadow(
-                        color: CupertinoColors.black,
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
+                child: Icon(
+                  isBackCamera
+                      ? CupertinoIcons.camera
+                      : CupertinoIcons.camera_on_rectangle,
+                  size: 60,
+                  color: CupertinoColors.systemGrey2,
                 ),
               ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Row(
+              children: [
+                Expanded(
+                  child: CupertinoButton.filled(
+                    onPressed: (canCapture && !_isCapturing) ? onCapture : null,
+                    child: _isCapturing
+                        ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                        : Text(hasPhoto ? 'Retake' : 'Take Photo'),
+                  ),
+                ),
+                if (hasPhoto) ...[
+                  const SizedBox(width: 8),
+                  CupertinoButton(
+                    onPressed: () => _retakePhoto(photoIndex),
+                    child: const Icon(CupertinoIcons.delete),
+                  ),
+                ],
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  String _getInstructionText() {
+    if (_capturedPhotos.isEmpty) {
+      return 'First, take a photo with the back camera';
+    } else if (_capturedPhotos.length == 1) {
+      return 'Now take a selfie with the front camera';
+    } else {
+      return 'Both photos captured! Tap Done to finish';
+    }
   }
 }
