@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'gallery_screen.dart';
+import 'debug_screen.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -23,6 +24,10 @@ class MainScreen extends StatelessWidget {
             icon: Icon(CupertinoIcons.photo_on_rectangle),
             label: 'Gallery',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.wrench_fill),
+            label: 'Debug',
+          ),
         ],
       ),
       tabBuilder: (BuildContext context, int index) {
@@ -38,6 +43,10 @@ class MainScreen extends StatelessWidget {
           case 2:
             return CupertinoTabView(
               builder: (context) => const GalleryScreen(),
+            );
+          case 3:
+            return CupertinoTabView(
+              builder: (context) => const DebugScreen(),
             );
           default:
             return CupertinoTabView(
