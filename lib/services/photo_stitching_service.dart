@@ -163,9 +163,9 @@ class PhotoStitchingService {
   }) {
     const textStyle = TextStyle(
       color: Color(0xFFFFFFFF),
-      fontSize: 20.0,
+      fontSize: 40.0,
       fontWeight: FontWeight.w600,
-      fontFamily: 'Peace Sans',
+      fontFamily: 'PeaceSans',
       shadows: [
         Shadow(
           offset: Offset(1.0, 1.0),

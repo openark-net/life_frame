@@ -30,3 +30,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  fonts:
+    - family: PeaceSans
+      fonts:
+        - asset: assets/fonts/PeaceSans.ttf
