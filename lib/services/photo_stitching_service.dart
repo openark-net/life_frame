@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:gal/gal.dart';
 import '../utils/location_formatter.dart';
 
 class PhotoStitchingService {
@@ -223,6 +224,8 @@ class PhotoStitchingService {
     
     final file = File(filePath);
     await file.writeAsBytes(bytes);
+
+    await Gal.putImage('$filePath', album: 'LifeFrame');
     
     return filePath;
   }
