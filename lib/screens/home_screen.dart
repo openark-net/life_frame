@@ -211,7 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         backPhotoPath: controller.todayBackPhoto,
                         frontPhotoPath: controller.todayFrontPhoto,
                         dateText: formattedDate,
-                        locationText: 'Victoria, BC',
+                        latitude: controller.todayEntry?.latitude,
+                        longitude: controller.todayEntry?.longitude,
                       );
 
                       if (stitchedPath != null) {

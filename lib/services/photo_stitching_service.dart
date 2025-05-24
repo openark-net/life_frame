@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 import 'package:path_provider/path_provider.dart';
+import '../utils/location_formatter.dart';
 
 class PhotoStitchingService {
   static const double frontPhotoScaleFactor = 0.25;
@@ -15,6 +16,8 @@ class PhotoStitchingService {
     required String frontPhotoPath,
     String? dateText,
     String? locationText,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       final backImage = await _loadImageFromFile(backPhotoPath);
@@ -24,11 +27,17 @@ class PhotoStitchingService {
         throw Exception('Failed to load one or both images');
       }
 
+      // Get formatted location from coordinates if provided
+      String? finalLocationText = locationText;
+      if (latitude != null && longitude != null) {
+        finalLocationText = await getFormattedLocation(latitude, longitude);
+      }
+
       final stitchedImage = await _createStitchedImage(
         backImage: backImage,
         frontImage: frontImage,
         dateText: dateText,
-        locationText: locationText,
+        locationText: finalLocationText,
       );
 
       final savedPath = await _saveImageToFile(stitchedImage);

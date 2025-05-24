@@ -41,6 +41,7 @@ dependencies:
   path_provider: ^2.1.2
   camera: ^0.10.6
   geolocator: ^13.0.1
+  geocoding: ^3.0.0
 
 dev_dependencies:
   flutter_test:
