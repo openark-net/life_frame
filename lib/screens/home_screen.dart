@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../controllers/photo_journal_controller.dart';
+import '../services/daily_photo_capture_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,6 +9,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<PhotoJournalController>();
+    final dailyPhotoCaptureService = DailyPhotoCaptureService();
 
     return CupertinoPageScaffold(
       child: SafeArea(
@@ -118,17 +120,19 @@ class HomeScreen extends StatelessWidget {
                     // CTA button - only show if no photo taken today
                     if (!controller.hasTodayPhoto) ...[
                       CupertinoButton.filled(
-                        onPressed: () {
-                          // TODO: Navigate to camera screen when functionality is added
+                        onPressed: controller.isLoading ? null : () async {
+                          await dailyPhotoCaptureService.captureDailyPhoto(context);
                         },
                         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                        child: const Text(
-                          'Take Your Daily Picture',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: controller.isLoading
+                            ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                            : const Text(
+                                'Take Your Daily Picture',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ],
                   ],
