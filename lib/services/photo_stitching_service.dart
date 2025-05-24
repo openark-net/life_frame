@@ -15,7 +15,6 @@ class PhotoStitchingService {
   Future<String?> stitchPhotos({
     required String backPhotoPath,
     required String frontPhotoPath,
-    String? dateText,
     String? locationText,
     double? latitude,
     double? longitude,
@@ -23,7 +22,7 @@ class PhotoStitchingService {
     try {
       final backImage = await _loadImageFromFile(backPhotoPath);
       final frontImage = await _loadImageFromFile(frontPhotoPath);
-      
+
       if (backImage == null || frontImage == null) {
         throw Exception('Failed to load one or both images');
       }
@@ -34,6 +33,9 @@ class PhotoStitchingService {
         finalLocationText = await getFormattedLocation(latitude, longitude);
       }
 
+      // Format current date
+      final dateText = _formatCurrentDate();
+
       final stitchedImage = await _createStitchedImage(
         backImage: backImage,
         frontImage: frontImage,
@@ -42,16 +44,26 @@ class PhotoStitchingService {
       );
 
       final savedPath = await _saveImageToFile(stitchedImage);
-      
+
       backImage.dispose();
       frontImage.dispose();
       stitchedImage.dispose();
-      
+
       return savedPath;
     } catch (e) {
       print('Error stitching photos: $e');
       return null;
     }
+  }
+
+  String _formatCurrentDate() {
+    final now = DateTime.now();
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+
+    return '${months[now.month - 1]} ${now.day}, ${now.year}';
   }
 
   Future<ui.Image?> _loadImageFromFile(String filePath) async {
@@ -75,31 +87,29 @@ class PhotoStitchingService {
   Future<ui.Image> _createStitchedImage({
     required ui.Image backImage,
     required ui.Image frontImage,
-    String? dateText,
+    required String dateText,
     String? locationText,
   }) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    
+
     final backImageWidth = backImage.width.toDouble();
     final backImageHeight = backImage.height.toDouble();
-    
+
     canvas.drawImage(backImage, Offset.zero, Paint());
-    
+
     final frontImageSize = _calculateFrontImageSize(frontImage, backImageWidth);
     _drawFrontImage(canvas, frontImage, frontImageSize);
-    
-    if (dateText != null || locationText != null) {
-      _drawTextOverlay(
-        canvas,
-        backImageWidth,
-        backImageHeight,
-        frontImageSize,
-        dateText: dateText,
-        locationText: locationText,
-      );
-    }
-    
+
+    _drawTextOverlay(
+      canvas,
+      backImageWidth,
+      backImageHeight,
+      frontImageSize,
+      dateText: dateText,
+      locationText: locationText,
+    );
+
     final picture = recorder.endRecording();
     return await picture.toImage(
       backImageWidth.toInt(),
@@ -111,10 +121,10 @@ class PhotoStitchingService {
     final frontWidth = frontImage.width.toDouble();
     final frontHeight = frontImage.height.toDouble();
     final aspectRatio = frontWidth / frontHeight;
-    
+
     final targetWidth = maxWidth * frontPhotoScaleFactor;
     final targetHeight = targetWidth / aspectRatio;
-    
+
     return Size(targetWidth, targetHeight);
   }
 
@@ -122,45 +132,45 @@ class PhotoStitchingService {
     final paint = Paint()
       ..filterQuality = FilterQuality.high
       ..isAntiAlias = true;
-    
+
     final srcRect = Rect.fromLTWH(
       0,
       0,
       frontImage.width.toDouble(),
       frontImage.height.toDouble(),
     );
-    
+
     final dstRect = Rect.fromLTWH(
       padding,
       padding,
       targetSize.width,
       targetSize.height,
     );
-    
+
     final rrect = RRect.fromRectAndRadius(dstRect, const Radius.circular(frontPhotoRadius));
-    
+
     canvas.save();
     canvas.clipRRect(rrect);
     canvas.drawImageRect(frontImage, srcRect, dstRect, paint);
     canvas.restore();
-    
+
     final borderPaint = Paint()
       ..color = const Color(0xFFFFFFFF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
       ..isAntiAlias = true;
-    
+
     canvas.drawRRect(rrect, borderPaint);
   }
 
   void _drawTextOverlay(
-    Canvas canvas,
-    double canvasWidth,
-    double canvasHeight,
-    Size frontImageSize, {
-    String? dateText,
-    String? locationText,
-  }) {
+      Canvas canvas,
+      double canvasWidth,
+      double canvasHeight,
+      Size frontImageSize, {
+        required String dateText,
+        String? locationText,
+      }) {
     const textStyle = TextStyle(
       color: Color(0xFFFFFFFF),
       fontSize: 80.0,
@@ -188,27 +198,25 @@ class PhotoStitchingService {
         textDirection: TextDirection.ltr,
       );
       locationPainter.layout();
-      
+
       locationPainter.paint(
         canvas,
         Offset(padding, currentY - locationPainter.height),
       );
-      
+
       currentY -= locationPainter.height + textPadding;
     }
 
-    if (dateText != null && dateText.isNotEmpty) {
-      final datePainter = TextPainter(
-        text: TextSpan(text: dateText, style: textStyle),
-        textDirection: TextDirection.ltr,
-      );
-      datePainter.layout();
-      
-      datePainter.paint(
-        canvas,
-        Offset(padding, currentY - datePainter.height),
-      );
-    }
+    final datePainter = TextPainter(
+      text: TextSpan(text: dateText, style: textStyle),
+      textDirection: TextDirection.ltr,
+    );
+    datePainter.layout();
+
+    datePainter.paint(
+      canvas,
+      Offset(padding, currentY - datePainter.height),
+    );
   }
 
   Future<String> _saveImageToFile(ui.Image image) async {
@@ -216,20 +224,19 @@ class PhotoStitchingService {
     if (byteData == null) {
       throw Exception('Failed to convert image to bytes');
     }
-    
+
     final bytes = byteData.buffer.asUint8List();
     final directory = await getApplicationDocumentsDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final filePath = '${directory.path}/stitched_photo_$timestamp.png';
-    
+
     final file = File(filePath);
     await file.writeAsBytes(bytes);
 
     await Gal.putImage('$filePath', album: 'LifeFrame');
-    
+
     return filePath;
   }
-
 
   Future<bool> deleteStitchedPhoto(String filePath) async {
     try {
@@ -252,7 +259,7 @@ class PhotoStitchingService {
           .where((file) => file.path.contains('stitched_photo_'))
           .map((file) => file.path)
           .toList();
-      
+
       files.sort((a, b) => b.compareTo(a));
       return files;
     } catch (e) {
