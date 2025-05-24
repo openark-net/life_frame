@@ -1,6 +1,7 @@
+// File: ./lib/screens/simple_camera_screen.dart
 import 'package:flutter/cupertino.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import '../services/camera_service.dart';
+import '../widgets/camera_widget.dart';
 
 class SimpleCameraScreen extends StatefulWidget {
   const SimpleCameraScreen({super.key});
@@ -10,7 +11,7 @@ class SimpleCameraScreen extends StatefulWidget {
 }
 
 class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
-  final ImagePicker _picker = ImagePicker();
+  final CameraService _cameraService = CameraService();
   List<String> _capturedPhotos = [];
   bool _isCapturing = false;
 
@@ -22,23 +23,22 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     });
 
     try {
-      final XFile? photo = await _picker.pickImage(
-        source: ImageSource.camera,
-        preferredCameraDevice: isBackCamera
-            ? CameraDevice.rear
-            : CameraDevice.front,
-        imageQuality: 85, // Slightly reduce quality to make images less sharp
-        maxWidth: 1920,   // Limit resolution
+      final String? photoPath = await _cameraService.capturePhoto(
+        isBackCamera: isBackCamera,
+        imageQuality: 85,
+        maxWidth: 1920,
         maxHeight: 1920,
       );
 
-      if (photo != null) {
+      if (photoPath != null) {
         setState(() {
-          _capturedPhotos.add(photo.path);
+          _capturedPhotos.add(photoPath);
         });
       }
     } catch (e) {
-      print('Error taking picture: $e');
+      if (mounted) {
+        _showErrorDialog('Error taking picture: $e');
+      }
     } finally {
       setState(() {
         _isCapturing = false;
@@ -64,6 +64,32 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     setState(() {
       _capturedPhotos.removeAt(index);
     });
+  }
+
+  void _showErrorDialog(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getInstructionText() {
+    if (_capturedPhotos.isEmpty) {
+      return 'First, take a photo with the back camera';
+    } else if (_capturedPhotos.length == 1) {
+      return 'Now take a selfie with the front camera';
+    } else {
+      return 'Both photos captured! Tap Done to finish';
+    }
   }
 
   @override
@@ -106,26 +132,32 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
 
               const SizedBox(height: 30),
 
-              // Photo previews and capture buttons
+              // Photo capture sections
               Expanded(
                 child: Column(
                   children: [
-                    // Back photo section
-                    _buildPhotoSection(
+                    // Back camera section
+                    CameraWidget(
                       title: 'Back Camera Photo',
-                      photoIndex: 0,
-                      onCapture: () => _capturePhoto(isBackCamera: true),
+                      photoPath: _capturedPhotos.isNotEmpty ? _capturedPhotos[0] : null,
                       isBackCamera: true,
+                      canCapture: true,
+                      isCapturing: _isCapturing,
+                      onCapture: () => _capturePhoto(isBackCamera: true),
+                      onDelete: _capturedPhotos.isNotEmpty ? () => _retakePhoto(0) : null,
                     ),
 
                     const SizedBox(height: 30),
 
-                    // Front photo section
-                    _buildPhotoSection(
+                    // Front camera section
+                    CameraWidget(
                       title: 'Front Camera Photo (Selfie)',
-                      photoIndex: 1,
-                      onCapture: () => _capturePhoto(isBackCamera: false),
+                      photoPath: _capturedPhotos.length > 1 ? _capturedPhotos[1] : null,
                       isBackCamera: false,
+                      canCapture: _capturedPhotos.isNotEmpty,
+                      isCapturing: _isCapturing,
+                      onCapture: () => _capturePhoto(isBackCamera: false),
+                      onDelete: _capturedPhotos.length > 1 ? () => _retakePhoto(1) : null,
                     ),
                   ],
                 ),
@@ -135,102 +167,5 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildPhotoSection({
-    required String title,
-    required int photoIndex,
-    required VoidCallback onCapture,
-    required bool isBackCamera,
-  }) {
-    final bool hasPhoto = _capturedPhotos.length > photoIndex;
-    final bool canCapture = photoIndex == 0 || _capturedPhotos.isNotEmpty;
-
-    return Expanded(
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: hasPhoto
-                ? CupertinoColors.systemGreen
-                : CupertinoColors.systemGrey4,
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            Expanded(
-              child: hasPhoto
-                  ? ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  File(_capturedPhotos[photoIndex]),
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
-              )
-                  : Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  isBackCamera
-                      ? CupertinoIcons.camera
-                      : CupertinoIcons.camera_on_rectangle,
-                  size: 60,
-                  color: CupertinoColors.systemGrey2,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            Row(
-              children: [
-                Expanded(
-                  child: CupertinoButton.filled(
-                    onPressed: (canCapture && !_isCapturing) ? onCapture : null,
-                    child: _isCapturing
-                        ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                        : Text(hasPhoto ? 'Retake' : 'Take Photo'),
-                  ),
-                ),
-                if (hasPhoto) ...[
-                  const SizedBox(width: 8),
-                  CupertinoButton(
-                    onPressed: () => _retakePhoto(photoIndex),
-                    child: const Icon(CupertinoIcons.delete),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _getInstructionText() {
-    if (_capturedPhotos.isEmpty) {
-      return 'First, take a photo with the back camera';
-    } else if (_capturedPhotos.length == 1) {
-      return 'Now take a selfie with the front camera';
-    } else {
-      return 'Both photos captured! Tap Done to finish';
-    }
   }
 }
