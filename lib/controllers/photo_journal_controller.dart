@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import '../models/daily_entry.dart';
 import '../services/storage_service.dart';
 
@@ -12,6 +13,8 @@ class PhotoJournalController extends GetxController {
   final RxList<DailyEntry> _allEntries = <DailyEntry>[].obs;
   final RxInt _totalPhotosCount = 0.obs;
   final RxString _currentDate = ''.obs;
+  final RxString _todayBackPhoto = ''.obs;
+  final RxString _todayFrontPhoto = ''.obs;
 
   bool get hasTodayPhoto => _hasTodayPhoto.value;
   bool get isLoading => _isLoading.value;
@@ -19,6 +22,8 @@ class PhotoJournalController extends GetxController {
   List<DailyEntry> get allEntries => _allEntries;
   int get totalPhotosCount => _totalPhotosCount.value;
   String get currentDate => _currentDate.value;
+  String get todayBackPhoto => _todayBackPhoto.value;
+  String get todayFrontPhoto => _todayFrontPhoto.value;
 
   @override
   void onInit() {
@@ -114,6 +119,60 @@ class PhotoJournalController extends GetxController {
     return '$photosDir/$fileName';
   }
 
+  Future<bool> savePhotosFromPaths({
+    required String backPhotoPath,
+    required String frontPhotoPath,
+  }) async {
+    try {
+      _isLoading.value = true;
+
+      // Copy photos to app directory and store paths
+      final Directory appDir = await _storageService.getPhotosDirectory();
+      
+      final String backFileName = 'back_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final String frontFileName = 'front_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      
+      final String savedBackPath = '${appDir.path}/$backFileName';
+      final String savedFrontPath = '${appDir.path}/$frontFileName';
+      
+      await File(backPhotoPath).copy(savedBackPath);
+      await File(frontPhotoPath).copy(savedFrontPath);
+
+      // Store the photo paths
+      _todayBackPhoto.value = savedBackPath;
+      _todayFrontPhoto.value = savedFrontPath;
+
+      // Get current location
+      Position? position;
+      try {
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+        }
+        
+        if (permission != LocationPermission.denied) {
+          position = await Geolocator.getCurrentPosition();
+        }
+      } catch (e) {
+        print('Error getting location: $e');
+      }
+
+      // Save entry with back photo as primary photo
+      final success = await savePhotoEntry(
+        photoPath: savedBackPath,
+        latitude: position?.latitude ?? 0.0,
+        longitude: position?.longitude ?? 0.0,
+      );
+
+      return success;
+    } catch (e) {
+      print('PhotoJournalController: Error saving photos: $e');
+      return false;
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
   Future<bool> deleteEntry(String date) async {
     try {
       _isLoading.value = true;
@@ -123,6 +182,8 @@ class PhotoJournalController extends GetxController {
         if (date == DailyEntry.getTodayKey()) {
           _hasTodayPhoto.value = false;
           _todayEntry.value = null;
+          _todayBackPhoto.value = '';
+          _todayFrontPhoto.value = '';
         }
         await _loadAllEntries();
       }

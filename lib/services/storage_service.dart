@@ -44,6 +44,11 @@ class StorageService extends GetxService {
     return monthDir.path;
   }
 
+  Future<Directory> getPhotosDirectory() async {
+    final path = await getPhotosDirectoryPath();
+    return Directory(path);
+  }
+
   String generatePhotoFileName() {
     final now = DateTime.now();
     final timestamp = now.millisecondsSinceEpoch;

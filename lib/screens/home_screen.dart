@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../controllers/photo_journal_controller.dart';
+import 'simple_camera_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -137,24 +139,43 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 CupertinoButton.filled(
-                  onPressed: () async {
-                    final success = await controller.savePhotoEntry(
-                      photoPath: '/mock/path/photo_${DateTime.now().millisecondsSinceEpoch}.jpg',
-                      latitude: 37.7749 + (DateTime.now().millisecond / 10000),
-                      longitude: -122.4194 + (DateTime.now().millisecond / 10000),
+                  onPressed: controller.isLoading ? null : () async {
+                    final result = await Navigator.of(context).push<Map<String, String>>(
+                      CupertinoPageRoute(
+                        builder: (context) => const SimpleCameraScreen(),
+                      ),
                     );
 
-                    if (success) {
-                      Get.snackbar(
-                        'Success',
-                        'Demo photo entry saved!',
-                        snackPosition: SnackPosition.TOP,
-                        backgroundColor: CupertinoColors.systemGreen,
-                        colorText: CupertinoColors.white,
+                    if (result != null && 
+                        result['backPhoto'] != null && 
+                        result['frontPhoto'] != null) {
+                      final success = await controller.savePhotosFromPaths(
+                        backPhotoPath: result['backPhoto']!,
+                        frontPhotoPath: result['frontPhoto']!,
                       );
+
+                      if (success) {
+                        Get.snackbar(
+                          'Success',
+                          'Photos captured successfully!',
+                          snackPosition: SnackPosition.TOP,
+                          backgroundColor: CupertinoColors.systemGreen,
+                          colorText: CupertinoColors.white,
+                        );
+                      } else {
+                        Get.snackbar(
+                          'Error',
+                          'Failed to save photos',
+                          snackPosition: SnackPosition.TOP,
+                          backgroundColor: CupertinoColors.systemRed,
+                          colorText: CupertinoColors.white,
+                        );
+                      }
                     }
                   },
-                  child: const Text('Simulate Photo Capture'),
+                  child: controller.isLoading
+                      ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                      : const Text('Capture Photos'),
                 ),
 
                 const SizedBox(height: 12),
@@ -175,6 +196,116 @@ class HomeScreen extends StatelessWidget {
                     },
                     child: const Text('Delete Today\'s Entry'),
                   ),
+
+                // Display captured photos section
+                if (controller.todayBackPhoto.isNotEmpty || controller.todayFrontPhoto.isNotEmpty) ...[
+                  const SizedBox(height: 30),
+                  Text(
+                    'Today\'s Photos:',
+                    style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  Row(
+                    children: [
+                      if (controller.todayBackPhoto.isNotEmpty) ...[
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Back Camera',
+                                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: CupertinoColors.separator,
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(
+                                    File(controller.todayBackPhoto),
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        height: 200,
+                                        color: CupertinoColors.systemGrey6,
+                                        child: const Center(
+                                          child: Icon(
+                                            CupertinoIcons.camera,
+                                            size: 40,
+                                            color: CupertinoColors.systemGrey3,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
+                      if (controller.todayFrontPhoto.isNotEmpty) ...[
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Front Camera',
+                                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: CupertinoColors.separator,
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(
+                                    File(controller.todayFrontPhoto),
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        height: 200,
+                                        color: CupertinoColors.systemGrey6,
+                                        child: const Center(
+                                          child: Icon(
+                                            CupertinoIcons.camera,
+                                            size: 40,
+                                            color: CupertinoColors.systemGrey3,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ],
             );
           }),
