@@ -2,7 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'services/storage_service.dart';
 import 'controllers/photo_journal_controller.dart';
-import 'screens/main_screen.dart';
+import 'controllers/navigation_controller.dart';
+import 'screens/root_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,7 @@ void main() async {
     return service;
   });
   Get.put(PhotoJournalController());
+  Get.put(NavigationController());
 
   runApp(const MyApp());
 }
@@ -28,7 +30,7 @@ class MyApp extends StatelessWidget {
         brightness: MediaQuery.platformBrightnessOf(context),
         primaryColor: CupertinoColors.systemBlue,
       ),
-      home: const MainScreen(),
+      home: const RootScreen(),
     );
   }
 }

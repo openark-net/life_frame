@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../controllers/photo_journal_controller.dart';
+import '../controllers/navigation_controller.dart';
 import '../services/daily_photo_capture_service.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -9,6 +10,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<PhotoJournalController>();
+    final navController = Get.find<NavigationController>();
     final dailyPhotoCaptureService = DailyPhotoCaptureService();
 
     return CupertinoPageScaffold(
@@ -22,14 +24,19 @@ class HomeScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Life Frame logo
-                    Text(
-                      'Life Frame',
-                      style: TextStyle(
-                        fontFamily: 'PeaceSans',
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: CupertinoTheme.of(context).primaryColor,
+                    // Life Frame logo with long-press gesture
+                    GestureDetector(
+                      onTapDown: (_) => navController.startLongPressTimer(),
+                      onTapUp: (_) => navController.cancelLongPressTimer(),
+                      onTapCancel: () => navController.cancelLongPressTimer(),
+                      child: Text(
+                        'Life Frame',
+                        style: TextStyle(
+                          fontFamily: 'PeaceSans',
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: CupertinoTheme.of(context).primaryColor,
+                        ),
                       ),
                     ),
                     

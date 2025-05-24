@@ -38,6 +38,7 @@ class DailyPhotoCaptureService {
         photoPath: stitchedPhotoPath,
         latitude: position?.latitude ?? 0.0,
         longitude: position?.longitude ?? 0.0,
+        stitchedPhotoPath: stitchedPhotoPath,
       );
 
       if (success) {
