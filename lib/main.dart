@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetCupertinoApp(
       title: 'Life Frame',
+      debugShowCheckedModeBanner: false,
       theme: CupertinoThemeData(
         brightness: MediaQuery.platformBrightnessOf(context),
         primaryColor: CupertinoColors.systemBlue,
