@@ -15,7 +15,7 @@ dependencies:
   get: ^4.6.6
   shared_preferences: ^2.2.2
   path_provider: ^2.1.2
-  image_picker: ^1.0.7 
+  image_picker: ^1.1.2 
   geolocator: ^13.0.1
   geocoding: ^3.0.0
   permission_handler: ^11.3.1
