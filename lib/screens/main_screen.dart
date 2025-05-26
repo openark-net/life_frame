@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,6 +8,20 @@ import 'map_screen.dart';
 import 'gallery_screen.dart';
 import 'debug_screen.dart';
 
+class TabDefinition {
+  final IconData icon;
+  final String label;
+  final Widget screen;
+  final bool Function() shouldShow;
+
+  const TabDefinition({
+    required this.icon,
+    required this.label,
+    required this.screen,
+    required this.shouldShow,
+  });
+}
+
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
@@ -15,42 +30,50 @@ class MainScreen extends StatelessWidget {
     final navController = Get.find<NavigationController>();
 
     return Obx(() {
-      final baseItems = [
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Icon(CupertinoIcons.home),
-          ),
+      // Define all possible tabs with their show conditions
+      final allTabs = <TabDefinition>[
+        TabDefinition(
+          icon: CupertinoIcons.home,
           label: 'Home',
+          screen: const HomeScreen(),
+          shouldShow: () => true, // Always show
         ),
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Icon(CupertinoIcons.map),
-          ),
+        TabDefinition(
+          icon: CupertinoIcons.map,
           label: 'Map',
+          screen: const MapScreen(),
+          shouldShow: () => Platform.isAndroid, // Only on Android
         ),
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Icon(CupertinoIcons.photo_on_rectangle),
-          ),
+        TabDefinition(
+          icon: CupertinoIcons.photo_on_rectangle,
           label: 'Gallery',
+          screen: const GalleryScreen(),
+          shouldShow: () => true, // Always show
+        ),
+        TabDefinition(
+          icon: CupertinoIcons.wrench_fill,
+          label: 'Debug',
+          screen: const DebugScreen(),
+          shouldShow: () => navController
+              .isDebugModeVisible, // Only when debug mode is visible
         ),
       ];
 
-      final items = navController.isDebugModeVisible
-          ? [
-              ...baseItems,
-              BottomNavigationBarItem(
-                icon: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Icon(CupertinoIcons.wrench_fill),
-                ),
-                label: 'Debug',
+      // Filter tabs based on their show conditions
+      final visibleTabs = allTabs.where((tab) => tab.shouldShow()).toList();
+
+      // Generate bottom navigation items
+      final items = visibleTabs
+          .map(
+            (tab) => BottomNavigationBarItem(
+              icon: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Icon(tab.icon),
               ),
-            ]
-          : baseItems;
+              label: tab.label,
+            ),
+          )
+          .toList();
 
       return CupertinoTabScaffold(
         tabBar: CupertinoTabBar(
@@ -65,22 +88,10 @@ class MainScreen extends StatelessWidget {
           ),
         ),
         tabBuilder: (BuildContext context, int index) {
-          switch (index) {
-            case 0:
-              return CupertinoTabView(builder: (context) => const HomeScreen());
-            case 1:
-              return CupertinoTabView(builder: (context) => const MapScreen());
-            case 2:
-              return CupertinoTabView(
-                builder: (context) => const GalleryScreen(),
-              );
-            case 3:
-              return CupertinoTabView(
-                builder: (context) => const DebugScreen(),
-              );
-            default:
-              return CupertinoTabView(builder: (context) => const HomeScreen());
-          }
+          // Simply return the screen at the given index
+          return CupertinoTabView(
+            builder: (context) => visibleTabs[index].screen,
+          );
         },
       );
     });

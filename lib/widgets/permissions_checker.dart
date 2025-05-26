@@ -5,21 +5,22 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-class PermissionsChecker extends StatefulWidget {
+class AndroidPermissionsScreen extends StatefulWidget {
   final VoidCallback? onAllPermissionsGranted;
   final Widget? child;
 
-  const PermissionsChecker({
+  const AndroidPermissionsScreen({
     super.key,
     this.onAllPermissionsGranted,
     this.child,
   });
 
   @override
-  State<PermissionsChecker> createState() => _PermissionsCheckerState();
+  State<AndroidPermissionsScreen> createState() =>
+      _AndroidPermissionsScreenState();
 }
 
-class _PermissionsCheckerState extends State<PermissionsChecker> {
+class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen> {
   final Map<PermissionType, PermissionStatus> _permissionStatuses = {};
   bool _isChecking = true;
   bool _allPermissionsGranted = false;
@@ -27,7 +28,22 @@ class _PermissionsCheckerState extends State<PermissionsChecker> {
   @override
   void initState() {
     super.initState();
-    _checkAllPermissions();
+    _initializePermissions();
+  }
+
+  Future<void> _initializePermissions() async {
+    // If on iOS, skip permission checking and continue immediately
+    if (Platform.isIOS) {
+      setState(() {
+        _allPermissionsGranted = true;
+        _isChecking = false;
+      });
+      widget.onAllPermissionsGranted?.call();
+      return;
+    }
+
+    // Only check permissions on Android
+    await _checkAllPermissions();
   }
 
   Future<void> _checkAllPermissions() async {
@@ -71,32 +87,24 @@ class _PermissionsCheckerState extends State<PermissionsChecker> {
   }
 
   Future<PermissionStatus> _checkStoragePermission() async {
-    if (Platform.isAndroid) {
-      final deviceInfo = await DeviceInfoPlugin().androidInfo;
-      if (deviceInfo.version.sdkInt >= 33) {
-        return await Permission.photos.status;
-      } else if (deviceInfo.version.sdkInt >= 30) {
-        return await Permission.manageExternalStorage.status;
-      } else {
-        return await Permission.storage.status;
-      }
-    } else {
+    final deviceInfo = await DeviceInfoPlugin().androidInfo;
+    if (deviceInfo.version.sdkInt >= 33) {
       return await Permission.photos.status;
+    } else if (deviceInfo.version.sdkInt >= 30) {
+      return await Permission.manageExternalStorage.status;
+    } else {
+      return await Permission.storage.status;
     }
   }
 
   Future<PermissionStatus> _checkNotificationPermission() async {
-    if (Platform.isAndroid) {
-      final androidImplementation = FlutterLocalNotificationsPlugin()
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >();
-      final granted =
-          await androidImplementation?.areNotificationsEnabled() ?? false;
-      return granted ? PermissionStatus.granted : PermissionStatus.denied;
-    } else {
-      return await Permission.notification.status;
-    }
+    final androidImplementation = FlutterLocalNotificationsPlugin()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final granted =
+        await androidImplementation?.areNotificationsEnabled() ?? false;
+    return granted ? PermissionStatus.granted : PermissionStatus.denied;
   }
 
   bool _areAllPermissionsGranted() {
@@ -129,33 +137,24 @@ class _PermissionsCheckerState extends State<PermissionsChecker> {
   }
 
   Future<PermissionStatus> _requestStoragePermission() async {
-    if (Platform.isAndroid) {
-      final deviceInfo = await DeviceInfoPlugin().androidInfo;
-      if (deviceInfo.version.sdkInt >= 33) {
-        return await Permission.photos.request();
-      } else if (deviceInfo.version.sdkInt >= 30) {
-        return await Permission.manageExternalStorage.request();
-      } else {
-        return await Permission.storage.request();
-      }
-    } else {
+    final deviceInfo = await DeviceInfoPlugin().androidInfo;
+    if (deviceInfo.version.sdkInt >= 33) {
       return await Permission.photos.request();
+    } else if (deviceInfo.version.sdkInt >= 30) {
+      return await Permission.manageExternalStorage.request();
+    } else {
+      return await Permission.storage.request();
     }
   }
 
   Future<PermissionStatus> _requestNotificationPermission() async {
-    if (Platform.isAndroid) {
-      final androidImplementation = FlutterLocalNotificationsPlugin()
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >();
-      final granted =
-          await androidImplementation?.requestNotificationsPermission() ??
-          false;
-      return granted ? PermissionStatus.granted : PermissionStatus.denied;
-    } else {
-      return await Permission.notification.request();
-    }
+    final androidImplementation = FlutterLocalNotificationsPlugin()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final granted =
+        await androidImplementation?.requestNotificationsPermission() ?? false;
+    return granted ? PermissionStatus.granted : PermissionStatus.denied;
   }
 
   @override

@@ -7,7 +7,7 @@ class RootScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PermissionsChecker(
+    return AndroidPermissionsScreen(
       onAllPermissionsGranted: () {},
       child:
           MainScreen(), // This will be shown when all permissions are granted
