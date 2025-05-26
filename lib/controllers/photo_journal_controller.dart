@@ -41,6 +41,7 @@ class PhotoJournalController extends GetxController {
     _updateCurrentDate();
     _checkTodayPhoto();
     _loadInitialEntries();
+    _loadAllEntries();
     _startDateUpdateTimer();
   }
 

@@ -8,7 +8,8 @@
       "Bash(cp:*)",
       "Bash(dart run:*)",
       "Bash(grep:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(dart format:*)"
     ],
     "deny": []
   }

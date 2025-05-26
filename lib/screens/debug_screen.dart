@@ -17,10 +17,7 @@ class _DebugScreenState extends State<DebugScreen> {
     const ControllerDebugScreen(),
   ];
 
-  final List<String> _tabTitles = [
-    'Photos',
-    'Controller',
-  ];
+  final List<String> _tabTitles = ['Photos', 'Controller'];
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +47,7 @@ class _DebugScreenState extends State<DebugScreen> {
               },
             ),
             const SizedBox(height: 8),
-            Expanded(
-              child: _screens[_selectedIndex],
-            ),
+            Expanded(child: _screens[_selectedIndex]),
           ],
         ),
       ),

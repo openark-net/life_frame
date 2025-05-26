@@ -34,6 +34,51 @@ class GalleryImage extends StatelessWidget {
     }
   }
 
+  Widget _buildPhotoWidget() {
+    String? photoPath;
+
+    // Prefer stitched photo if it exists
+    if (entry.stitchedPhotoPath != null &&
+        entry.stitchedPhotoPath!.isNotEmpty &&
+        File(entry.stitchedPhotoPath!).existsSync()) {
+      photoPath = entry.stitchedPhotoPath;
+    } else if (entry.photoPath.isNotEmpty &&
+        File(entry.photoPath).existsSync()) {
+      photoPath = entry.photoPath;
+    }
+
+    if (photoPath != null) {
+      return Image.file(
+        File(photoPath),
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: CupertinoColors.systemGrey6,
+            child: const Center(
+              child: Icon(
+                CupertinoIcons.exclamationmark_triangle,
+                size: 40,
+                color: CupertinoColors.systemGrey3,
+              ),
+            ),
+          );
+        },
+      );
+    } else {
+      return Container(
+        color: CupertinoColors.systemGrey6,
+        child: const Center(
+          child: Icon(
+            CupertinoIcons.photo,
+            size: 40,
+            color: CupertinoColors.systemGrey3,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -100,36 +145,7 @@ class GalleryImage extends StatelessWidget {
               ),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
-                child:
-                    entry.stitchedPhotoPath != null &&
-                        File(entry.stitchedPhotoPath!).existsSync()
-                    ? Image.file(
-                        File(entry.stitchedPhotoPath!),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: CupertinoColors.systemGrey6,
-                            child: const Center(
-                              child: Icon(
-                                CupertinoIcons.exclamationmark_triangle,
-                                size: 40,
-                                color: CupertinoColors.systemGrey3,
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    : Container(
-                        color: CupertinoColors.systemGrey6,
-                        child: const Center(
-                          child: Icon(
-                            CupertinoIcons.photo,
-                            size: 40,
-                            color: CupertinoColors.systemGrey3,
-                          ),
-                        ),
-                      ),
+                child: _buildPhotoWidget(),
               ),
             ),
           ],

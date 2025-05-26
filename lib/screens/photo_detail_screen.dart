@@ -76,7 +76,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
   void _generateRandomRotations() {
     _currentPhotoRotation = (_random.nextDouble() - 0.5) * 20 * pi / 180;
     _nextPhotoRotation = (_random.nextDouble() - 0.5) * 20 * pi / 180;
-    
+
     // Ensure background photo has a significantly different angle
     while ((_currentPhotoRotation - _nextPhotoRotation).abs() < 10 * pi / 180) {
       _nextPhotoRotation = (_random.nextDouble() - 0.5) * 20 * pi / 180;
@@ -102,16 +102,20 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
 
       if (_entries.isNotEmpty) {
         _pageController = PageController(initialPage: _currentIndex);
-        
+
         // Preload initial images to prevent flashing
-        final currentImage = FileImage(File(_entries[_currentIndex].stitchedPhotoPath!));
+        final currentImage = FileImage(
+          File(_entries[_currentIndex].stitchedPhotoPath!),
+        );
         precacheImage(currentImage, context);
-        
+
         if (_currentIndex < _entries.length - 1) {
-          final nextImage = FileImage(File(_entries[_currentIndex + 1].stitchedPhotoPath!));
+          final nextImage = FileImage(
+            File(_entries[_currentIndex + 1].stitchedPhotoPath!),
+          );
           precacheImage(nextImage, context);
         }
-        
+
         _startNextPhotoPreview();
       }
     } catch (e) {
@@ -138,9 +142,11 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
   void _startNextPhotoPreview() {
     if (_currentIndex < _entries.length - 1) {
       // Preload the next image to prevent flashing
-      final nextImage = FileImage(File(_entries[_currentIndex + 1].stitchedPhotoPath!));
+      final nextImage = FileImage(
+        File(_entries[_currentIndex + 1].stitchedPhotoPath!),
+      );
       precacheImage(nextImage, context);
-      
+
       Future.delayed(const Duration(milliseconds: 800), () {
         if (mounted) {
           _nextPhotoAnimationController.forward();
@@ -153,7 +159,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
     setState(() {
       _currentIndex = index;
     });
-    
+
     // Preload current image to prevent flashing
     final currentImage = FileImage(File(_entries[index].stitchedPhotoPath!));
     precacheImage(currentImage, context);
@@ -293,31 +299,31 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
                       offset: const Offset(25, 20),
                       child: Container(
                         margin: const EdgeInsets.all(35),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: CupertinoColors.white.withValues(
-                              alpha: _nextPhotoFadeAnimation.value * 0.1,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: CupertinoColors.white.withValues(
+                                alpha: _nextPhotoFadeAnimation.value * 0.1,
+                              ),
+                              blurRadius: 20,
+                              spreadRadius: 2,
                             ),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: AspectRatio(
-                          aspectRatio: 3 / 5,
-                          child: Opacity(
-                            opacity: _nextPhotoFadeAnimation.value,
-                            child: Image.file(
-                              File(_entries[index + 1].stitchedPhotoPath!),
-                              fit: BoxFit.cover,
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: AspectRatio(
+                            aspectRatio: 3 / 5,
+                            child: Opacity(
+                              opacity: _nextPhotoFadeAnimation.value,
+                              child: Image.file(
+                                File(_entries[index + 1].stitchedPhotoPath!),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
-                      ),
                       ),
                     ),
                   ),

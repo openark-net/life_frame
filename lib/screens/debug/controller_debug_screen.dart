@@ -25,24 +25,26 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Obx(() => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 20),
-            _buildControllerState(controller),
-            const SizedBox(height: 20),
-            _buildStorageData(storageService),
-            const SizedBox(height: 20),
-            _buildTestActions(controller),
-            if (_testResult != null) ...[
+        child: Obx(
+          () => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
               const SizedBox(height: 20),
-              _buildTestResult(),
+              _buildControllerState(controller),
+              const SizedBox(height: 20),
+              _buildStorageData(storageService),
+              const SizedBox(height: 20),
+              _buildTestActions(controller),
+              if (_testResult != null) ...[
+                const SizedBox(height: 20),
+                _buildTestResult(),
+              ],
+              const SizedBox(height: 20),
+              _buildEntriesViewer(controller),
             ],
-            const SizedBox(height: 20),
-            _buildEntriesViewer(controller),
-          ],
-        )),
+          ),
+        ),
       ),
     );
   }
@@ -50,10 +52,7 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
   Widget _buildHeader() {
     return const Text(
       'Controller Debug',
-      style: TextStyle(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-      ),
+      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
     );
   }
 
@@ -69,21 +68,37 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
         children: [
           const Text(
             'Controller State',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          _buildStateRow('Has Today Photo', controller.hasTodayPhoto.toString()),
+          _buildStateRow(
+            'Has Today Photo',
+            controller.hasTodayPhoto.toString(),
+          ),
           _buildStateRow('Is Loading', controller.isLoading.toString()),
           _buildStateRow('Current Date', controller.currentDate),
-          _buildStateRow('Total Photos Count', controller.totalPhotosCount.toString()),
+          _buildStateRow(
+            'Total Photos Count',
+            controller.totalPhotosCount.toString(),
+          ),
           _buildStateRow('Current Page', controller.currentPage.toString()),
           _buildStateRow('Has More Pages', controller.hasMorePages.toString()),
-          _buildStateRow('Is Loading More', controller.isLoadingMore.toString()),
-          _buildStateRow('Today Back Photo', controller.todayBackPhoto.isEmpty ? 'None' : controller.todayBackPhoto),
-          _buildStateRow('Today Front Photo', controller.todayFrontPhoto.isEmpty ? 'None' : controller.todayFrontPhoto),
+          _buildStateRow(
+            'Is Loading More',
+            controller.isLoadingMore.toString(),
+          ),
+          _buildStateRow(
+            'Today Back Photo',
+            controller.todayBackPhoto.isEmpty
+                ? 'None'
+                : controller.todayBackPhoto,
+          ),
+          _buildStateRow(
+            'Today Front Photo',
+            controller.todayFrontPhoto.isEmpty
+                ? 'None'
+                : controller.todayFrontPhoto,
+          ),
           _buildStateRow('Streak', controller.getStreak().toString()),
           const SizedBox(height: 8),
           if (controller.todayEntry != null) ...[
@@ -118,10 +133,7 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
         children: [
           const Text(
             'Storage Service Data',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           FutureBuilder<String>(
@@ -168,10 +180,7 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
         children: [
           const Text(
             'Test Actions',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -200,7 +209,9 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
               }),
               _buildTestButton('Get Next Entry', () async {
                 if (controller.todayEntry != null) {
-                  final next = await controller.getNextEntry(controller.todayEntry!.timestamp);
+                  final next = await controller.getNextEntry(
+                    controller.todayEntry!.timestamp,
+                  );
                   _setTestResult('Next entry: ${next?.toString() ?? 'null'}');
                 } else {
                   _setTestResult('No today entry to get next from');
@@ -208,8 +219,12 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
               }),
               _buildTestButton('Get Previous Entry', () async {
                 if (controller.todayEntry != null) {
-                  final previous = await controller.getPreviousEntry(controller.todayEntry!.timestamp);
-                  _setTestResult('Previous entry: ${previous?.toString() ?? 'null'}');
+                  final previous = await controller.getPreviousEntry(
+                    controller.todayEntry!.timestamp,
+                  );
+                  _setTestResult(
+                    'Previous entry: ${previous?.toString() ?? 'null'}',
+                  );
                 } else {
                   _setTestResult('No today entry to get previous from');
                 }
@@ -236,10 +251,7 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
             children: [
               const Text(
                 'Test Result',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               CupertinoButton(
                 padding: EdgeInsets.zero,
@@ -253,10 +265,7 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            _testResult!,
-            style: const TextStyle(fontSize: 14),
-          ),
+          Text(_testResult!, style: const TextStyle(fontSize: 14)),
         ],
       ),
     );
@@ -264,7 +273,7 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
 
   Widget _buildEntriesViewer(PhotoJournalController controller) {
     final entries = controller.allEntries;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -276,10 +285,7 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
         children: [
           Text(
             'All Entries (${entries.length})',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           if (entries.isEmpty)
@@ -369,7 +375,9 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
         Text(
           'Valid: ${entry.isValid()}',
           style: TextStyle(
-            color: entry.isValid() ? CupertinoColors.systemGreen : CupertinoColors.systemRed,
+            color: entry.isValid()
+                ? CupertinoColors.systemGreen
+                : CupertinoColors.systemRed,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -391,10 +399,7 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontFamily: 'monospace'),
-            ),
+            child: Text(value, style: const TextStyle(fontFamily: 'monospace')),
           ),
         ],
       ),
@@ -405,10 +410,7 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
     return CupertinoButton.filled(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       onPressed: onPressed,
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 12),
-      ),
+      child: Text(label, style: const TextStyle(fontSize: 12)),
     );
   }
 

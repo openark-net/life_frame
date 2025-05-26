@@ -49,13 +49,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
             return const Center(child: CupertinoActivityIndicator());
           }
 
-          final entries = _controller.paginatedEntries
-              .where(
-                (entry) =>
-                    entry.stitchedPhotoPath != null &&
-                    entry.stitchedPhotoPath!.isNotEmpty,
-              )
-              .toList();
+          final entries = _controller.paginatedEntries;
 
           if (entries.isEmpty && !_controller.isLoading) {
             return CustomScrollView(
