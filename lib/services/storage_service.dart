@@ -153,12 +153,6 @@ class StorageService extends GetxService {
       return false;
     }
   }
-
-  Future<int> getEntriesCount() async {
-    final entries = await _getAllEntries();
-    return entries.length;
-  }
-
   Future<void> clearAllData() async {
     try {
       await _prefs.remove(_entriesKey);

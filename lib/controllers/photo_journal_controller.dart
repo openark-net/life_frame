@@ -115,12 +115,6 @@ class PhotoJournalController extends GetxController {
     }
   }
 
-  Future<String> getPhotoSavePath() async {
-    final photosDir = await _storageService.getPhotosDirectoryPath();
-    final fileName = _storageService.generatePhotoFileName();
-    return '$photosDir/$fileName';
-  }
-
   Future<bool> savePhotosFromPaths({
     required String backPhotoPath,
     required String frontPhotoPath,
@@ -204,31 +198,6 @@ class PhotoJournalController extends GetxController {
     return await deleteEntry(today);
   }
 
-  Future<DailyEntry?> getEntryForDate(String date) async {
-    return await _storageService.getDailyEntry(date);
-  }
-
-  bool hasEntryForDate(String date) {
-    return _allEntries.any((entry) => entry.date == date);
-  }
-
-  List<DailyEntry> getEntriesForMonth(int year, int month) {
-    final monthStr = month.toString().padLeft(2, '0');
-    final yearMonthPrefix = '$year-$monthStr';
-
-    return _allEntries
-        .where((entry) => entry.date.startsWith(yearMonthPrefix))
-        .toList();
-  }
-
-  List<DailyEntry> getEntriesForYear(int year) {
-    final yearPrefix = '$year-';
-
-    return _allEntries
-        .where((entry) => entry.date.startsWith(yearPrefix))
-        .toList();
-  }
-
   int getStreak() {
     if (_allEntries.isEmpty) return 0;
 
@@ -257,11 +226,6 @@ class PhotoJournalController extends GetxController {
     return streak;
   }
 
-  Future<void> refreshData() async {
-    await _checkTodayPhoto();
-    await _loadAllEntries();
-  }
-
   Future<void> clearAllData() async {
     try {
       _isLoading.value = true;
@@ -275,11 +239,6 @@ class PhotoJournalController extends GetxController {
     } finally {
       _isLoading.value = false;
     }
-  }
-
-  bool isPhotoFileValid(String photoPath) {
-    final file = File(photoPath);
-    return file.existsSync();
   }
 
   Future<bool> updateTodayEntryWithStitchedPhoto(String stitchedPhotoPath) async {
