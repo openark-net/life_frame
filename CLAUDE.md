@@ -8,7 +8,7 @@ Life Frame is a Flutter application for daily photo journaling - "A picture of y
 
 ### Core Features
 - **Daily reminders**: Push notifications to remind users to take their daily photo
-- **Dual-camera capture**: Simultaneously captures photos from both front and back cameras
+- **Dual-camera capture**: Captures photos from both front and back cameras
 - **Photo stitching**: Combines front and back camera photos into a single composite image
 - **Metadata overlay**: Adds date and location text overlay to photos
 - **Location tracking**: Stores user location data locally to build a timeline of photo locations
@@ -56,3 +56,29 @@ Future dependencies will likely include:
 - Daily reminder system needs background task scheduling
 
 The project currently contains the default Flutter counter app template and is ready for implementing the daily photo journaling features.
+
+# Expectations for Code Quality
+
+All the following are expected in a response, most of these are not
+hard requirements but are expected to be present in a good solution.
+
+- Readability
+- Good names
+- Good error handling
+- DRY principles
+- SOLID principles
+- Separation of concerns  
+- Testability
+- Maintainability
+- Scalability
+- Do not use comments unless strictly necessary
+
+Write me some top tier code. The best code. 
+Write me some code that will last a thousand years.
+
+If you have to refactor some surrounding logic
+in order to accomplish a better solution, feel free to
+do this.
+
+Follow existing patterns in the codebase.
+
