@@ -3,15 +3,50 @@ import 'package:get/get.dart';
 import '../controllers/photo_journal_controller.dart';
 import '../controllers/navigation_controller.dart';
 import '../services/daily_photo_capture_service.dart';
+import '../widgets/home/photo_status_indicator.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _isTakingPicture = false;
+
+  PhotoStatus _getPhotoStatus(PhotoJournalController controller) {
+    if (_isTakingPicture) {
+      return PhotoStatus.loading;
+    }
+    return controller.hasTodayPhoto
+        ? PhotoStatus.photoTaken
+        : PhotoStatus.noPhoto;
+  }
+
+  Future<void> _handleTakePicture(BuildContext context) async {
+    if (_isTakingPicture) return;
+
+    setState(() {
+      _isTakingPicture = true;
+    });
+
+    try {
+      final dailyPhotoCaptureService = DailyPhotoCaptureService();
+      await dailyPhotoCaptureService.captureDailyPhoto(context);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isTakingPicture = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<PhotoJournalController>();
     final navController = Get.find<NavigationController>();
-    final dailyPhotoCaptureService = DailyPhotoCaptureService();
 
     return CupertinoPageScaffold(
       child: SafeArea(
@@ -23,6 +58,9 @@ class HomeScreen extends StatelessWidget {
                 vertical: 20.0,
               ),
               child: Obx(() {
+                final photoStatus = _getPhotoStatus(controller);
+                final isActionDisabled = _isTakingPicture;
+
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -45,35 +83,8 @@ class HomeScreen extends StatelessWidget {
 
                     const SizedBox(height: 60),
 
-                    // Photo status indicator (large check mark or X)
-                    Icon(
-                      controller.hasTodayPhoto
-                          ? CupertinoIcons.checkmark_circle_fill
-                          : CupertinoIcons.xmark_circle_fill,
-                      size: 120,
-                      color: controller.hasTodayPhoto
-                          ? CupertinoColors.systemGreen
-                          : CupertinoColors.systemRed,
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Supporting text below check mark/X
-                    Text(
-                      controller.hasTodayPhoto
-                          ? 'Great job! You\'ve captured your photo for today.'
-                          : 'You haven\'t taken your daily photo yet.',
-                      style: CupertinoTheme.of(context).textTheme.textStyle
-                          .copyWith(
-                            fontSize: 18,
-                            color:
-                                CupertinoTheme.of(context).brightness ==
-                                    Brightness.dark
-                                ? CupertinoColors.lightBackgroundGray
-                                : CupertinoColors.secondaryLabel,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
+                    // Photo status indicator
+                    PhotoStatusIndicator(status: photoStatus),
 
                     const SizedBox(height: 40),
 
@@ -138,29 +149,22 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 60),
 
                     // CTA button - only show if no photo taken today
-                    if (!controller.hasTodayPhoto) ...[
+                    if (photoStatus == PhotoStatus.noPhoto) ...[
                       CupertinoButton.filled(
-                        onPressed: controller.isLoading
+                        onPressed: isActionDisabled
                             ? null
-                            : () async {
-                                await dailyPhotoCaptureService
-                                    .captureDailyPhoto(context);
-                              },
+                            : () => _handleTakePicture(context),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 40,
                           vertical: 16,
                         ),
-                        child: controller.isLoading
-                            ? const CupertinoActivityIndicator(
-                                color: CupertinoColors.white,
-                              )
-                            : const Text(
-                                'Take Your Daily Picture',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                        child: const Text(
+                          'Take Your Daily Picture',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ],
