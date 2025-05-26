@@ -29,7 +29,7 @@ class _ActionButtonsState extends State<ActionButtons> {
           const SizedBox(height: 12),
 
           CupertinoButton.filled(
-            onPressed: controller.isLoading ? null : _handleCapturePhotos,
+            onPressed: null,
             child: controller.isLoading
                 ? const CupertinoActivityIndicator(color: CupertinoColors.white)
                 : const Text('Capture Photos'),
@@ -50,29 +50,6 @@ class _ActionButtonsState extends State<ActionButtons> {
         ],
       ),
     );
-  }
-
-  Future<void> _handleCapturePhotos() async {
-    final controller = Get.find<PhotoJournalController>();
-
-    final result = await Navigator.of(context).push<Map<String, String>>(
-      CupertinoPageRoute(builder: (context) => const SimpleCameraScreen()),
-    );
-
-    if (result != null &&
-        result['backPhoto'] != null &&
-        result['frontPhoto'] != null) {
-      final success = await controller.savePhotosFromPaths(
-        backPhotoPath: result['backPhoto']!,
-        frontPhotoPath: result['frontPhoto']!,
-      );
-
-      _showSnackbar(
-        success ? 'Success' : 'Error',
-        success ? 'Photos captured successfully!' : 'Failed to save photos',
-        success ? CupertinoColors.systemGreen : CupertinoColors.systemRed,
-      );
-    }
   }
 
   Future<void> _handleStitchPhotos() async {

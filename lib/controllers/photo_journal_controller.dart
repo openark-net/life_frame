@@ -202,62 +202,6 @@ class PhotoJournalController extends GetxController {
     return null;
   }
 
-  Future<bool> savePhotosFromPaths({
-    required String backPhotoPath,
-    required String frontPhotoPath,
-  }) async {
-    try {
-      _isLoading.value = true;
-
-      // Copy photos to app directory and store paths
-      final Directory appDir = await _storageService.getPhotosDirectory();
-
-      final String backFileName =
-          'back_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final String frontFileName =
-          'front_${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-      final String savedBackPath = '${appDir.path}/$backFileName';
-      final String savedFrontPath = '${appDir.path}/$frontFileName';
-
-      await File(backPhotoPath).copy(savedBackPath);
-      await File(frontPhotoPath).copy(savedFrontPath);
-
-      // Store the photo paths
-      _todayBackPhoto.value = savedBackPath;
-      _todayFrontPhoto.value = savedFrontPath;
-
-      // Get current location
-      Position? position;
-      try {
-        LocationPermission permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.denied) {
-          permission = await Geolocator.requestPermission();
-        }
-
-        if (permission != LocationPermission.denied) {
-          position = await Geolocator.getCurrentPosition();
-        }
-      } catch (e) {
-        print('Error getting location: $e');
-      }
-
-      // Save entry with back photo as primary photo
-      final success = await savePhotoEntry(
-        photoPath: savedBackPath,
-        latitude: position?.latitude ?? 0.0,
-        longitude: position?.longitude ?? 0.0,
-      );
-
-      return success;
-    } catch (e) {
-      print('PhotoJournalController: Error saving photos: $e');
-      return false;
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
   Future<bool> deleteEntry(String date) async {
     try {
       _isLoading.value = true;

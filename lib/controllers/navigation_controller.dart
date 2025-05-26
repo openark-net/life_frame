@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 
 class NavigationController extends GetxController {
-  final RxBool _isDebugModeVisible = false.obs;
+  final RxBool _isDebugModeVisible = kDebugMode.obs;
   Timer? _longPressTimer;
 
   bool get isDebugModeVisible => _isDebugModeVisible.value;
