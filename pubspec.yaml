@@ -24,7 +24,7 @@ dependencies:
   media_scanner: ^2.1.0
   device_info_plus: ^11.4.0
   gal: 2.3.1
-  flutter_local_notifications: ^17.2.3
+  flutter_local_notifications: ^19.2.1
   native_exif: ^0.6.2
 
 

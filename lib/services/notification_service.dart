@@ -126,8 +126,6 @@ class NotificationService extends GetxService {
           scheduledTime,
           notificationDetails,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
         );
         print('NotificationService: Successfully scheduled exact notification');
@@ -140,18 +138,12 @@ class NotificationService extends GetxService {
           scheduledTime,
           notificationDetails,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
         );
         print(
           'NotificationService: Successfully scheduled inexact notification',
         );
       }
-
-      // Test immediate notification
-      print('NotificationService: Sending test immediate notification');
-      await _sendImmediateNotification();
     } catch (e) {
       print('Error scheduling notification: $e');
       // App can still function without notifications
