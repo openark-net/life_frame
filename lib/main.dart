@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'services/storage_service.dart';
 import 'services/notification_service.dart';
@@ -8,6 +9,8 @@ import 'screens/root_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: ".env");
 
   await Get.putAsync(() async {
     final service = StorageService();
@@ -36,6 +39,9 @@ class MyApp extends StatelessWidget {
       theme: CupertinoThemeData(
         brightness: MediaQuery.platformBrightnessOf(context),
         primaryColor: CupertinoColors.systemBlue,
+        scaffoldBackgroundColor: CupertinoColors.systemBackground,
+        barBackgroundColor: CupertinoColors.systemBackground,
+        textTheme: CupertinoTextThemeData(primaryColor: CupertinoColors.label),
       ),
       home: const RootScreen(),
     );

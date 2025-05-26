@@ -312,7 +312,9 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
-                      color: CupertinoColors.white,
+                      color: CupertinoColors.systemBackground.resolveFrom(
+                        context,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: CupertinoColors.systemGrey4),
                     ),

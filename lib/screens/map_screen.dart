@@ -27,14 +27,14 @@ class MapScreen extends StatelessWidget {
           Positioned(
             bottom: 20,
             right: 20,
-            child: _buildInfoCard(mapController),
+            child: _buildInfoCard(mapController, context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard(MapController controller) {
+  Widget _buildInfoCard(MapController controller, BuildContext context) {
     return Obx(() {
       if (controller.displayedEntries.isEmpty && !controller.isLoading.value) {
         return Container(

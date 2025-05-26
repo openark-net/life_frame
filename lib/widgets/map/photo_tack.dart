@@ -9,11 +9,7 @@ class PhotoTack extends StatelessWidget {
   final DailyEntry entry;
   final double size;
 
-  const PhotoTack({
-    super.key,
-    required this.entry,
-    this.size = 40.0,
-  });
+  const PhotoTack({super.key, required this.entry, this.size = 40.0});
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +20,7 @@ class PhotoTack extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(
-            color: CupertinoColors.white,
-            width: 2.0,
-          ),
+          border: Border.all(color: CupertinoColors.white, width: 2.0),
           boxShadow: [
             BoxShadow(
               color: CupertinoColors.black.withValues(alpha: 0.3),
@@ -36,40 +29,46 @@ class PhotoTack extends StatelessWidget {
             ),
           ],
         ),
-        child: ClipOval(
-          child: _buildPhotoPreview(),
-        ),
+        child: ClipOval(child: _buildPhotoPreview()),
       ),
     );
   }
 
   Widget _buildPhotoPreview() {
+    return Builder(
+      builder: (context) {
+        return _buildPhotoPreviewInternal(context);
+      },
+    );
+  }
+
+  Widget _buildPhotoPreviewInternal(BuildContext context) {
     final photoPath = entry.stitchedPhotoPath ?? entry.photoPath;
-    
+
     if (photoPath.isEmpty) {
-      return _buildPlaceholder();
+      return _buildPlaceholder(context);
     }
 
     final file = File(photoPath);
-    
+
     return Image.file(
       file,
       fit: BoxFit.cover,
       width: size,
       height: size,
       errorBuilder: (context, error, stackTrace) {
-        return _buildPlaceholder();
+        return _buildPlaceholder(context);
       },
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) {
           return child;
         }
-        return _buildLoadingIndicator();
+        return _buildLoadingIndicator(context);
       },
     );
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
     return Container(
       width: size,
       height: size,
@@ -82,29 +81,23 @@ class PhotoTack extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingIndicator() {
+  Widget _buildLoadingIndicator(BuildContext context) {
     return Container(
       width: size,
       height: size,
       color: CupertinoColors.systemGrey5,
-      child: Center(
-        child: CupertinoActivityIndicator(
-          radius: size * 0.2,
-        ),
-      ),
+      child: Center(child: CupertinoActivityIndicator(radius: size * 0.2)),
     );
   }
 
   void _onTapped() {
     try {
       final controller = Get.find<PhotoJournalController>();
-      
+
       Navigator.of(Get.context!).push(
         CupertinoPageRoute(
-          builder: (context) => PhotoDetailScreen(
-            controller: controller,
-            initialEntry: entry,
-          ),
+          builder: (context) =>
+              PhotoDetailScreen(controller: controller, initialEntry: entry),
         ),
       );
     } catch (e) {

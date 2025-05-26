@@ -5,15 +5,13 @@ import '../../controllers/map_controller.dart';
 class MapLoadingOverlay extends StatelessWidget {
   final MapController controller;
 
-  const MapLoadingOverlay({
-    super.key,
-    required this.controller,
-  });
+  const MapLoadingOverlay({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (!controller.isLoading.value && !controller.isLoadingMoreEntries.value) {
+      if (!controller.isLoading.value &&
+          !controller.isLoadingMoreEntries.value) {
         return const SizedBox.shrink();
       }
 
@@ -39,10 +37,13 @@ class MapLoadingOverlay extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     '${controller.displayedEntries.length} photos loaded',
-                    style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                      fontSize: 14,
-                    ),
+                    style: CupertinoTheme.of(context).textTheme.textStyle
+                        .copyWith(
+                          color: CupertinoColors.secondaryLabel.resolveFrom(
+                            context,
+                          ),
+                          fontSize: 14,
+                        ),
                   ),
                 ],
               ],

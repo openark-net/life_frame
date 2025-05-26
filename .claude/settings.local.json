@@ -9,7 +9,8 @@
       "Bash(dart run:*)",
       "Bash(grep:*)",
       "Bash(mkdir:*)",
-      "Bash(dart format:*)"
+      "Bash(dart format:*)",
+      "Bash(flutter clean:*)"
     ],
     "deny": []
   }

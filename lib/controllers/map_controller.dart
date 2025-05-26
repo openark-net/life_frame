@@ -9,18 +9,18 @@ import '../screens/photo_detail_screen.dart';
 
 class MapController extends GetxController {
   final StorageService _storageService = Get.find<StorageService>();
-  
+
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMoreEntries = false.obs;
   final RxList<DailyEntry> displayedEntries = <DailyEntry>[].obs;
   final RxSet<Marker> markers = <Marker>{}.obs;
-  
+
   static const int _pageSize = 50;
   int _currentPage = 0;
   bool _hasMorePages = true;
-  
+
   Completer<GoogleMapController>? _mapController;
-  
+
   static const CameraPosition _defaultCameraPosition = CameraPosition(
     target: LatLng(37.7749, -122.4194),
     zoom: 2.0,
@@ -47,10 +47,9 @@ class MapController extends GetxController {
       _hasMorePages = true;
       displayedEntries.clear();
       markers.clear();
-      
+
       await _loadNextPage();
       await _loadAllPages();
-      
     } catch (e) {
       print('MapController: Error loading initial data: $e');
     } finally {
@@ -70,9 +69,12 @@ class MapController extends GetxController {
 
     try {
       isLoadingMoreEntries.value = true;
-      
-      final entries = await _storageService.getEntriesPage(_currentPage, _pageSize);
-      
+
+      final entries = await _storageService.getEntriesPage(
+        _currentPage,
+        _pageSize,
+      );
+
       if (entries.isEmpty) {
         _hasMorePages = false;
         return;
@@ -80,13 +82,12 @@ class MapController extends GetxController {
 
       displayedEntries.addAll(entries);
       await _addMarkersForEntries(entries);
-      
+
       _currentPage++;
-      
+
       if (entries.length < _pageSize) {
         _hasMorePages = false;
       }
-      
     } catch (e) {
       print('MapController: Error loading page $_currentPage: $e');
     } finally {
@@ -96,7 +97,7 @@ class MapController extends GetxController {
 
   Future<void> _addMarkersForEntries(List<DailyEntry> entries) async {
     final newMarkers = <Marker>{};
-    
+
     for (final entry in entries) {
       if (entry.latitude.abs() <= 90 && entry.longitude.abs() <= 180) {
         final marker = Marker(
@@ -111,14 +112,14 @@ class MapController extends GetxController {
         newMarkers.add(marker);
       }
     }
-    
+
     markers.addAll(newMarkers);
   }
 
   void _onMarkerTapped(DailyEntry entry) {
     try {
       final photoJournalController = Get.find<PhotoJournalController>();
-      
+
       Navigator.of(Get.context!).push(
         CupertinoPageRoute(
           builder: (context) => PhotoDetailScreen(

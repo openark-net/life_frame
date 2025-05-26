@@ -34,7 +34,7 @@ class GalleryImage extends StatelessWidget {
     }
   }
 
-  Widget _buildPhotoWidget() {
+  Widget _buildPhotoWidget(BuildContext context) {
     String? photoPath;
 
     // Prefer stitched photo if it exists
@@ -145,7 +145,7 @@ class GalleryImage extends StatelessWidget {
               ),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
-                child: _buildPhotoWidget(),
+                child: _buildPhotoWidget(context),
               ),
             ),
           ],

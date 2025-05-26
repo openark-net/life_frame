@@ -113,7 +113,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                       } else {
                         return Container(
                           padding: const EdgeInsets.all(32),
-                          child: const Center(
+                          child: Center(
                             child: Text(
                               '📸',
                               style: TextStyle(

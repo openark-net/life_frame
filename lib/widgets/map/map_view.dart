@@ -8,10 +8,7 @@ import '../../controllers/map_controller.dart';
 class MapView extends StatelessWidget {
   final MapController controller;
 
-  const MapView({
-    super.key,
-    required this.controller,
-  });
+  const MapView({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +24,8 @@ class MapView extends StatelessWidget {
         zoomControlsEnabled: false,
         mapType: MapType.normal,
         minMaxZoomPreference: const MinMaxZoomPreference(2.0, 20.0),
-        onCameraMove: (CameraPosition position) {
-        },
-        onCameraIdle: () {
-        },
+        onCameraMove: (CameraPosition position) {},
+        onCameraIdle: () {},
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
       );
     });
