@@ -93,7 +93,7 @@ class GalleryImage extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 24),
         decoration: BoxDecoration(
-          color: CupertinoColors.systemBackground,
+          color: CupertinoColors.systemGrey.withOpacity(0.1),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -115,7 +115,15 @@ class GalleryImage extends StatelessWidget {
                   Text(
                     _formatDateForDisplay(entry.date),
                     style: CupertinoTheme.of(context).textTheme.textStyle
-                        .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
+                        .copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color:
+                              CupertinoTheme.of(context).brightness ==
+                                  Brightness.dark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black,
+                        ),
                   ),
                   FutureBuilder<String>(
                     future: getFormattedLocation(
@@ -128,7 +136,11 @@ class GalleryImage extends StatelessWidget {
                         style: CupertinoTheme.of(context).textTheme.textStyle
                             .copyWith(
                               fontSize: 14,
-                              color: CupertinoColors.systemGrey,
+                              color:
+                                  CupertinoTheme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? CupertinoColors.systemGrey2
+                                  : CupertinoColors.systemGrey,
                             ),
                       );
                     },

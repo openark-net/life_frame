@@ -2,15 +2,15 @@ import 'dart:async';
 import 'package:get/get.dart';
 
 class NavigationController extends GetxController {
-  final RxBool _isNavBarVisible = true.obs;
+  final RxBool _isDebugModeVisible = false.obs;
   Timer? _longPressTimer;
 
-  bool get isNavBarVisible => _isNavBarVisible.value;
+  bool get isDebugModeVisible => _isDebugModeVisible.value;
 
   void startLongPressTimer() {
     _cancelLongPressTimer();
     _longPressTimer = Timer(const Duration(seconds: 3), () {
-      _isNavBarVisible.value = true;
+      _isDebugModeVisible.value = true;
     });
   }
 
@@ -23,16 +23,16 @@ class NavigationController extends GetxController {
     _longPressTimer = null;
   }
 
-  void hideNavBar() {
-    _isNavBarVisible.value = false;
+  void hideDebugMode() {
+    _isDebugModeVisible.value = false;
   }
 
-  void showNavBar() {
-    _isNavBarVisible.value = true;
+  void showDebugMode() {
+    _isDebugModeVisible.value = true;
   }
 
-  void toggleNavBar() {
-    _isNavBarVisible.value = !_isNavBarVisible.value;
+  void toggleDebugMode() {
+    _isDebugModeVisible.value = !_isDebugModeVisible.value;
   }
 
   @override

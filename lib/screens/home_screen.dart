@@ -66,7 +66,11 @@ class HomeScreen extends StatelessWidget {
                       style: CupertinoTheme.of(context).textTheme.textStyle
                           .copyWith(
                             fontSize: 18,
-                            color: CupertinoColors.secondaryLabel,
+                            color:
+                                CupertinoTheme.of(context).brightness ==
+                                    Brightness.dark
+                                ? CupertinoColors.lightBackgroundGray
+                                : CupertinoColors.secondaryLabel,
                           ),
                       textAlign: TextAlign.center,
                     ),
