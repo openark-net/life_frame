@@ -15,6 +15,7 @@ Life Frame is a Flutter application for daily photo journaling - "A picture of y
 - **Cupertino UI**: Uses iOS-style interface components
 - **Theme support**: Supports system color scheme with light/dark mode adaptation
 
+
 ## Development Commands
 
 - **Run the app**: `flutter run`
@@ -72,6 +73,7 @@ hard requirements but are expected to be present in a good solution.
 - Maintainability
 - Scalability
 - Do not use comments unless strictly necessary
+- Ensure we use theme colors so we can support dark mode
 
 Write me some top tier code. The best code. 
 Write me some code that will last a thousand years.
