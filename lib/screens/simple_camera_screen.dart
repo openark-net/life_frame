@@ -25,9 +25,6 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     try {
       final String? photoPath = await _cameraService.capturePhoto(
         isBackCamera: isBackCamera,
-        imageQuality: 85,
-        maxWidth: 1920,
-        maxHeight: 1920,
       );
 
       if (photoPath != null) {

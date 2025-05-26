@@ -99,18 +99,13 @@ class MapController extends GetxController {
     final newMarkers = <Marker>{};
 
     for (final entry in entries) {
-      if (entry.latitude.abs() <= 90 && entry.longitude.abs() <= 180) {
-        final marker = Marker(
-          markerId: MarkerId(entry.date),
-          position: LatLng(entry.latitude, entry.longitude),
-          infoWindow: InfoWindow(
-            title: entry.date,
-            snippet: 'Tap to view photo',
-          ),
-          onTap: () => _onMarkerTapped(entry),
-        );
-        newMarkers.add(marker);
-      }
+      final marker = Marker(
+        markerId: MarkerId(entry.date),
+        position: LatLng(entry.latitude, entry.longitude),
+        infoWindow: InfoWindow(title: entry.date, snippet: 'Tap to view photo'),
+        onTap: () => _onMarkerTapped(entry),
+      );
+      newMarkers.add(marker);
     }
 
     markers.addAll(newMarkers);
