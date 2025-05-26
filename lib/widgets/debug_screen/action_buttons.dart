@@ -7,10 +7,7 @@ import '../../screens/simple_camera_screen.dart';
 class ActionButtons extends StatefulWidget {
   final Function(String?) onStitchedPhotoChanged;
 
-  const ActionButtons({
-    super.key,
-    required this.onStitchedPhotoChanged,
-  });
+  const ActionButtons({super.key, required this.onStitchedPhotoChanged});
 
   @override
   State<ActionButtons> createState() => _ActionButtonsState();
@@ -21,45 +18,45 @@ class _ActionButtonsState extends State<ActionButtons> {
   Widget build(BuildContext context) {
     final controller = Get.find<PhotoJournalController>();
 
-    return Obx(() => Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'Actions:',
-          style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-        ),
-        const SizedBox(height: 12),
-        
-        CupertinoButton.filled(
-          onPressed: controller.isLoading ? null : _handleCapturePhotos,
-          child: controller.isLoading
-              ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-              : const Text('Capture Photos'),
-        ),
+    return Obx(
+      () => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Actions:',
+            style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+          ),
+          const SizedBox(height: 12),
 
-        if (controller.hasTodayPhoto) ...[
-          const SizedBox(height: 12),
           CupertinoButton.filled(
-            onPressed: _handleStitchPhotos,
-            child: const Text('Stitch Today\'s Photos'),
+            onPressed: controller.isLoading ? null : _handleCapturePhotos,
+            child: controller.isLoading
+                ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                : const Text('Capture Photos'),
           ),
-          const SizedBox(height: 12),
-          CupertinoButton(
-            onPressed: _handleDeleteTodayEntry,
-            child: const Text('Delete Today\'s Entry'),
-          ),
+
+          if (controller.hasTodayPhoto) ...[
+            const SizedBox(height: 12),
+            CupertinoButton.filled(
+              onPressed: _handleStitchPhotos,
+              child: const Text('Stitch Today\'s Photos'),
+            ),
+            const SizedBox(height: 12),
+            CupertinoButton(
+              onPressed: _handleDeleteTodayEntry,
+              child: const Text('Delete Today\'s Entry'),
+            ),
+          ],
         ],
-      ],
-    ));
+      ),
+    );
   }
 
   Future<void> _handleCapturePhotos() async {
     final controller = Get.find<PhotoJournalController>();
-    
+
     final result = await Navigator.of(context).push<Map<String, String>>(
-      CupertinoPageRoute(
-        builder: (context) => const SimpleCameraScreen(),
-      ),
+      CupertinoPageRoute(builder: (context) => const SimpleCameraScreen()),
     );
 
     if (result != null &&
@@ -80,8 +77,9 @@ class _ActionButtonsState extends State<ActionButtons> {
 
   Future<void> _handleStitchPhotos() async {
     final controller = Get.find<PhotoJournalController>();
-    
-    if (controller.todayBackPhoto.isEmpty || controller.todayFrontPhoto.isEmpty) {
+
+    if (controller.todayBackPhoto.isEmpty ||
+        controller.todayFrontPhoto.isEmpty) {
       _showSnackbar(
         'Error',
         'Both front and back photos are required for stitching',
@@ -118,7 +116,7 @@ class _ActionButtonsState extends State<ActionButtons> {
 
   Future<void> _handleDeleteTodayEntry() async {
     final controller = Get.find<PhotoJournalController>();
-    
+
     final success = await controller.deleteTodayEntry();
     if (success) {
       widget.onStitchedPhotoChanged(null);

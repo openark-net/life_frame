@@ -124,13 +124,15 @@ class PhotoJournalController extends GetxController {
 
       // Copy photos to app directory and store paths
       final Directory appDir = await _storageService.getPhotosDirectory();
-      
-      final String backFileName = 'back_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final String frontFileName = 'front_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      
+
+      final String backFileName =
+          'back_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final String frontFileName =
+          'front_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
       final String savedBackPath = '${appDir.path}/$backFileName';
       final String savedFrontPath = '${appDir.path}/$frontFileName';
-      
+
       await File(backPhotoPath).copy(savedBackPath);
       await File(frontPhotoPath).copy(savedFrontPath);
 
@@ -145,7 +147,7 @@ class PhotoJournalController extends GetxController {
         if (permission == LocationPermission.denied) {
           permission = await Geolocator.requestPermission();
         }
-        
+
         if (permission != LocationPermission.denied) {
           position = await Geolocator.getCurrentPosition();
         }
@@ -250,10 +252,12 @@ class PhotoJournalController extends GetxController {
     }
   }
 
-  Future<bool> updateTodayEntryWithStitchedPhoto(String stitchedPhotoPath) async {
+  Future<bool> updateTodayEntryWithStitchedPhoto(
+    String stitchedPhotoPath,
+  ) async {
     try {
       _isLoading.value = true;
-      
+
       final currentEntry = _todayEntry.value;
       if (currentEntry == null) {
         return false;
@@ -264,7 +268,7 @@ class PhotoJournalController extends GetxController {
       );
 
       final success = await _storageService.saveDailyEntry(updatedEntry);
-      
+
       if (success) {
         _todayEntry.value = updatedEntry;
         await _loadAllEntries();
@@ -272,7 +276,9 @@ class PhotoJournalController extends GetxController {
 
       return success;
     } catch (e) {
-      print('PhotoJournalController: Error updating entry with stitched photo: $e');
+      print(
+        'PhotoJournalController: Error updating entry with stitched photo: $e',
+      );
       return false;
     } finally {
       _isLoading.value = false;

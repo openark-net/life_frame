@@ -63,8 +63,18 @@ class PhotoStitchingService {
   String _formatCurrentDate() {
     final now = DateTime.now();
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
 
     return '${months[now.month - 1]} ${now.day}, ${now.year}';
@@ -151,7 +161,10 @@ class PhotoStitchingService {
       targetSize.height,
     );
 
-    final rrect = RRect.fromRectAndRadius(dstRect, const Radius.circular(frontPhotoRadius));
+    final rrect = RRect.fromRectAndRadius(
+      dstRect,
+      const Radius.circular(frontPhotoRadius),
+    );
 
     canvas.save();
     canvas.clipRRect(rrect);
@@ -168,13 +181,13 @@ class PhotoStitchingService {
   }
 
   void _drawTextOverlay(
-      Canvas canvas,
-      double canvasWidth,
-      double canvasHeight,
-      Size frontImageSize, {
-        required String dateText,
-        String? locationText,
-      }) {
+    Canvas canvas,
+    double canvasWidth,
+    double canvasHeight,
+    Size frontImageSize, {
+    required String dateText,
+    String? locationText,
+  }) {
     const textStyle = TextStyle(
       color: Color(0xFFFFFFFF),
       fontSize: 80.0,
@@ -217,10 +230,7 @@ class PhotoStitchingService {
     );
     datePainter.layout();
 
-    datePainter.paint(
-      canvas,
-      Offset(padding, currentY - datePainter.height),
-    );
+    datePainter.paint(canvas, Offset(padding, currentY - datePainter.height));
   }
 
   Future<String> _saveImageToFile(ui.Image image) async {
@@ -232,7 +242,8 @@ class PhotoStitchingService {
     final bytes = byteData.buffer.asUint8List();
     final directory = await getApplicationDocumentsDirectory();
     final now = DateTime.now();
-    final dateString = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final dateString =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
     final filePath = '${directory.path}/life_frame_$dateString.png';
 
     final file = File(filePath);
@@ -243,7 +254,10 @@ class PhotoStitchingService {
     return filePath;
   }
 
-  Future<void> _deleteOriginalPhotos(String backPhotoPath, String frontPhotoPath) async {
+  Future<void> _deleteOriginalPhotos(
+    String backPhotoPath,
+    String frontPhotoPath,
+  ) async {
     try {
       final backFile = File(backPhotoPath);
       final frontFile = File(frontPhotoPath);
@@ -279,7 +293,8 @@ class PhotoStitchingService {
   Future<List<String>> getAllStitchedPhotos() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      final files = directory.listSync()
+      final files = directory
+          .listSync()
           .where((file) => file.path.contains('life_frame_'))
           .map((file) => file.path)
           .toList();

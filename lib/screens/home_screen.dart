@@ -18,7 +18,10 @@ class HomeScreen extends StatelessWidget {
         child: Center(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 32.0,
+                vertical: 20.0,
+              ),
               child: Obx(() {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -39,7 +42,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 60),
 
                     // Photo status indicator (large check mark or X)
@@ -60,10 +63,11 @@ class HomeScreen extends StatelessWidget {
                       controller.hasTodayPhoto
                           ? 'Great job! You\'ve captured your photo for today.'
                           : 'You haven\'t taken your daily photo yet.',
-                      style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                        fontSize: 18,
-                        color: CupertinoColors.secondaryLabel,
-                      ),
+                      style: CupertinoTheme.of(context).textTheme.textStyle
+                          .copyWith(
+                            fontSize: 18,
+                            color: CupertinoColors.secondaryLabel,
+                          ),
                       textAlign: TextAlign.center,
                     ),
 
@@ -71,7 +75,10 @@ class HomeScreen extends StatelessWidget {
 
                     // Day streak with fire icon background
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 24,
+                      ),
                       decoration: BoxDecoration(
                         color: CupertinoColors.systemOrange.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -88,7 +95,9 @@ class HomeScreen extends StatelessWidget {
                             child: Icon(
                               CupertinoIcons.flame_fill,
                               size: 80,
-                              color: CupertinoColors.systemOrange.withOpacity(0.3),
+                              color: CupertinoColors.systemOrange.withOpacity(
+                                0.3,
+                              ),
                             ),
                           ),
                           // Streak counter in front
@@ -127,12 +136,20 @@ class HomeScreen extends StatelessWidget {
                     // CTA button - only show if no photo taken today
                     if (!controller.hasTodayPhoto) ...[
                       CupertinoButton.filled(
-                        onPressed: controller.isLoading ? null : () async {
-                          await dailyPhotoCaptureService.captureDailyPhoto(context);
-                        },
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                        onPressed: controller.isLoading
+                            ? null
+                            : () async {
+                                await dailyPhotoCaptureService
+                                    .captureDailyPhoto(context);
+                              },
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 16,
+                        ),
                         child: controller.isLoading
-                            ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                            ? const CupertinoActivityIndicator(
+                                color: CupertinoColors.white,
+                              )
                             : const Text(
                                 'Take Your Daily Picture',
                                 style: TextStyle(

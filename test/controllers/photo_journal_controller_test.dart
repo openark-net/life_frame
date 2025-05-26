@@ -9,7 +9,11 @@ import 'package:life_frame/models/daily_entry.dart';
 
 import 'photo_journal_controller_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<StorageService>(), MockSpec<Directory>(), MockSpec<File>()])
+@GenerateNiceMocks([
+  MockSpec<StorageService>(),
+  MockSpec<Directory>(),
+  MockSpec<File>(),
+])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -29,8 +33,12 @@ void main() {
       mockStorageService = MockStorageService();
 
       // Stub the GetX lifecycle methods
-      when(mockStorageService.onStart).thenReturn(InternalFinalCallback<void>(callback: () {}));
-      when(mockStorageService.onDelete).thenReturn(InternalFinalCallback<void>(callback: () {}));
+      when(
+        mockStorageService.onStart,
+      ).thenReturn(InternalFinalCallback<void>(callback: () {}));
+      when(
+        mockStorageService.onDelete,
+      ).thenReturn(InternalFinalCallback<void>(callback: () {}));
       when(mockStorageService.initialized).thenReturn(true);
       when(mockStorageService.isClosed).thenReturn(false);
 
@@ -75,7 +83,9 @@ void main() {
 
     group('save photo entry', () {
       test('should save photo entry successfully', () async {
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
 
         final result = await controller.savePhotoEntry(
@@ -92,11 +102,15 @@ void main() {
         expect(controller.todayEntry!.longitude, equals(-122.4194));
 
         verify(mockStorageService.saveDailyEntry(any)).called(1);
-        verify(mockStorageService.getAllEntries()).called(greaterThan(1)); // Called during init and save
+        verify(
+          mockStorageService.getAllEntries(),
+        ).called(greaterThan(1)); // Called during init and save
       });
 
       test('should handle save photo entry failure', () async {
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => false);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => false);
 
         final result = await controller.savePhotoEntry(
           photoPath: '/test/photo.jpg',
@@ -110,7 +124,9 @@ void main() {
       });
 
       test('should include stitched photo path when provided', () async {
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
 
         final result = await controller.savePhotoEntry(
@@ -121,24 +137,33 @@ void main() {
         );
 
         expect(result, isTrue);
-        expect(controller.todayEntry!.stitchedPhotoPath, equals('/test/stitched.jpg'));
+        expect(
+          controller.todayEntry!.stitchedPhotoPath,
+          equals('/test/stitched.jpg'),
+        );
       });
     });
 
     group('delete entries', () {
       test('should delete entry successfully', () async {
-        when(mockStorageService.deleteDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.deleteDailyEntry(any),
+        ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
 
         final result = await controller.deleteEntry('2024-01-15');
 
         expect(result, isTrue);
         verify(mockStorageService.deleteDailyEntry('2024-01-15')).called(1);
-        verify(mockStorageService.getAllEntries()).called(greaterThan(1)); // Called during init and delete
+        verify(
+          mockStorageService.getAllEntries(),
+        ).called(greaterThan(1)); // Called during init and delete
       });
 
       test('should handle delete entry failure', () async {
-        when(mockStorageService.deleteDailyEntry(any)).thenAnswer((_) async => false);
+        when(
+          mockStorageService.deleteDailyEntry(any),
+        ).thenAnswer((_) async => false);
 
         final result = await controller.deleteEntry('2024-01-15');
 
@@ -147,14 +172,17 @@ void main() {
       });
 
       test('should delete today entry', () async {
-        when(mockStorageService.deleteDailyEntry(DailyEntry.getTodayKey()))
-            .thenAnswer((_) async => true);
+        when(
+          mockStorageService.deleteDailyEntry(DailyEntry.getTodayKey()),
+        ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
 
         final result = await controller.deleteTodayEntry();
 
         expect(result, isTrue);
-        verify(mockStorageService.deleteDailyEntry(DailyEntry.getTodayKey())).called(1);
+        verify(
+          mockStorageService.deleteDailyEntry(DailyEntry.getTodayKey()),
+        ).called(1);
       });
     });
 
@@ -163,94 +191,112 @@ void main() {
         expect(controller.getStreak(), equals(0));
       });
 
-      test('should return 3 when no photo today but last 3 days have photos', () async {
-        final today = DateTime.now();
-        final yesterday = today.subtract(const Duration(days: 1));
-        final dayBefore = today.subtract(const Duration(days: 2));
-        final threeDaysAgo = today.subtract(const Duration(days: 3));
+      test(
+        'should return 3 when no photo today but last 3 days have photos',
+        () async {
+          final today = DateTime.now();
+          final yesterday = today.subtract(const Duration(days: 1));
+          final dayBefore = today.subtract(const Duration(days: 2));
+          final threeDaysAgo = today.subtract(const Duration(days: 3));
 
-        final entries = [
-          DailyEntry(
-            date: DailyEntry.formatDate(yesterday),
-            photoPath: '/test/photo1.jpg',
+          final entries = [
+            DailyEntry(
+              date: DailyEntry.formatDate(yesterday),
+              photoPath: '/test/photo1.jpg',
+              latitude: 37.7749,
+              longitude: -122.4194,
+              timestamp: yesterday,
+            ),
+            DailyEntry(
+              date: DailyEntry.formatDate(dayBefore),
+              photoPath: '/test/photo2.jpg',
+              latitude: 37.7749,
+              longitude: -122.4194,
+              timestamp: dayBefore,
+            ),
+            DailyEntry(
+              date: DailyEntry.formatDate(threeDaysAgo),
+              photoPath: '/test/photo3.jpg',
+              latitude: 37.7749,
+              longitude: -122.4194,
+              timestamp: threeDaysAgo,
+            ),
+          ];
+
+          when(
+            mockStorageService.getAllEntries(),
+          ).thenAnswer((_) async => entries);
+          when(
+            mockStorageService.saveDailyEntry(any),
+          ).thenAnswer((_) async => true);
+
+          // Trigger loading of entries
+          await controller.savePhotoEntry(
+            photoPath: '/test/photo.jpg',
             latitude: 37.7749,
             longitude: -122.4194,
-            timestamp: yesterday,
-          ),
-          DailyEntry(
-            date: DailyEntry.formatDate(dayBefore),
-            photoPath: '/test/photo2.jpg',
+          );
+
+          // Then delete today's entry to simulate no photo today
+          when(
+            mockStorageService.deleteDailyEntry(any),
+          ).thenAnswer((_) async => true);
+          when(
+            mockStorageService.getAllEntries(),
+          ).thenAnswer((_) async => entries);
+          await controller.deleteTodayEntry();
+
+          expect(controller.getStreak(), equals(3));
+        },
+      );
+
+      test(
+        'should return 3 when photo today and last 2 days have photos',
+        () async {
+          final today = DateTime.now();
+          final yesterday = today.subtract(const Duration(days: 1));
+          final dayBefore = today.subtract(const Duration(days: 2));
+
+          final entries = [
+            DailyEntry(
+              date: DailyEntry.formatDate(today),
+              photoPath: '/test/photo1.jpg',
+              latitude: 37.7749,
+              longitude: -122.4194,
+              timestamp: today,
+            ),
+            DailyEntry(
+              date: DailyEntry.formatDate(yesterday),
+              photoPath: '/test/photo2.jpg',
+              latitude: 37.7749,
+              longitude: -122.4194,
+              timestamp: yesterday,
+            ),
+            DailyEntry(
+              date: DailyEntry.formatDate(dayBefore),
+              photoPath: '/test/photo3.jpg',
+              latitude: 37.7749,
+              longitude: -122.4194,
+              timestamp: dayBefore,
+            ),
+          ];
+
+          when(
+            mockStorageService.getAllEntries(),
+          ).thenAnswer((_) async => entries);
+          when(
+            mockStorageService.saveDailyEntry(any),
+          ).thenAnswer((_) async => true);
+
+          await controller.savePhotoEntry(
+            photoPath: '/test/photo.jpg',
             latitude: 37.7749,
             longitude: -122.4194,
-            timestamp: dayBefore,
-          ),
-          DailyEntry(
-            date: DailyEntry.formatDate(threeDaysAgo),
-            photoPath: '/test/photo3.jpg',
-            latitude: 37.7749,
-            longitude: -122.4194,
-            timestamp: threeDaysAgo,
-          ),
-        ];
+          );
 
-        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
-
-        // Trigger loading of entries
-        await controller.savePhotoEntry(
-          photoPath: '/test/photo.jpg',
-          latitude: 37.7749,
-          longitude: -122.4194,
-        );
-
-        // Then delete today's entry to simulate no photo today
-        when(mockStorageService.deleteDailyEntry(any)).thenAnswer((_) async => true);
-        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
-        await controller.deleteTodayEntry();
-
-        expect(controller.getStreak(), equals(3));
-      });
-
-      test('should return 3 when photo today and last 2 days have photos', () async {
-        final today = DateTime.now();
-        final yesterday = today.subtract(const Duration(days: 1));
-        final dayBefore = today.subtract(const Duration(days: 2));
-
-        final entries = [
-          DailyEntry(
-            date: DailyEntry.formatDate(today),
-            photoPath: '/test/photo1.jpg',
-            latitude: 37.7749,
-            longitude: -122.4194,
-            timestamp: today,
-          ),
-          DailyEntry(
-            date: DailyEntry.formatDate(yesterday),
-            photoPath: '/test/photo2.jpg',
-            latitude: 37.7749,
-            longitude: -122.4194,
-            timestamp: yesterday,
-          ),
-          DailyEntry(
-            date: DailyEntry.formatDate(dayBefore),
-            photoPath: '/test/photo3.jpg',
-            latitude: 37.7749,
-            longitude: -122.4194,
-            timestamp: dayBefore,
-          ),
-        ];
-
-        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
-
-        await controller.savePhotoEntry(
-          photoPath: '/test/photo.jpg',
-          latitude: 37.7749,
-          longitude: -122.4194,
-        );
-
-        expect(controller.getStreak(), equals(3));
-      });
+          expect(controller.getStreak(), equals(3));
+        },
+      );
 
       test('should return 0 when no photo yesterday', () async {
         final today = DateTime.now();
@@ -266,8 +312,12 @@ void main() {
           ),
         ];
 
-        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.getAllEntries(),
+        ).thenAnswer((_) async => entries);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => true);
 
         await controller.savePhotoEntry(
           photoPath: '/test/photo.jpg',
@@ -276,8 +326,12 @@ void main() {
         );
 
         // Delete today's entry to simulate checking streak before taking today's photo
-        when(mockStorageService.deleteDailyEntry(any)).thenAnswer((_) async => true);
-        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        when(
+          mockStorageService.deleteDailyEntry(any),
+        ).thenAnswer((_) async => true);
+        when(
+          mockStorageService.getAllEntries(),
+        ).thenAnswer((_) async => entries);
         await controller.deleteTodayEntry();
 
         expect(controller.getStreak(), equals(0));
@@ -304,8 +358,12 @@ void main() {
           ),
         ];
 
-        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.getAllEntries(),
+        ).thenAnswer((_) async => entries);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => true);
 
         await controller.savePhotoEntry(
           photoPath: '/test/photo.jpg',
@@ -347,8 +405,12 @@ void main() {
           ),
         ];
 
-        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.getAllEntries(),
+        ).thenAnswer((_) async => entries);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => true);
 
         await controller.savePhotoEntry(
           photoPath: '/test/photo.jpg',
@@ -357,8 +419,12 @@ void main() {
         );
 
         // Delete today's entry
-        when(mockStorageService.deleteDailyEntry(any)).thenAnswer((_) async => true);
-        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        when(
+          mockStorageService.deleteDailyEntry(any),
+        ).thenAnswer((_) async => true);
+        when(
+          mockStorageService.getAllEntries(),
+        ).thenAnswer((_) async => entries);
         await controller.deleteTodayEntry();
 
         // Should only count yesterday since there's a gap
@@ -383,7 +449,9 @@ void main() {
     group('update stitched photo', () {
       test('should update today entry with stitched photo', () async {
         // First create a today entry
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
 
         await controller.savePhotoEntry(
@@ -392,15 +460,24 @@ void main() {
           longitude: -122.4194,
         );
 
-        final result = await controller.updateTodayEntryWithStitchedPhoto('/test/stitched.jpg');
+        final result = await controller.updateTodayEntryWithStitchedPhoto(
+          '/test/stitched.jpg',
+        );
 
         expect(result, isTrue);
-        expect(controller.todayEntry!.stitchedPhotoPath, equals('/test/stitched.jpg'));
-        verify(mockStorageService.saveDailyEntry(any)).called(2); // Once for original, once for update
+        expect(
+          controller.todayEntry!.stitchedPhotoPath,
+          equals('/test/stitched.jpg'),
+        );
+        verify(
+          mockStorageService.saveDailyEntry(any),
+        ).called(2); // Once for original, once for update
       });
 
       test('should return false when no today entry exists', () async {
-        final result = await controller.updateTodayEntryWithStitchedPhoto('/test/stitched.jpg');
+        final result = await controller.updateTodayEntryWithStitchedPhoto(
+          '/test/stitched.jpg',
+        );
 
         expect(result, isFalse);
         verifyNever(mockStorageService.saveDailyEntry(any));
@@ -433,7 +510,9 @@ void main() {
 
     group('error handling', () {
       test('should handle errors in savePhotoEntry', () async {
-        when(mockStorageService.saveDailyEntry(any)).thenThrow(Exception('Test error'));
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenThrow(Exception('Test error'));
 
         final result = await controller.savePhotoEntry(
           photoPath: '/test/photo.jpg',
@@ -446,7 +525,9 @@ void main() {
       });
 
       test('should handle errors in deleteEntry', () async {
-        when(mockStorageService.deleteDailyEntry(any)).thenThrow(Exception('Test error'));
+        when(
+          mockStorageService.deleteDailyEntry(any),
+        ).thenThrow(Exception('Test error'));
 
         final result = await controller.deleteEntry('2024-01-15');
 
@@ -455,7 +536,9 @@ void main() {
       });
 
       test('should handle errors in clearAllData', () async {
-        when(mockStorageService.clearAllData()).thenThrow(Exception('Test error'));
+        when(
+          mockStorageService.clearAllData(),
+        ).thenThrow(Exception('Test error'));
 
         await controller.clearAllData();
 
@@ -471,7 +554,9 @@ void main() {
       });
 
       test('should generate timestamp correctly in saved entries', () async {
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
 
         final beforeSave = DateTime.now();
@@ -485,14 +570,24 @@ void main() {
         final afterSave = DateTime.now();
         final savedEntry = controller.todayEntry!;
 
-        expect(savedEntry.timestamp.isAfter(beforeSave) || savedEntry.timestamp.isAtSameMomentAs(beforeSave), isTrue);
-        expect(savedEntry.timestamp.isBefore(afterSave) || savedEntry.timestamp.isAtSameMomentAs(afterSave), isTrue);
+        expect(
+          savedEntry.timestamp.isAfter(beforeSave) ||
+              savedEntry.timestamp.isAtSameMomentAs(beforeSave),
+          isTrue,
+        );
+        expect(
+          savedEntry.timestamp.isBefore(afterSave) ||
+              savedEntry.timestamp.isAtSameMomentAs(afterSave),
+          isTrue,
+        );
       });
     });
 
     group('public API consistency', () {
       test('should maintain consistent state between getters', () async {
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
 
         // Initially no photo
@@ -514,9 +609,13 @@ void main() {
       });
 
       test('should handle reactive updates correctly', () async {
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.saveDailyEntry(any),
+        ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
-        when(mockStorageService.deleteDailyEntry(any)).thenAnswer((_) async => true);
+        when(
+          mockStorageService.deleteDailyEntry(any),
+        ).thenAnswer((_) async => true);
 
         // Save a photo
         await controller.savePhotoEntry(

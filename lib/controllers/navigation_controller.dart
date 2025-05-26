@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 
 class NavigationController extends GetxController {
-  final RxBool _isNavBarVisible = false.obs;
+  final RxBool _isNavBarVisible = true.obs;
   Timer? _longPressTimer;
 
   bool get isNavBarVisible => _isNavBarVisible.value;

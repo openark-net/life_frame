@@ -9,9 +9,11 @@ class DebugScreenHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<PhotoJournalController>();
 
-    return Obx(() => Text(
-      'Today: ${controller.currentDate}',
-      style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-    ));
+    return Obx(
+      () => Text(
+        'Today: ${controller.currentDate}',
+        style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+      ),
+    );
   }
 }

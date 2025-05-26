@@ -6,12 +6,7 @@ class MapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoPageScaffold(
-      child: Center(
-        child: Text(
-          'Map',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
+      child: Center(child: Text('Map', style: TextStyle(fontSize: 24))),
     );
   }
 }

@@ -9,25 +9,27 @@ class StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<PhotoJournalController>();
 
-    return Obx(() => Row(
-      children: [
-        Expanded(
-          child: _StatCard(
-            value: '${controller.totalPhotosCount}',
-            label: 'Total Photos',
-            backgroundColor: CupertinoColors.systemBlue.withOpacity(0.1),
+    return Obx(
+      () => Row(
+        children: [
+          Expanded(
+            child: _StatCard(
+              value: '${controller.totalPhotosCount}',
+              label: 'Total Photos',
+              backgroundColor: CupertinoColors.systemBlue.withOpacity(0.1),
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _StatCard(
-            value: '${controller.getStreak()}',
-            label: 'Day Streak',
-            backgroundColor: CupertinoColors.systemGreen.withOpacity(0.1),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _StatCard(
+              value: '${controller.getStreak()}',
+              label: 'Day Streak',
+              backgroundColor: CupertinoColors.systemGreen.withOpacity(0.1),
+            ),
           ),
-        ),
-      ],
-    ));
+        ],
+      ),
+    );
   }
 }
 

@@ -17,7 +17,10 @@ import 'package:geocoding/geocoding.dart';
 Future<String> getFormattedLocation(double latitude, double longitude) async {
   try {
     // Perform reverse geocoding to get address information
-    List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      latitude,
+      longitude,
+    );
 
     if (placemarks.isEmpty) {
       return 'Unknown Location';

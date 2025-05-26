@@ -11,7 +11,8 @@ class PhotoPreviewSection extends StatelessWidget {
     final controller = Get.find<PhotoJournalController>();
 
     return Obx(() {
-      if (controller.todayBackPhoto.isEmpty && controller.todayFrontPhoto.isEmpty) {
+      if (controller.todayBackPhoto.isEmpty &&
+          controller.todayFrontPhoto.isEmpty) {
         return const SizedBox.shrink();
       }
 
@@ -54,10 +55,7 @@ class _PhotoPreview extends StatelessWidget {
   final String title;
   final String imagePath;
 
-  const _PhotoPreview({
-    required this.title,
-    required this.imagePath,
-  });
+  const _PhotoPreview({required this.title, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -66,19 +64,16 @@ class _PhotoPreview extends StatelessWidget {
       children: [
         Text(
           title,
-          style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: CupertinoTheme.of(
+            context,
+          ).textTheme.textStyle.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Container(
           height: 200,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: CupertinoColors.separator,
-              width: 0.5,
-            ),
+            border: Border.all(color: CupertinoColors.separator, width: 0.5),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),

@@ -13,13 +13,15 @@ class DailyPhotoCaptureService {
     try {
       // Step 1: Navigate to camera screen and capture photos
       final result = await _navigateToCameraScreen(context);
-      if (result == null || result['backPhoto'] == null || result['frontPhoto'] == null) {
+      if (result == null ||
+          result['backPhoto'] == null ||
+          result['frontPhoto'] == null) {
         return false;
       }
 
       // Step 2: Get current location
       final position = await _getCurrentLocation();
-      
+
       // Step 3: Automatically stitch photos together
       final stitchedPhotoPath = await _stitchingService.stitchPhotos(
         backPhotoPath: result['backPhoto']!,
@@ -55,11 +57,11 @@ class DailyPhotoCaptureService {
     }
   }
 
-  Future<Map<String, String>?> _navigateToCameraScreen(BuildContext context) async {
+  Future<Map<String, String>?> _navigateToCameraScreen(
+    BuildContext context,
+  ) async {
     return await Navigator.of(context).push<Map<String, String>>(
-      CupertinoPageRoute(
-        builder: (context) => const SimpleCameraScreen(),
-      ),
+      CupertinoPageRoute(builder: (context) => const SimpleCameraScreen()),
     );
   }
 
@@ -70,7 +72,8 @@ class DailyPhotoCaptureService {
         permission = await Geolocator.requestPermission();
       }
 
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
         print('Location permissions are denied');
         return null;
       }

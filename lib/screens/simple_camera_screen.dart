@@ -102,10 +102,10 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
         ),
         trailing: _capturedPhotos.length >= 2
             ? CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _finishCapture,
-          child: const Text('Done'),
-        )
+                padding: EdgeInsets.zero,
+                onPressed: _finishCapture,
+                child: const Text('Done'),
+              )
             : null,
       ),
       child: SafeArea(
@@ -139,12 +139,16 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
                     // Back camera section
                     CameraWidget(
                       title: 'Back Camera Photo',
-                      photoPath: _capturedPhotos.isNotEmpty ? _capturedPhotos[0] : null,
+                      photoPath: _capturedPhotos.isNotEmpty
+                          ? _capturedPhotos[0]
+                          : null,
                       isBackCamera: true,
                       canCapture: true,
                       isCapturing: _isCapturing,
                       onCapture: () => _capturePhoto(isBackCamera: true),
-                      onDelete: _capturedPhotos.isNotEmpty ? () => _retakePhoto(0) : null,
+                      onDelete: _capturedPhotos.isNotEmpty
+                          ? () => _retakePhoto(0)
+                          : null,
                     ),
 
                     const SizedBox(height: 30),
@@ -152,12 +156,16 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
                     // Front camera section
                     CameraWidget(
                       title: 'Front Camera Photo (Selfie)',
-                      photoPath: _capturedPhotos.length > 1 ? _capturedPhotos[1] : null,
+                      photoPath: _capturedPhotos.length > 1
+                          ? _capturedPhotos[1]
+                          : null,
                       isBackCamera: false,
                       canCapture: _capturedPhotos.isNotEmpty,
                       isCapturing: _isCapturing,
                       onCapture: () => _capturePhoto(isBackCamera: false),
-                      onDelete: _capturedPhotos.length > 1 ? () => _retakePhoto(1) : null,
+                      onDelete: _capturedPhotos.length > 1
+                          ? () => _retakePhoto(1)
+                          : null,
                     ),
                   ],
                 ),

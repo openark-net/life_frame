@@ -43,17 +43,12 @@ class CameraWidget extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 16),
 
-            Expanded(
-              child: _buildPhotoPreview(hasPhoto),
-            ),
+            Expanded(child: _buildPhotoPreview(hasPhoto)),
 
             const SizedBox(height: 16),
 

@@ -153,6 +153,7 @@ class StorageService extends GetxService {
       return false;
     }
   }
+
   Future<void> clearAllData() async {
     try {
       await _prefs.remove(_entriesKey);

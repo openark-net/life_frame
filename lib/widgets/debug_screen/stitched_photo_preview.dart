@@ -4,10 +4,7 @@ import 'package:flutter/cupertino.dart';
 class StitchedPhotoPreview extends StatelessWidget {
   final String? stitchedPhotoPath;
 
-  const StitchedPhotoPreview({
-    super.key,
-    required this.stitchedPhotoPath,
-  });
+  const StitchedPhotoPreview({super.key, required this.stitchedPhotoPath});
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +24,7 @@ class StitchedPhotoPreview extends StatelessWidget {
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: CupertinoColors.separator,
-              width: 0.5,
-            ),
+            border: Border.all(color: CupertinoColors.separator, width: 0.5),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),

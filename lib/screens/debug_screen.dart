@@ -23,9 +23,7 @@ class _DebugScreenState extends State<DebugScreen> {
     final controller = Get.find<PhotoJournalController>();
 
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Debug Screen'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Debug Screen')),
       child: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

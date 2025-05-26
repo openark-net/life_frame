@@ -16,10 +16,7 @@ class MainScreen extends StatelessWidget {
             icon: Icon(CupertinoIcons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.map),
-            label: 'Map',
-          ),
+          BottomNavigationBarItem(icon: Icon(CupertinoIcons.map), label: 'Map'),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.photo_on_rectangle),
             label: 'Gallery',
@@ -33,25 +30,17 @@ class MainScreen extends StatelessWidget {
       tabBuilder: (BuildContext context, int index) {
         switch (index) {
           case 0:
-            return CupertinoTabView(
-              builder: (context) => const HomeScreen(),
-            );
+            return CupertinoTabView(builder: (context) => const HomeScreen());
           case 1:
-            return CupertinoTabView(
-              builder: (context) => const MapScreen(),
-            );
+            return CupertinoTabView(builder: (context) => const MapScreen());
           case 2:
             return CupertinoTabView(
               builder: (context) => const GalleryScreen(),
             );
           case 3:
-            return CupertinoTabView(
-              builder: (context) => const DebugScreen(),
-            );
+            return CupertinoTabView(builder: (context) => const DebugScreen());
           default:
-            return CupertinoTabView(
-              builder: (context) => const HomeScreen(),
-            );
+            return CupertinoTabView(builder: (context) => const HomeScreen());
         }
       },
     );

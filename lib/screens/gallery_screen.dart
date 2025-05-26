@@ -10,8 +10,18 @@ class GalleryScreen extends StatelessWidget {
     try {
       final dateTime = DateTime.parse(date);
       const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
       ];
       return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
     } catch (e) {
@@ -24,9 +34,7 @@ class GalleryScreen extends StatelessWidget {
     final controller = Get.find<PhotoJournalController>();
 
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Gallery'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Gallery')),
       child: SafeArea(
         child: Obx(() {
           if (controller.isLoading) {
@@ -34,7 +42,11 @@ class GalleryScreen extends StatelessWidget {
           }
 
           final entries = controller.allEntries
-              .where((entry) => entry.stitchedPhotoPath != null && entry.stitchedPhotoPath!.isNotEmpty)
+              .where(
+                (entry) =>
+                    entry.stitchedPhotoPath != null &&
+                    entry.stitchedPhotoPath!.isNotEmpty,
+              )
               .toList();
 
           if (entries.isEmpty) {
@@ -97,10 +109,11 @@ class GalleryScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: Text(
                         _formatDateForDisplay(entry.date),
-                        style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: CupertinoTheme.of(context).textTheme.textStyle
+                            .copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ),
 

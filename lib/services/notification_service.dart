@@ -10,7 +10,8 @@ class NotificationService extends GetxService {
 
   static const String _channelId = 'daily_photo_reminder';
   static const String _channelName = 'Daily Photo Reminders';
-  static const String _channelDescription = 'Reminders to take your daily photo';
+  static const String _channelDescription =
+      'Reminders to take your daily photo';
 
   @override
   Future<void> onInit() async {
@@ -26,16 +27,16 @@ class NotificationService extends GetxService {
 
     const DarwinInitializationSettings iosInitializationSettings =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
     const InitializationSettings initializationSettings =
         InitializationSettings(
-      android: androidInitializationSettings,
-      iOS: iosInitializationSettings,
-    );
+          android: androidInitializationSettings,
+          iOS: iosInitializationSettings,
+        );
 
     await _notifications.initialize(
       initializationSettings,
@@ -52,7 +53,8 @@ class NotificationService extends GetxService {
 
     await _notifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(channel);
 
     // Request permissions
@@ -62,19 +64,17 @@ class NotificationService extends GetxService {
   static Future<void> _requestPermissions() async {
     final androidPlugin = _notifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-    
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
     await androidPlugin?.requestNotificationsPermission();
 
     final iosPlugin = _notifications
         .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>();
-    
-    await iosPlugin?.requestPermissions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+          IOSFlutterLocalNotificationsPlugin
+        >();
+
+    await iosPlugin?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
   static Future<void> _scheduleDailyReminder() async {
@@ -84,13 +84,17 @@ class NotificationService extends GetxService {
     // Check if exact alarms are available on Android
     final androidPlugin = _notifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-    
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
     bool canScheduleExactNotifications = true;
     if (androidPlugin != null) {
       try {
-        canScheduleExactNotifications = await androidPlugin.canScheduleExactNotifications() ?? false;
-        print('NotificationService: Can schedule exact notifications: $canScheduleExactNotifications');
+        canScheduleExactNotifications =
+            await androidPlugin.canScheduleExactNotifications() ?? false;
+        print(
+          'NotificationService: Can schedule exact notifications: $canScheduleExactNotifications',
+        );
       } catch (e) {
         print('Error checking exact alarm permission: $e');
         canScheduleExactNotifications = false;
@@ -106,10 +110,7 @@ class NotificationService extends GetxService {
         priority: Priority.high,
         icon: '@mipmap/ic_launcher',
       ),
-      iOS: DarwinNotificationDetails(
-        sound: 'default.caf',
-        badgeNumber: 1,
-      ),
+      iOS: DarwinNotificationDetails(sound: 'default.caf', badgeNumber: 1),
     );
 
     final scheduledTime = _getNext11AM();
@@ -143,13 +144,14 @@ class NotificationService extends GetxService {
               UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
         );
-        print('NotificationService: Successfully scheduled inexact notification');
+        print(
+          'NotificationService: Successfully scheduled inexact notification',
+        );
       }
-      
+
       // Test immediate notification
       print('NotificationService: Sending test immediate notification');
       await _sendImmediateNotification();
-      
     } catch (e) {
       print('Error scheduling notification: $e');
       // App can still function without notifications
@@ -158,17 +160,25 @@ class NotificationService extends GetxService {
 
   static tz.TZDateTime _getNext11AM() {
     final now = tz.TZDateTime.now(tz.local);
-    var next11AM = tz.TZDateTime(tz.local, now.year, now.month, now.day, 13, 38);
-    
+    var next11AM = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      13,
+      38,
+    );
+
     if (next11AM.isBefore(now)) {
       next11AM = next11AM.add(const Duration(days: 1));
     }
-    
+
     return next11AM;
   }
 
   static Future<void> _onNotificationTapped(
-      NotificationResponse notificationResponse) async {
+    NotificationResponse notificationResponse,
+  ) async {
     // When notification is tapped, navigate to camera screen
     // This will be handled by your app's navigation
   }
@@ -196,10 +206,7 @@ class NotificationService extends GetxService {
         priority: Priority.high,
         icon: '@mipmap/ic_launcher',
       ),
-      iOS: DarwinNotificationDetails(
-        sound: 'default.caf',
-        badgeNumber: 1,
-      ),
+      iOS: DarwinNotificationDetails(sound: 'default.caf', badgeNumber: 1),
     );
 
     await _notifications.show(
