@@ -6,7 +6,8 @@
       "Bash(flutter build:*)",
       "Bash(flutter pub:*)",
       "Bash(cp:*)",
-      "Bash(dart run:*)"
+      "Bash(dart run:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

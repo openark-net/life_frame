@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../models/daily_entry.dart';
 import '../utils/location_formatter.dart';
+import '../controllers/photo_journal_controller.dart';
+import '../screens/photo_detail_screen.dart';
 
 class GalleryImage extends StatelessWidget {
   final DailyEntry entry;
@@ -36,13 +38,11 @@ class GalleryImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.snackbar(
-          'TODO: ONTAP',
-          'Gallery image tap functionality not implemented yet',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: CupertinoColors.systemBlue,
-          colorText: CupertinoColors.white,
-          duration: const Duration(seconds: 2),
+        final controller = Get.find<PhotoJournalController>();
+        Get.to(
+          () => PhotoDetailScreen(controller: controller, initialEntry: entry),
+          transition: Transition.fadeIn,
+          duration: const Duration(milliseconds: 300),
         );
       },
       child: Container(
