@@ -370,7 +370,9 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
         Text('Photo Path: ${entry.photoPath}'),
         if (entry.stitchedPhotoPath != null)
           Text('Stitched Path: ${entry.stitchedPhotoPath}'),
-        Text('Location: ${getFormattedLocation(entry.latitude, entry.longitude)}'),
+        Text(
+          'Location: ${getFormattedLocation(entry.latitude, entry.longitude)}',
+        ),
         const SizedBox(height: 8),
         Text(
           'Valid: ${entry.isValid()}',

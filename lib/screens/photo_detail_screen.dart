@@ -282,110 +282,121 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
   }
 
   Widget _buildPhotoView(DailyEntry entry, int index) {
-    return Center(
-      child: Stack(
-        alignment: Alignment.center,
+    return SafeArea(
+      child: Column(
         children: [
-          // Next photo preview (behind current photo)
-          if (index < _entries.length - 1)
-            AnimatedBuilder(
-              animation: _nextPhotoFadeAnimation,
-              builder: (context, child) {
-                return Transform.rotate(
-                  angle: _nextPhotoRotation,
-                  child: Transform.scale(
-                    scale: 0.85,
-                    child: Transform.translate(
-                      offset: const Offset(25, 20),
-                      child: Container(
-                        margin: const EdgeInsets.all(35),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: CupertinoColors.white.withValues(
-                                alpha: _nextPhotoFadeAnimation.value * 0.1,
-                              ),
-                              blurRadius: 20,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: AspectRatio(
-                            aspectRatio: 3 / 5,
-                            child: Opacity(
-                              opacity: _nextPhotoFadeAnimation.value,
-                              child: Image.file(
-                                File(_entries[index + 1].stitchedPhotoPath!),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+          // Space for header
+          const SizedBox(height: 60),
 
-          // Current photo
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: _currentPhotoRotation,
-                child: Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: Opacity(
-                    opacity: _fadeAnimation.value,
-                    child: Container(
-                      margin: const EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: CupertinoColors.black.withValues(alpha: 0.5),
-                            blurRadius: 30,
-                            spreadRadius: 5,
-                            offset: const Offset(0, 10),
-                          ),
-                          BoxShadow(
-                            color: CupertinoColors.white.withValues(alpha: 0.1),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: AspectRatio(
-                          aspectRatio: 3 / 5,
-                          child: Image.file(
-                            File(entry.stitchedPhotoPath!),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: CupertinoColors.systemGrey6,
-                                child: const Center(
-                                  child: Icon(
-                                    CupertinoIcons.exclamationmark_triangle,
-                                    size: 40,
-                                    color: CupertinoColors.systemGrey3,
+          // Main photo area
+          Expanded(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Next photo preview (behind current photo)
+                if (index < _entries.length - 1)
+                  AnimatedBuilder(
+                    animation: _nextPhotoFadeAnimation,
+                    builder: (context, child) {
+                      return Transform.rotate(
+                        angle: _nextPhotoRotation,
+                        child: Transform.scale(
+                          scale: 0.85,
+                          child: Transform.translate(
+                            offset: const Offset(25, 20),
+                            child: Container(
+                              margin: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: CupertinoColors.white.withValues(
+                                      alpha:
+                                          _nextPhotoFadeAnimation.value * 0.1,
+                                    ),
+                                    blurRadius: 20,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Opacity(
+                                  opacity: _nextPhotoFadeAnimation.value,
+                                  child: Image.file(
+                                    File(
+                                      _entries[index + 1].stitchedPhotoPath!,
+                                    ),
+                                    fit: BoxFit.contain,
                                   ),
                                 ),
-                              );
-                            },
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                // Current photo
+                AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return Transform.rotate(
+                      angle: _currentPhotoRotation,
+                      child: Transform.scale(
+                        scale: _scaleAnimation.value,
+                        child: Opacity(
+                          opacity: _fadeAnimation.value,
+                          child: Container(
+                            margin: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: CupertinoColors.black.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                  blurRadius: 30,
+                                  spreadRadius: 5,
+                                  offset: const Offset(0, 10),
+                                ),
+                                BoxShadow(
+                                  color: CupertinoColors.white.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  blurRadius: 20,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.file(
+                                File(entry.stitchedPhotoPath!),
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: CupertinoColors.systemGrey6,
+                                    child: const Center(
+                                      child: Icon(
+                                        CupertinoIcons.exclamationmark_triangle,
+                                        size: 40,
+                                        color: CupertinoColors.systemGrey3,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
-              );
-            },
+              ],
+            ),
           ),
         ],
       ),
