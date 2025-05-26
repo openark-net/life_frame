@@ -79,6 +79,15 @@ class PhotoJournalController extends GetxController {
     }
   }
 
+  Future<DailyEntry?> getEntryByDate(DateTime date) async {
+    try {
+      return await _storageService.getDailyEntry(date);
+    } catch (e) {
+      print('PhotoJournalController: Error getting entry by date: $e');
+      return null;
+    }
+  }
+
   Future<bool> savePhotoEntry({
     required String photoPath,
     required double latitude,

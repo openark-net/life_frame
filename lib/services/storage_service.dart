@@ -73,10 +73,11 @@ class StorageService extends GetxService {
     }
   }
 
-  Future<DailyEntry?> getDailyEntry(String date) async {
+  Future<DailyEntry?> getDailyEntry(DateTime date) async {
     try {
+      final dateKey = DailyEntry.formatDate(date);
       final entries = await _getAllEntries();
-      final entryData = entries[date];
+      final entryData = entries[dateKey];
 
       if (entryData != null) {
         return DailyEntry.fromJson(entryData);
@@ -89,18 +90,16 @@ class StorageService extends GetxService {
   }
 
   Future<DailyEntry?> getTodayEntry() async {
-    final today = DailyEntry.getTodayKey();
-    return await getDailyEntry(today);
+    return await getDailyEntry(DateTime.now());
   }
 
-  Future<bool> hasPhotoForDate(String date) async {
+  Future<bool> hasPhotoForDate(DateTime date) async {
     final entry = await getDailyEntry(date);
     return entry != null;
   }
 
   Future<bool> hasTodayPhoto() async {
-    final today = DailyEntry.getTodayKey();
-    return await hasPhotoForDate(today);
+    return await hasPhotoForDate(DateTime.now());
   }
 
   Future<Map<String, dynamic>> _getAllEntries() async {

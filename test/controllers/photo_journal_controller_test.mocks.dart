@@ -200,7 +200,7 @@ class MockStorageService extends _i1.Mock implements _i4.StorageService {
           as _i5.Future<bool>);
 
   @override
-  _i5.Future<_i7.DailyEntry?> getDailyEntry(String? date) =>
+  _i5.Future<_i7.DailyEntry?> getDailyEntry(DateTime? date) =>
       (super.noSuchMethod(
             Invocation.method(#getDailyEntry, [date]),
             returnValue: _i5.Future<_i7.DailyEntry?>.value(),
@@ -218,7 +218,7 @@ class MockStorageService extends _i1.Mock implements _i4.StorageService {
           as _i5.Future<_i7.DailyEntry?>);
 
   @override
-  _i5.Future<bool> hasPhotoForDate(String? date) =>
+  _i5.Future<bool> hasPhotoForDate(DateTime? date) =>
       (super.noSuchMethod(
             Invocation.method(#hasPhotoForDate, [date]),
             returnValue: _i5.Future<bool>.value(false),
