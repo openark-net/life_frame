@@ -25,7 +25,8 @@ dependencies:
   device_info_plus: ^11.4.0
   gal: 2.3.1
   flutter_local_notifications: ^17.2.3
-  exif: ^3.3.0
+  native_exif: ^0.6.2
+
 
 dev_dependencies:
   flutter_test:

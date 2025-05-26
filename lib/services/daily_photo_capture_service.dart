@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:life_frame/services/image_metadata.dart';
 import '../controllers/photo_journal_controller.dart';
 import '../screens/simple_camera_screen.dart';
 import '../services/photo_stitching_service.dart';
@@ -36,15 +37,16 @@ class DailyPhotoCaptureService {
       }
 
       // Step 4: Save the photo entry with location
-      final success = await _controller.savePhotoEntry(
+      final newEntry = await _controller.savePhotoEntry(
         photoPath: stitchedPhotoPath,
         latitude: position?.latitude ?? 0.0,
         longitude: position?.longitude ?? 0.0,
         stitchedPhotoPath: stitchedPhotoPath,
       );
 
-      if (success) {
+      if (newEntry != null) {
         _showSuccessSnackbar('Daily photo captured successfully!');
+        ImageMetadata.applyMetadata(newEntry);
         return true;
       } else {
         _showErrorSnackbar('Failed to save photo entry');

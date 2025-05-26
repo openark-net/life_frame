@@ -166,7 +166,7 @@ class PhotoJournalController extends GetxController {
     }
   }
 
-  Future<bool> savePhotoEntry({
+  Future<DailyEntry?> savePhotoEntry({
     required String photoPath,
     required double latitude,
     required double longitude,
@@ -192,15 +192,14 @@ class PhotoJournalController extends GetxController {
         _todayEntry.value = entry;
         await _loadAllEntries();
         await refreshEntries();
+        return entry;
       }
-
-      return success;
     } catch (e) {
       print('PhotoJournalController: Error saving photo entry: $e');
-      return false;
     } finally {
       _isLoading.value = false;
     }
+    return null;
   }
 
   Future<bool> savePhotosFromPaths({
