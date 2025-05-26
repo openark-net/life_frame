@@ -128,6 +128,129 @@ class StorageService extends GetxService {
     }
   }
 
+  Future<List<String>> _getSortedDateKeys() async {
+    try {
+      final entriesMap = await _getAllEntries();
+      final dateKeys = entriesMap.keys.toList()
+        ..sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
+      return dateKeys;
+    } catch (e) {
+      print('StorageService: Error getting sorted date keys: $e');
+      return [];
+    }
+  }
+
+  Future<int> getTotalEntriesCount() async {
+    try {
+      final entriesMap = await _getAllEntries();
+      return entriesMap.length;
+    } catch (e) {
+      print('StorageService: Error getting total entries count: $e');
+      return 0;
+    }
+  }
+
+  Future<int> getTotalPages(int pageSize) async {
+    final totalCount = await getTotalEntriesCount();
+    return (totalCount / pageSize).ceil();
+  }
+
+  Future<List<DailyEntry>> getEntriesPage(int page, int pageSize) async {
+    try {
+      final dateKeys = await _getSortedDateKeys();
+      final startIndex = page * pageSize;
+      final endIndex = (startIndex + pageSize).clamp(0, dateKeys.length);
+
+      if (startIndex >= dateKeys.length) {
+        return [];
+      }
+
+      final pageKeys = dateKeys.sublist(startIndex, endIndex);
+      final entriesMap = await _getAllEntries();
+
+      final entries = <DailyEntry>[];
+      for (final key in pageKeys) {
+        final entryData = entriesMap[key];
+        if (entryData != null) {
+          entries.add(DailyEntry.fromJson(entryData));
+        }
+      }
+
+      return entries;
+    } catch (e) {
+      print('StorageService: Error getting entries page: $e');
+      return [];
+    }
+  }
+
+  Future<DailyEntry?> getNextEntry(DateTime currentDate) async {
+    try {
+      final currentDateKey = DailyEntry.formatDate(currentDate);
+      final dateKeys = await _getSortedDateKeys();
+
+      final currentIndex = dateKeys.indexOf(currentDateKey);
+      if (currentIndex == -1 || currentIndex == 0) {
+        return null; // No next entry (already at newest)
+      }
+
+      final nextDateKey = dateKeys[currentIndex - 1];
+      final entriesMap = await _getAllEntries();
+      final entryData = entriesMap[nextDateKey];
+
+      return entryData != null ? DailyEntry.fromJson(entryData) : null;
+    } catch (e) {
+      print('StorageService: Error getting next entry: $e');
+      return null;
+    }
+  }
+
+  Future<DailyEntry?> getPreviousEntry(DateTime currentDate) async {
+    try {
+      final currentDateKey = DailyEntry.formatDate(currentDate);
+      final dateKeys = await _getSortedDateKeys();
+
+      final currentIndex = dateKeys.indexOf(currentDateKey);
+      if (currentIndex == -1 || currentIndex >= dateKeys.length - 1) {
+        return null; // No previous entry (already at oldest)
+      }
+
+      final previousDateKey = dateKeys[currentIndex + 1];
+      final entriesMap = await _getAllEntries();
+      final entryData = entriesMap[previousDateKey];
+
+      return entryData != null ? DailyEntry.fromJson(entryData) : null;
+    } catch (e) {
+      print('StorageService: Error getting previous entry: $e');
+      return null;
+    }
+  }
+
+  Future<List<DailyEntry>> getEntriesInDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final entriesMap = await _getAllEntries();
+      final entries = <DailyEntry>[];
+
+      for (final entryData in entriesMap.values) {
+        final entry = DailyEntry.fromJson(entryData);
+        final entryDate = DateTime.parse('${entry.date}T00:00:00');
+
+        if (entryDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
+            entryDate.isBefore(endDate.add(const Duration(days: 1)))) {
+          entries.add(entry);
+        }
+      }
+
+      entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      return entries;
+    } catch (e) {
+      print('StorageService: Error getting entries in date range: $e');
+      return [];
+    }
+  }
+
   Future<bool> deleteDailyEntry(String date) async {
     try {
       final entries = await _getAllEntries();

@@ -249,6 +249,71 @@ class MockStorageService extends _i1.Mock implements _i4.StorageService {
           as _i5.Future<List<_i7.DailyEntry>>);
 
   @override
+  _i5.Future<int> getTotalEntriesCount() =>
+      (super.noSuchMethod(
+            Invocation.method(#getTotalEntriesCount, []),
+            returnValue: _i5.Future<int>.value(0),
+            returnValueForMissingStub: _i5.Future<int>.value(0),
+          )
+          as _i5.Future<int>);
+
+  @override
+  _i5.Future<int> getTotalPages(int? pageSize) =>
+      (super.noSuchMethod(
+            Invocation.method(#getTotalPages, [pageSize]),
+            returnValue: _i5.Future<int>.value(0),
+            returnValueForMissingStub: _i5.Future<int>.value(0),
+          )
+          as _i5.Future<int>);
+
+  @override
+  _i5.Future<List<_i7.DailyEntry>> getEntriesPage(int? page, int? pageSize) =>
+      (super.noSuchMethod(
+            Invocation.method(#getEntriesPage, [page, pageSize]),
+            returnValue: _i5.Future<List<_i7.DailyEntry>>.value(
+              <_i7.DailyEntry>[],
+            ),
+            returnValueForMissingStub: _i5.Future<List<_i7.DailyEntry>>.value(
+              <_i7.DailyEntry>[],
+            ),
+          )
+          as _i5.Future<List<_i7.DailyEntry>>);
+
+  @override
+  _i5.Future<_i7.DailyEntry?> getNextEntry(DateTime? currentDate) =>
+      (super.noSuchMethod(
+            Invocation.method(#getNextEntry, [currentDate]),
+            returnValue: _i5.Future<_i7.DailyEntry?>.value(),
+            returnValueForMissingStub: _i5.Future<_i7.DailyEntry?>.value(),
+          )
+          as _i5.Future<_i7.DailyEntry?>);
+
+  @override
+  _i5.Future<_i7.DailyEntry?> getPreviousEntry(DateTime? currentDate) =>
+      (super.noSuchMethod(
+            Invocation.method(#getPreviousEntry, [currentDate]),
+            returnValue: _i5.Future<_i7.DailyEntry?>.value(),
+            returnValueForMissingStub: _i5.Future<_i7.DailyEntry?>.value(),
+          )
+          as _i5.Future<_i7.DailyEntry?>);
+
+  @override
+  _i5.Future<List<_i7.DailyEntry>> getEntriesInDateRange(
+    DateTime? startDate,
+    DateTime? endDate,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getEntriesInDateRange, [startDate, endDate]),
+            returnValue: _i5.Future<List<_i7.DailyEntry>>.value(
+              <_i7.DailyEntry>[],
+            ),
+            returnValueForMissingStub: _i5.Future<List<_i7.DailyEntry>>.value(
+              <_i7.DailyEntry>[],
+            ),
+          )
+          as _i5.Future<List<_i7.DailyEntry>>);
+
+  @override
   _i5.Future<bool> deleteDailyEntry(String? date) =>
       (super.noSuchMethod(
             Invocation.method(#deleteDailyEntry, [date]),

@@ -48,6 +48,12 @@ void main() {
       // Stub the default methods that will be called during initialization
       when(mockStorageService.hasTodayPhoto()).thenAnswer((_) async => false);
       when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+      when(
+        mockStorageService.getEntriesPage(0, 30),
+      ).thenAnswer((_) async => []);
+      when(
+        mockStorageService.getTotalEntriesCount(),
+      ).thenAnswer((_) async => 0);
 
       // Put the mock service first
       Get.put<StorageService>(mockStorageService);
@@ -73,7 +79,8 @@ void main() {
 
         // Verify initialization methods were called
         verify(mockStorageService.hasTodayPhoto()).called(1);
-        verify(mockStorageService.getAllEntries()).called(1);
+        verify(mockStorageService.getEntriesPage(0, 30)).called(1);
+        verify(mockStorageService.getTotalEntriesCount()).called(1);
       });
 
       test('should set current date on init', () {
@@ -87,6 +94,12 @@ void main() {
           mockStorageService.saveDailyEntry(any),
         ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getEntriesPage(0, 30),
+        ).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getTotalEntriesCount(),
+        ).thenAnswer((_) async => 0);
 
         final result = await controller.savePhotoEntry(
           photoPath: '/test/photo.jpg',
@@ -102,9 +115,10 @@ void main() {
         expect(controller.todayEntry!.longitude, equals(-122.4194));
 
         verify(mockStorageService.saveDailyEntry(any)).called(1);
+        verify(mockStorageService.getAllEntries()).called(1);
         verify(
-          mockStorageService.getAllEntries(),
-        ).called(greaterThan(1)); // Called during init and save
+          mockStorageService.getEntriesPage(0, 30),
+        ).called(greaterThan(1)); // Called during init and refresh
       });
 
       test('should handle save photo entry failure', () async {
@@ -128,6 +142,12 @@ void main() {
           mockStorageService.saveDailyEntry(any),
         ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getEntriesPage(0, 30),
+        ).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getTotalEntriesCount(),
+        ).thenAnswer((_) async => 0);
 
         final result = await controller.savePhotoEntry(
           photoPath: '/test/photo.jpg',
@@ -150,14 +170,21 @@ void main() {
           mockStorageService.deleteDailyEntry(any),
         ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getEntriesPage(0, 30),
+        ).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getTotalEntriesCount(),
+        ).thenAnswer((_) async => 0);
 
         final result = await controller.deleteEntry('2024-01-15');
 
         expect(result, isTrue);
         verify(mockStorageService.deleteDailyEntry('2024-01-15')).called(1);
+        verify(mockStorageService.getAllEntries()).called(1);
         verify(
-          mockStorageService.getAllEntries(),
-        ).called(greaterThan(1)); // Called during init and delete
+          mockStorageService.getEntriesPage(0, 30),
+        ).called(greaterThan(1)); // Called during init and refresh
       });
 
       test('should handle delete entry failure', () async {
@@ -176,6 +203,12 @@ void main() {
           mockStorageService.deleteDailyEntry(DailyEntry.getTodayKey()),
         ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getEntriesPage(0, 30),
+        ).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getTotalEntriesCount(),
+        ).thenAnswer((_) async => 0);
 
         final result = await controller.deleteTodayEntry();
 
@@ -453,6 +486,12 @@ void main() {
           mockStorageService.saveDailyEntry(any),
         ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getEntriesPage(0, 30),
+        ).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getTotalEntriesCount(),
+        ).thenAnswer((_) async => 0);
 
         await controller.savePhotoEntry(
           photoPath: '/test/photo.jpg',
@@ -492,6 +531,12 @@ void main() {
           return true;
         });
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getEntriesPage(0, 30),
+        ).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getTotalEntriesCount(),
+        ).thenAnswer((_) async => 0);
 
         expect(controller.isLoading, isFalse);
 
@@ -558,6 +603,12 @@ void main() {
           mockStorageService.saveDailyEntry(any),
         ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getEntriesPage(0, 30),
+        ).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getTotalEntriesCount(),
+        ).thenAnswer((_) async => 0);
 
         final beforeSave = DateTime.now();
 
@@ -589,6 +640,12 @@ void main() {
           mockStorageService.saveDailyEntry(any),
         ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getEntriesPage(0, 30),
+        ).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getTotalEntriesCount(),
+        ).thenAnswer((_) async => 0);
 
         // Initially no photo
         expect(controller.hasTodayPhoto, isFalse);
@@ -613,6 +670,12 @@ void main() {
           mockStorageService.saveDailyEntry(any),
         ).thenAnswer((_) async => true);
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getEntriesPage(0, 30),
+        ).thenAnswer((_) async => []);
+        when(
+          mockStorageService.getTotalEntriesCount(),
+        ).thenAnswer((_) async => 0);
         when(
           mockStorageService.deleteDailyEntry(any),
         ).thenAnswer((_) async => true);
