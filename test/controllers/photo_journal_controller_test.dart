@@ -44,8 +44,8 @@ void main() {
       // Put the mock service first
       Get.put<StorageService>(mockStorageService);
 
-      // Create controller after service is available
-      controller = PhotoJournalController();
+      // Create controller using Get.put to ensure onInit is called
+      controller = Get.put(PhotoJournalController());
     });
 
     tearDown(() {
@@ -163,7 +163,55 @@ void main() {
         expect(controller.getStreak(), equals(0));
       });
 
-      test('should calculate streak correctly for consecutive days', () async {
+      test('should return 3 when no photo today but last 3 days have photos', () async {
+        final today = DateTime.now();
+        final yesterday = today.subtract(const Duration(days: 1));
+        final dayBefore = today.subtract(const Duration(days: 2));
+        final threeDaysAgo = today.subtract(const Duration(days: 3));
+
+        final entries = [
+          DailyEntry(
+            date: DailyEntry.formatDate(yesterday),
+            photoPath: '/test/photo1.jpg',
+            latitude: 37.7749,
+            longitude: -122.4194,
+            timestamp: yesterday,
+          ),
+          DailyEntry(
+            date: DailyEntry.formatDate(dayBefore),
+            photoPath: '/test/photo2.jpg',
+            latitude: 37.7749,
+            longitude: -122.4194,
+            timestamp: dayBefore,
+          ),
+          DailyEntry(
+            date: DailyEntry.formatDate(threeDaysAgo),
+            photoPath: '/test/photo3.jpg',
+            latitude: 37.7749,
+            longitude: -122.4194,
+            timestamp: threeDaysAgo,
+          ),
+        ];
+
+        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+
+        // Trigger loading of entries
+        await controller.savePhotoEntry(
+          photoPath: '/test/photo.jpg',
+          latitude: 37.7749,
+          longitude: -122.4194,
+        );
+
+        // Then delete today's entry to simulate no photo today
+        when(mockStorageService.deleteDailyEntry(any)).thenAnswer((_) async => true);
+        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        await controller.deleteTodayEntry();
+
+        expect(controller.getStreak(), equals(3));
+      });
+
+      test('should return 3 when photo today and last 2 days have photos', () async {
         final today = DateTime.now();
         final yesterday = today.subtract(const Duration(days: 1));
         final dayBefore = today.subtract(const Duration(days: 2));
@@ -192,18 +240,129 @@ void main() {
           ),
         ];
 
-        // Mock getAllEntries to return our test entries
         when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
 
-        // Load entries into the controller
         await controller.savePhotoEntry(
           photoPath: '/test/photo.jpg',
           latitude: 37.7749,
           longitude: -122.4194,
         );
-        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
 
         expect(controller.getStreak(), equals(3));
+      });
+
+      test('should return 0 when no photo yesterday', () async {
+        final today = DateTime.now();
+        final dayBefore = today.subtract(const Duration(days: 2));
+
+        final entries = [
+          DailyEntry(
+            date: DailyEntry.formatDate(dayBefore),
+            photoPath: '/test/photo1.jpg',
+            latitude: 37.7749,
+            longitude: -122.4194,
+            timestamp: dayBefore,
+          ),
+        ];
+
+        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+
+        await controller.savePhotoEntry(
+          photoPath: '/test/photo.jpg',
+          latitude: 37.7749,
+          longitude: -122.4194,
+        );
+
+        // Delete today's entry to simulate checking streak before taking today's photo
+        when(mockStorageService.deleteDailyEntry(any)).thenAnswer((_) async => true);
+        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        await controller.deleteTodayEntry();
+
+        expect(controller.getStreak(), equals(0));
+      });
+
+      test('should return 1 when no photo yesterday but photo today', () async {
+        final today = DateTime.now();
+        final dayBefore = today.subtract(const Duration(days: 2));
+
+        final entries = [
+          DailyEntry(
+            date: DailyEntry.formatDate(today),
+            photoPath: '/test/photo1.jpg',
+            latitude: 37.7749,
+            longitude: -122.4194,
+            timestamp: today,
+          ),
+          DailyEntry(
+            date: DailyEntry.formatDate(dayBefore),
+            photoPath: '/test/photo2.jpg',
+            latitude: 37.7749,
+            longitude: -122.4194,
+            timestamp: dayBefore,
+          ),
+        ];
+
+        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+
+        await controller.savePhotoEntry(
+          photoPath: '/test/photo.jpg',
+          latitude: 37.7749,
+          longitude: -122.4194,
+        );
+
+        expect(controller.getStreak(), equals(1));
+      });
+
+      test('should handle streak with gap correctly', () async {
+        final today = DateTime.now();
+        final yesterday = today.subtract(const Duration(days: 1));
+        final threeDaysAgo = today.subtract(const Duration(days: 3));
+        final fourDaysAgo = today.subtract(const Duration(days: 4));
+
+        final entries = [
+          DailyEntry(
+            date: DailyEntry.formatDate(yesterday),
+            photoPath: '/test/photo1.jpg',
+            latitude: 37.7749,
+            longitude: -122.4194,
+            timestamp: yesterday,
+          ),
+          // Gap on day 2
+          DailyEntry(
+            date: DailyEntry.formatDate(threeDaysAgo),
+            photoPath: '/test/photo2.jpg',
+            latitude: 37.7749,
+            longitude: -122.4194,
+            timestamp: threeDaysAgo,
+          ),
+          DailyEntry(
+            date: DailyEntry.formatDate(fourDaysAgo),
+            photoPath: '/test/photo3.jpg',
+            latitude: 37.7749,
+            longitude: -122.4194,
+            timestamp: fourDaysAgo,
+          ),
+        ];
+
+        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        when(mockStorageService.saveDailyEntry(any)).thenAnswer((_) async => true);
+
+        await controller.savePhotoEntry(
+          photoPath: '/test/photo.jpg',
+          latitude: 37.7749,
+          longitude: -122.4194,
+        );
+
+        // Delete today's entry
+        when(mockStorageService.deleteDailyEntry(any)).thenAnswer((_) async => true);
+        when(mockStorageService.getAllEntries()).thenAnswer((_) async => entries);
+        await controller.deleteTodayEntry();
+
+        // Should only count yesterday since there's a gap
+        expect(controller.getStreak(), equals(1));
       });
     });
 

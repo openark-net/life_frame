@@ -207,6 +207,15 @@ class PhotoJournalController extends GetxController {
     int streak = 0;
     DateTime checkDate = DateTime.now();
 
+    // Check if we have a photo for today
+    final todayKey = DailyEntry.getTodayKey();
+    final hasTodayPhoto = sortedEntries.any((entry) => entry.date == todayKey);
+
+    // If no photo today, start counting from yesterday
+    if (!hasTodayPhoto) {
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+
     for (final entry in sortedEntries) {
       final entryDate = DateTime.parse('${entry.date}T00:00:00');
       final expectedDate = DateTime(
