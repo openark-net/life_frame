@@ -62,7 +62,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
       CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
     );
 
-    _nextPhotoFadeAnimation = Tween<double>(begin: 0.0, end: 0.3).animate(
+    _nextPhotoFadeAnimation = Tween<double>(begin: 0.0, end: 0.6).animate(
       CurvedAnimation(
         parent: _nextPhotoAnimationController,
         curve: Curves.easeInOut,
@@ -76,6 +76,11 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
   void _generateRandomRotations() {
     _currentPhotoRotation = (_random.nextDouble() - 0.5) * 20 * pi / 180;
     _nextPhotoRotation = (_random.nextDouble() - 0.5) * 20 * pi / 180;
+    
+    // Ensure background photo has a significantly different angle
+    while ((_currentPhotoRotation - _nextPhotoRotation).abs() < 10 * pi / 180) {
+      _nextPhotoRotation = (_random.nextDouble() - 0.5) * 20 * pi / 180;
+    }
   }
 
   Future<void> _loadEntries() async {
@@ -97,6 +102,16 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
 
       if (_entries.isNotEmpty) {
         _pageController = PageController(initialPage: _currentIndex);
+        
+        // Preload initial images to prevent flashing
+        final currentImage = FileImage(File(_entries[_currentIndex].stitchedPhotoPath!));
+        precacheImage(currentImage, context);
+        
+        if (_currentIndex < _entries.length - 1) {
+          final nextImage = FileImage(File(_entries[_currentIndex + 1].stitchedPhotoPath!));
+          precacheImage(nextImage, context);
+        }
+        
         _startNextPhotoPreview();
       }
     } catch (e) {
@@ -122,7 +137,11 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
 
   void _startNextPhotoPreview() {
     if (_currentIndex < _entries.length - 1) {
-      Future.delayed(const Duration(milliseconds: 1000), () {
+      // Preload the next image to prevent flashing
+      final nextImage = FileImage(File(_entries[_currentIndex + 1].stitchedPhotoPath!));
+      precacheImage(nextImage, context);
+      
+      Future.delayed(const Duration(milliseconds: 800), () {
         if (mounted) {
           _nextPhotoAnimationController.forward();
         }
@@ -134,6 +153,10 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
     setState(() {
       _currentIndex = index;
     });
+    
+    // Preload current image to prevent flashing
+    final currentImage = FileImage(File(_entries[index].stitchedPhotoPath!));
+    precacheImage(currentImage, context);
 
     _animationController.reset();
     _nextPhotoAnimationController.reset();
@@ -265,9 +288,11 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
                 return Transform.rotate(
                   angle: _nextPhotoRotation,
                   child: Transform.scale(
-                    scale: 0.9,
-                    child: Container(
-                      margin: const EdgeInsets.all(40),
+                    scale: 0.85,
+                    child: Transform.translate(
+                      offset: const Offset(25, 20),
+                      child: Container(
+                        margin: const EdgeInsets.all(35),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
@@ -283,7 +308,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: AspectRatio(
-                          aspectRatio: 3 / 4,
+                          aspectRatio: 3 / 5,
                           child: Opacity(
                             opacity: _nextPhotoFadeAnimation.value,
                             child: Image.file(
@@ -292,6 +317,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
                             ),
                           ),
                         ),
+                      ),
                       ),
                     ),
                   ),
@@ -330,7 +356,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen>
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: AspectRatio(
-                          aspectRatio: 3 / 4,
+                          aspectRatio: 3 / 5,
                           child: Image.file(
                             File(entry.stitchedPhotoPath!),
                             fit: BoxFit.cover,

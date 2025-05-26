@@ -1,12 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
-import '../controllers/photo_journal_controller.dart';
-import '../widgets/debug_screen/debug_screen_header.dart';
-import '../widgets/debug_screen/today_photo_status_card.dart';
-import '../widgets/debug_screen/stats_row.dart';
-import '../widgets/debug_screen/action_buttons.dart';
-import '../widgets/debug_screen/photo_preview_section.dart';
-import '../widgets/debug_screen/stitched_photo_preview.dart';
+import 'debug/photo_debug_screen.dart';
+import 'debug/controller_debug_screen.dart';
 
 class DebugScreen extends StatefulWidget {
   const DebugScreen({super.key});
@@ -16,47 +10,50 @@ class DebugScreen extends StatefulWidget {
 }
 
 class _DebugScreenState extends State<DebugScreen> {
-  String? stitchedPhotoPath;
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = [
+    const PhotoDebugScreen(),
+    const ControllerDebugScreen(),
+  ];
+
+  final List<String> _tabTitles = [
+    'Photos',
+    'Controller',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<PhotoJournalController>();
-
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Debug Screen')),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text('Debug: ${_tabTitles[_selectedIndex]}'),
+      ),
       child: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Obx(() {
-              if (controller.isLoading) {
-                return const Center(child: CupertinoActivityIndicator());
-              }
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const DebugScreenHeader(),
-                  const SizedBox(height: 20),
-                  const TodayPhotoStatusCard(),
-                  const SizedBox(height: 20),
-                  const StatsRow(),
-                  const SizedBox(height: 30),
-                  ActionButtons(
-                    onStitchedPhotoChanged: (path) {
-                      setState(() {
-                        stitchedPhotoPath = path;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 30),
-                  const PhotoPreviewSection(),
-                  const SizedBox(height: 30),
-                  StitchedPhotoPreview(stitchedPhotoPath: stitchedPhotoPath),
-                ],
-              );
-            }),
-          ),
+        child: Column(
+          children: [
+            CupertinoSlidingSegmentedControl<int>(
+              groupValue: _selectedIndex,
+              onValueChanged: (value) {
+                setState(() {
+                  _selectedIndex = value!;
+                });
+              },
+              children: const {
+                0: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Text('Photos'),
+                ),
+                1: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Text('Controller'),
+                ),
+              },
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: _screens[_selectedIndex],
+            ),
+          ],
         ),
       ),
     );
