@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../controllers/photo_journal_controller.dart';
 import '../../services/photo_stitching_service.dart';
-import '../../screens/simple_camera_screen.dart';
 
 class ActionButtons extends StatefulWidget {
   final Function(String?) onStitchedPhotoChanged;

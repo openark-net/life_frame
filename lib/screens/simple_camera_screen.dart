@@ -12,7 +12,7 @@ class SimpleCameraScreen extends StatefulWidget {
 
 class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
   final CameraService _cameraService = CameraService();
-  List<String> _capturedPhotos = [];
+  final List<String> _capturedPhotos = [];
   bool _isCapturing = false;
 
   Future<void> _capturePhoto({required bool isBackCamera}) async {

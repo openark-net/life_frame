@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:get/get.dart';
-import 'package:geolocator/geolocator.dart';
 import '../models/daily_entry.dart';
 import '../services/storage_service.dart';
 

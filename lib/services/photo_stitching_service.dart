@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,8 +14,8 @@ class PhotoStitchingService {
   Future<String?> stitchPhotos({
     required String backPhotoPath,
     required String frontPhotoPath,
-    required double latitude,
-    required double longitude,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       final backImage = await _loadImageFromFile(backPhotoPath);
@@ -25,7 +24,7 @@ class PhotoStitchingService {
       if (backImage == null || frontImage == null) {
         throw Exception('Failed to load one or both images');
       }
-      String locationText = await getFormattedLocation(latitude, longitude);
+      String locationText = await _getLocationText(latitude, longitude);
       final dateText = _formatCurrentDate();
 
       final stitchedImage = await _createStitchedImage(
@@ -48,6 +47,12 @@ class PhotoStitchingService {
       print('Error stitching photos: $e');
       return null;
     }
+  }
+
+  Future<String> _getLocationText(double? latitude, double? longitude) async {
+    return (latitude == null || longitude == null)
+        ? ""
+        : await getFormattedLocation(latitude, longitude);
   }
 
   String _formatCurrentDate() {
@@ -180,7 +185,7 @@ class PhotoStitchingService {
   }) {
     const textStyle = TextStyle(
       color: Color(0xFFFFFFFF),
-      fontSize: 80.0,
+      fontSize: 100.0,
       fontWeight: FontWeight.w600,
       fontFamily: 'PeaceSans',
       shadows: [
@@ -265,6 +270,4 @@ class PhotoStitchingService {
       print('Error deleting original photos: $e');
     }
   }
-
-
 }

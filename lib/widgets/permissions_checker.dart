@@ -116,20 +116,18 @@ class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen> {
   }
 
   Future<void> _requestPermission(PermissionType type) async {
-    PermissionStatus status;
-
     switch (type) {
       case PermissionType.location:
-        status = await Permission.location.request();
+        await Permission.location.request();
         break;
       case PermissionType.camera:
-        status = await Permission.camera.request();
+        await Permission.camera.request();
         break;
       case PermissionType.storage:
-        status = await _requestStoragePermission();
+        await _requestStoragePermission();
         break;
       case PermissionType.notifications:
-        status = await _requestNotificationPermission();
+        await _requestNotificationPermission();
         break;
     }
 
@@ -201,8 +199,6 @@ class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen> {
       child: Column(
         children: PermissionType.values.map((type) {
           final status = _permissionStatuses[type] ?? PermissionStatus.denied;
-          final isLast = type == PermissionType.values.last;
-
           return Column(
             children: [
               _PermissionTile(
