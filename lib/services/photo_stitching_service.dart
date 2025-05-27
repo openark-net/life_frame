@@ -15,9 +15,8 @@ class PhotoStitchingService {
   Future<String?> stitchPhotos({
     required String backPhotoPath,
     required String frontPhotoPath,
-    String? locationText,
-    double? latitude,
-    double? longitude,
+    required double latitude,
+    required double longitude,
   }) async {
     try {
       final backImage = await _loadImageFromFile(backPhotoPath);
@@ -26,31 +25,22 @@ class PhotoStitchingService {
       if (backImage == null || frontImage == null) {
         throw Exception('Failed to load one or both images');
       }
-
-      // Get formatted location from coordinates if provided
-      String? finalLocationText = locationText;
-      if (latitude != null && longitude != null) {
-        finalLocationText = await getFormattedLocation(latitude, longitude);
-      }
-
-      // Format current date
+      String locationText = await getFormattedLocation(latitude, longitude);
       final dateText = _formatCurrentDate();
 
       final stitchedImage = await _createStitchedImage(
         backImage: backImage,
         frontImage: frontImage,
         dateText: dateText,
-        locationText: finalLocationText,
+        locationText: locationText,
       );
 
       final savedPath = await _saveImageToFile(stitchedImage);
 
-      // Clean up memory
       backImage.dispose();
       frontImage.dispose();
       stitchedImage.dispose();
 
-      // Delete original photos to save space
       await _deleteOriginalPhotos(backPhotoPath, frontPhotoPath);
 
       return savedPath;
@@ -276,34 +266,5 @@ class PhotoStitchingService {
     }
   }
 
-  Future<bool> deleteStitchedPhoto(String filePath) async {
-    try {
-      final file = File(filePath);
-      if (await file.exists()) {
-        await file.delete();
-        return true;
-      }
-      return false;
-    } catch (e) {
-      print('Error deleting stitched photo: $e');
-      return false;
-    }
-  }
 
-  Future<List<String>> getAllStitchedPhotos() async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final files = directory
-          .listSync()
-          .where((file) => file.path.contains('life_frame_'))
-          .map((file) => file.path)
-          .toList();
-
-      files.sort((a, b) => b.compareTo(a));
-      return files;
-    } catch (e) {
-      print('Error getting stitched photos: $e');
-      return [];
-    }
-  }
 }
