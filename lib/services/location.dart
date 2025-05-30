@@ -14,8 +14,8 @@ class LocationService extends GetxService {
   Position? get cachedPosition => _cachedPosition;
   bool get hasValidCachedLocation =>
       _cachedPosition != null &&
-          _lastLocationUpdate != null &&
-          DateTime.now().difference(_lastLocationUpdate!) < _locationCacheTimeout;
+      _lastLocationUpdate != null &&
+      DateTime.now().difference(_lastLocationUpdate!) < _locationCacheTimeout;
 
   @override
   Future<void> onInit() async {

@@ -58,8 +58,8 @@ class DailyPhotoCaptureService {
   }
 
   Future<Map<String, String>?> _navigateToCameraScreen(
-      BuildContext context,
-      ) async {
+    BuildContext context,
+  ) async {
     return await Navigator.of(context).push<Map<String, String>>(
       CupertinoPageRoute(builder: (context) => const SimpleCameraScreen()),
     );

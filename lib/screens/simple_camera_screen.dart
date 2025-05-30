@@ -150,6 +150,8 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     }
   }
 
+  bool get _shouldMirrorPreview => _isFrontCamera && Platform.isAndroid;
+
   Widget _buildCameraPreview() {
     if (_controller == null || !_controller!.value.isInitialized) {
       return const Center(
@@ -165,18 +167,27 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
         final size = MediaQuery.of(context).size;
         var scale = size.aspectRatio * _controller!.value.aspectRatio;
 
-        // If the camera preview is wider than the screen,
-        // scale it to fill the height instead
         if (scale < 1) {
           scale = 1 / scale;
         }
 
-        return ClipRect(
+        Widget cameraPreview = ClipRect(
           child: Transform.scale(
             scale: scale,
             child: Center(child: CameraPreview(_controller!)),
           ),
         );
+
+        // Mirror the preview on Android front camera to match iOS behavior
+        if (_shouldMirrorPreview) {
+          cameraPreview = Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()..scale(-1.0, 1.0),
+            child: cameraPreview,
+          );
+        }
+
+        return cameraPreview;
       },
     );
   }
