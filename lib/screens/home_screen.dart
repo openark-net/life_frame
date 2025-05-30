@@ -65,11 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Life Frame logo with long-press gesture
                     GestureDetector(
-                      onTapDown: (_) => navController.startLongPressTimer(),
-                      onTapUp: (_) => navController.cancelLongPressTimer(),
-                      onTapCancel: () => navController.cancelLongPressTimer(),
+                      onDoubleTap: () => navController.toggleDebugMode(),
                       child: Text(
                         'Life Frame 📸',
                         style: TextStyle(
