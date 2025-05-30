@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
@@ -32,6 +33,14 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     try {
       final permissionStatus = await Permission.camera.request();
       if (!permissionStatus.isGranted) {
+        Get.snackbar(
+          'Error',
+          "No permission to access camera",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: CupertinoColors.systemRed,
+          colorText: CupertinoColors.white,
+          duration: const Duration(seconds: 3),
+        );
         if (mounted) {
           Navigator.of(context).pop();
         }
