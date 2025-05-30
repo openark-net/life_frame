@@ -1,2 +1,2 @@
 #!/bin/bash
-flutter run -d 00008110-000405E02293801E $@
+flutter run -d 00008110-000405E02293801E --release $@

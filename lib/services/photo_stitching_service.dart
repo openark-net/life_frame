@@ -8,6 +8,7 @@ class PhotoStitchingService {
   static const double padding = 16.0;
   static const double textPadding = 8.0;
   static const double frontPhotoRadius = 50.0; // Increased from 12.0
+  static const double fontSize = 80.0;
 
   Future<ui.Image?> stitchPhotos({
     required FramePhotos framePhotos,
@@ -149,7 +150,7 @@ class PhotoStitchingService {
   }) {
     const textStyle = TextStyle(
       color: Color(0xFFFFFFFF),
-      fontSize: 100.0,
+      fontSize: fontSize,
       fontWeight: FontWeight.w600,
       fontFamily: 'PeaceSans',
       shadows: [

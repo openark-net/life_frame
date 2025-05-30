@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -203,7 +204,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     );
   }
 
-  bool get _shouldMirrorPreview => _isFrontCamera;
+  bool get _shouldMirrorPreview => _isFrontCamera && Platform.isAndroid;
 
   @override
   void dispose() {
