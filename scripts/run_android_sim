@@ -1,3 +1,2 @@
 #!/bin/bash
-flutter emulators --launch Medium_Phone_API_35
-
+flutter run -d emulator-5554 $@

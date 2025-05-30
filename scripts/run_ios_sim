@@ -1,3 +1,4 @@
 #!/bin/bash
-flutter emulators --launch apple_ios_simulator
-
+echo TODO
+exit -1
+flutter run -d R5CT33217PX $@

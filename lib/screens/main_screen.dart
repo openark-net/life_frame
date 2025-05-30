@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/navigation_controller.dart';
 import 'home_screen.dart';
-import 'map_screen.dart';
 import 'gallery_screen.dart';
 import 'debug_screen.dart';
 
@@ -37,12 +36,6 @@ class MainScreen extends StatelessWidget {
           label: 'Home',
           screen: const HomeScreen(),
           shouldShow: () => true, // Always show
-        ),
-        TabDefinition(
-          icon: CupertinoIcons.map,
-          label: 'Map',
-          screen: const MapScreen(),
-          shouldShow: () => Platform.isAndroid, // Only on Android
         ),
         TabDefinition(
           icon: CupertinoIcons.photo_on_rectangle,
