@@ -55,7 +55,8 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     if (_cameras == null || _cameras!.isEmpty) return;
 
     final camera = _cameras!.firstWhere(
-          (camera) => camera.lensDirection ==
+      (camera) =>
+          camera.lensDirection ==
           (isBack ? CameraLensDirection.back : CameraLensDirection.front),
       orElse: () => _cameras!.first,
     );
@@ -88,7 +89,9 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
   }
 
   Future<void> _capturePhoto() async {
-    if (_controller == null || !_controller!.value.isInitialized || _isProcessing) {
+    if (_controller == null ||
+        !_controller!.value.isInitialized ||
+        _isProcessing) {
       return;
     }
 
@@ -127,10 +130,9 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
 
   void _completeCapture() {
     if (_backPhotoPath != null && _frontPhotoPath != null) {
-      Navigator.of(context).pop({
-        'backPhoto': _backPhotoPath!,
-        'frontPhoto': _frontPhotoPath!,
-      });
+      Navigator.of(
+        context,
+      ).pop({'backPhoto': _backPhotoPath!, 'frontPhoto': _frontPhotoPath!});
     }
   }
 
@@ -180,9 +182,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
         return ClipRect(
           child: Transform.scale(
             scale: scale,
-            child: Center(
-              child: CameraPreview(_controller!),
-            ),
+            child: Center(child: CameraPreview(_controller!)),
           ),
         );
       },
@@ -216,7 +216,10 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -237,7 +240,10 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: CupertinoColors.black.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(20),
@@ -283,10 +289,10 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
                       child: _isProcessing
                           ? const CupertinoActivityIndicator()
                           : Icon(
-                        CupertinoIcons.camera_fill,
-                        color: CupertinoColors.black,
-                        size: 32,
-                      ),
+                              CupertinoIcons.camera_fill,
+                              color: CupertinoColors.black,
+                              size: 32,
+                            ),
                     ),
                   ),
                 ),
@@ -303,17 +309,11 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
                 height: 80,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: CupertinoColors.white,
-                    width: 2,
-                  ),
+                  border: Border.all(color: CupertinoColors.white, width: 2),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Image.file(
-                    File(_backPhotoPath!),
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.file(File(_backPhotoPath!), fit: BoxFit.cover),
                 ),
               ),
             ),

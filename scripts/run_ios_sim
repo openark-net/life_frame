@@ -1,4 +1,2 @@
 #!/bin/bash
-echo TODO
-exit -1
-flutter run -d R5CT33217PX $@
+flutter run -d 98137F0A-104A-44A0-9264-F507BDD5FAF2 $@
