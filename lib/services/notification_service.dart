@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:life_frame/controllers/navigation_controller.dart';
 
 class NotificationService extends GetxService {
   final FlutterLocalNotificationsPlugin _notifications =
@@ -63,6 +65,7 @@ class NotificationService extends GetxService {
         final granted = await androidPlugin.requestNotificationsPermission();
         debugPrint('Notification permission granted: $granted');
 
+        // Request exact alarm permission for Android 12+
         await androidPlugin.requestExactAlarmsPermission();
       }
     } else if (Platform.isIOS) {
@@ -106,12 +109,13 @@ class NotificationService extends GetxService {
       macOS: darwinDetails,
     );
 
-    // Schedule notification every 30 seconds for testing
+    // Schedule notification every minute for testing
+    // Note: 30 seconds is not supported, minimum is everyMinute
     await _notifications.periodicallyShow(
       0,
       'Time for your daily photo!',
       'Capture a moment from your life today 📸',
-      RepeatInterval.everyMinute, // Using everyMinute as minimum interval
+      RepeatInterval.everyMinute,
       details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
@@ -164,8 +168,6 @@ class NotificationService extends GetxService {
       scheduledDate,
       details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
 
