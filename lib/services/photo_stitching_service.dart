@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:gal/gal.dart';
+import '../models/frame_photos.dart';
 import '../utils/location_formatter.dart';
 
 class PhotoStitchingService {
@@ -11,40 +9,24 @@ class PhotoStitchingService {
   static const double textPadding = 8.0;
   static const double frontPhotoRadius = 12.0;
 
-  Future<String?> stitchPhotos({
-    required String backPhotoPath,
-    required String frontPhotoPath,
+  Future<ui.Image?> stitchPhotos({
+    required FramePhotos framePhotos,
     double? latitude,
     double? longitude,
   }) async {
     try {
-      final backImage = await _loadImageFromFile(backPhotoPath);
-      final frontImage = await _loadImageFromFile(frontPhotoPath);
-
-      if (backImage == null || frontImage == null) {
-        throw Exception('Failed to load one or both images');
-      }
-      String locationText = await _getLocationText(latitude, longitude);
+      final locationText = await _getLocationText(latitude, longitude);
       final dateText = _formatCurrentDate();
 
       final stitchedImage = await _createStitchedImage(
-        backImage: backImage,
-        frontImage: frontImage,
+        backImage: framePhotos.back,
+        frontImage: framePhotos.front,
         dateText: dateText,
         locationText: locationText,
       );
 
-      final savedPath = await _saveImageToFile(stitchedImage);
-
-      backImage.dispose();
-      frontImage.dispose();
-      stitchedImage.dispose();
-
-      await _deleteOriginalPhotos(backPhotoPath, frontPhotoPath);
-
-      return savedPath;
+      return stitchedImage;
     } catch (e) {
-      print('Error stitching photos: $e');
       return null;
     }
   }
@@ -73,24 +55,6 @@ class PhotoStitchingService {
     ];
 
     return '${months[now.month - 1]} ${now.day}, ${now.year}';
-  }
-
-  Future<ui.Image?> _loadImageFromFile(String filePath) async {
-    try {
-      final file = File(filePath);
-      final bytes = await file.readAsBytes();
-      final codec = await ui.instantiateImageCodec(
-        bytes,
-        allowUpscaling: false,
-        targetWidth: null,
-        targetHeight: null,
-      );
-      final frame = await codec.getNextFrame();
-      return frame.image;
-    } catch (e) {
-      print('Error loading image from $filePath: $e');
-      return null;
-    }
   }
 
   Future<ui.Image> _createStitchedImage({
@@ -226,48 +190,5 @@ class PhotoStitchingService {
     datePainter.layout();
 
     datePainter.paint(canvas, Offset(padding, currentY - datePainter.height));
-  }
-
-  Future<String> _saveImageToFile(ui.Image image) async {
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData == null) {
-      throw Exception('Failed to convert image to bytes');
-    }
-
-    final bytes = byteData.buffer.asUint8List();
-    final directory = await getApplicationDocumentsDirectory();
-    final now = DateTime.now();
-    final dateString =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-    final filePath = '${directory.path}/life_frame_$dateString.png';
-
-    final file = File(filePath);
-    await file.writeAsBytes(bytes);
-
-    await Gal.putImage('$filePath', album: 'LifeFrame');
-
-    return filePath;
-  }
-
-  Future<void> _deleteOriginalPhotos(
-    String backPhotoPath,
-    String frontPhotoPath,
-  ) async {
-    try {
-      final backFile = File(backPhotoPath);
-      final frontFile = File(frontPhotoPath);
-
-      if (await backFile.exists()) {
-        await backFile.delete();
-        print('Deleted original back photo: $backPhotoPath');
-      }
-
-      if (await frontFile.exists()) {
-        await frontFile.delete();
-        print('Deleted original front photo: $frontPhotoPath');
-      }
-    } catch (e) {
-      print('Error deleting original photos: $e');
-    }
   }
 }

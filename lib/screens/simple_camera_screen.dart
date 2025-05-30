@@ -1,10 +1,8 @@
-import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
-import 'package:permission_handler/permission_handler.dart';
+import '../models/frame_photos.dart';
 
 class SimpleCameraScreen extends StatefulWidget {
   const SimpleCameraScreen({super.key});
@@ -16,8 +14,8 @@ class SimpleCameraScreen extends StatefulWidget {
 class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
   CameraController? _controller;
   List<CameraDescription>? _cameras;
-  String? _backPhotoPath;
-  String? _frontPhotoPath;
+  ui.Image? _backPhoto;
+  ui.Image? _frontPhoto;
   bool _isProcessing = false;
   bool _isFrontCamera = false;
   String _statusMessage = 'Position your shot';
@@ -63,8 +61,6 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     try {
       await _controller!.initialize();
       await _controller!.setFlashMode(FlashMode.off);
-
-      // Lock to portrait orientation for consistent photos
       await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
 
       if (mounted) {
@@ -80,6 +76,13 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     }
   }
 
+  Future<ui.Image> _convertXFileToImage(XFile xFile) async {
+    final Uint8List bytes = await xFile.readAsBytes();
+    final ui.Codec codec = await ui.instantiateImageCodec(bytes);
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+    return frameInfo.image;
+  }
+
   Future<void> _capturePhoto() async {
     if (_controller == null ||
         !_controller!.value.isInitialized ||
@@ -93,19 +96,13 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
       await HapticFeedback.lightImpact();
 
       final XFile photo = await _controller!.takePicture();
-      final Directory tempDir = await getTemporaryDirectory();
-      final String fileName = _isFrontCamera
-          ? 'front_${DateTime.now().millisecondsSinceEpoch}.jpg'
-          : 'back_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final String filePath = path.join(tempDir.path, fileName);
-
-      await photo.saveTo(filePath);
+      final ui.Image image = await _convertXFileToImage(photo);
 
       if (_isFrontCamera) {
-        _frontPhotoPath = filePath;
+        _frontPhoto = image;
         _completeCapture();
       } else {
-        _backPhotoPath = filePath;
+        _backPhoto = image;
         await _switchToFrontCamera();
       }
     } catch (e) {
@@ -121,10 +118,9 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
   }
 
   void _completeCapture() {
-    if (_backPhotoPath != null && _frontPhotoPath != null) {
-      Navigator.of(
-        context,
-      ).pop({'backPhoto': _backPhotoPath!, 'frontPhoto': _frontPhotoPath!});
+    if (_backPhoto != null && _frontPhoto != null) {
+      final framePhotos = FramePhotos(front: _frontPhoto!, back: _backPhoto!);
+      Navigator.of(context).pop(framePhotos);
     }
   }
 
@@ -149,8 +145,6 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
       );
     }
   }
-
-  bool get _shouldMirrorPreview => _isFrontCamera && Platform.isAndroid;
 
   Widget _buildCameraPreview() {
     if (_controller == null || !_controller!.value.isInitialized) {
@@ -178,7 +172,6 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
           ),
         );
 
-        // Mirror the preview on Android front camera to match iOS behavior
         if (_shouldMirrorPreview) {
           cameraPreview = Transform(
             alignment: Alignment.center,
@@ -192,6 +185,23 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     );
   }
 
+  Widget _buildPhotoThumbnail(ui.Image image) {
+    return Container(
+      width: 60,
+      height: 80,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: CupertinoColors.white, width: 2),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: RawImage(image: image, fit: BoxFit.cover),
+      ),
+    );
+  }
+
+  bool get _shouldMirrorPreview => _isFrontCamera;
+
   @override
   void dispose() {
     SystemChrome.setPreferredOrientations([
@@ -201,20 +211,22 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
       DeviceOrientation.landscapeRight,
     ]);
     _controller?.dispose();
+
+    // Clean up ui.Image objects if navigation is cancelled
+    _backPhoto?.dispose();
+    _frontPhoto?.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = CupertinoTheme.of(context);
-
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.black,
       child: Stack(
         fit: StackFit.expand,
         children: [
           _buildCameraPreview(),
-
           SafeArea(
             child: Column(
               children: [
@@ -291,7 +303,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
                       ),
                       child: _isProcessing
                           ? const CupertinoActivityIndicator()
-                          : Icon(
+                          : const Icon(
                               CupertinoIcons.camera_fill,
                               color: CupertinoColors.black,
                               size: 32,
@@ -302,23 +314,11 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
               ],
             ),
           ),
-
-          if (_backPhotoPath != null && !_isFrontCamera)
+          if (_backPhoto != null && !_isFrontCamera)
             Positioned(
               bottom: 40,
               left: 20,
-              child: Container(
-                width: 60,
-                height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: CupertinoColors.white, width: 2),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: Image.file(File(_backPhotoPath!), fit: BoxFit.cover),
-                ),
-              ),
+              child: _buildPhotoThumbnail(_backPhoto!),
             ),
         ],
       ),
