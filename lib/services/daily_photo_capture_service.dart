@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:life_frame/models/frame_photos.dart';
-import 'package:life_frame/services/image_metadata.dart';
+import 'package:life_frame/services/image_filesystem.dart';
 import 'package:life_frame/services/location.dart';
 import '../controllers/photo_journal_controller.dart';
 import '../screens/simple_camera_screen.dart';
@@ -34,7 +34,7 @@ class DailyPhotoCaptureService {
 
       // todo: confirm with user
 
-      final photoPath = await ImageMetadata.saveImageWithMetadata(
+      final photoPath = await ImageFilesystem.saveImageWithMetadata(
         photo,
         latitude: position?.latitude,
         longitude: position?.longitude,

@@ -4,20 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:native_exif/native_exif.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
-import '../models/daily_entry.dart';
 
-class ImageMetadata {
+class ImageFilesystem {
   static const String _lifeFrameSoftware = 'life_frame';
-
-  /// Converts decimal degrees to degrees, minutes, seconds format for EXIF
-  static List<double> _decimalToDMS(double decimal) {
-    final absDecimal = decimal.abs();
-    final degrees = absDecimal.floor().toDouble();
-    final minutes = ((absDecimal - degrees) * 60).floor().toDouble();
-    final seconds = ((absDecimal - degrees - minutes / 60) * 3600);
-
-    return [degrees, minutes, seconds];
-  }
 
   /// Saves a ui.Image as JPEG with metadata to app directory and gallery
   /// Returns the path where the image was saved in the gallery
@@ -91,6 +80,7 @@ class ImageMetadata {
   }
 
   /// Builds GPS metadata map from coordinates and timestamp
+  /// Note: native_exif expects GPS coordinates as double values in decimal degrees
   static Map<String, Object> _buildGpsMetadata(
     double latitude,
     double longitude,
@@ -106,29 +96,19 @@ class ImageMetadata {
     final latRef = latitude >= 0 ? 'N' : 'S';
     final lngRef = longitude >= 0 ? 'E' : 'W';
 
-    // Convert coordinates to DMS format
-    final latDMS = _decimalToDMS(latitude);
-    final lngDMS = _decimalToDMS(longitude);
+    // Use absolute values for coordinates, as direction is handled by reference
+    final absLatitude = latitude.abs();
+    final absLongitude = longitude.abs();
 
     return {
       'GPSVersionID': '2.3.0.0',
-      'GPSLatitude': latDMS,
+      'GPSLatitude': absLatitude,
       'GPSLatitudeRef': latRef,
-      'GPSLongitude': lngDMS,
+      'GPSLongitude': absLongitude,
       'GPSLongitudeRef': lngRef,
       'GPSTimeStamp': gpsTime,
       'GPSDateStamp': gpsDate,
       'GPSMapDatum': 'WGS-84',
     };
-  }
-
-  /// Legacy method - applies EXIF metadata to an image file based on DailyEntry data
-  static Future<void> applyMetadata(DailyEntry entry) async {
-    await _applyMetadataToFile(
-      entry.photoPath,
-      entry.timestamp,
-      entry.latitude,
-      entry.longitude,
-    );
   }
 }
