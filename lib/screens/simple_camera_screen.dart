@@ -1,7 +1,10 @@
-// File: ./lib/screens/simple_camera_screen.dart
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
-import '../services/camera_service.dart';
-import '../widgets/camera_widget.dart';
+import 'package:flutter/services.dart';
+import 'package:camera/camera.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'package:permission_handler/permission_handler.dart';
 
 class SimpleCameraScreen extends StatefulWidget {
   const SimpleCameraScreen({super.key});
@@ -11,165 +14,285 @@ class SimpleCameraScreen extends StatefulWidget {
 }
 
 class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
-  final CameraService _cameraService = CameraService();
-  final List<String> _capturedPhotos = [];
-  bool _isCapturing = false;
+  CameraController? _controller;
+  List<CameraDescription>? _cameras;
+  String? _backPhotoPath;
+  String? _frontPhotoPath;
+  bool _isProcessing = false;
+  bool _isFrontCamera = false;
+  String _statusMessage = 'Position your shot';
 
-  Future<void> _capturePhoto({required bool isBackCamera}) async {
-    if (_isCapturing) return;
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+  }
 
-    setState(() {
-      _isCapturing = true;
-    });
+  Future<void> _initializeCamera() async {
+    try {
+      final permissionStatus = await Permission.camera.request();
+      if (!permissionStatus.isGranted) {
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+        return;
+      }
+
+      _cameras = await availableCameras();
+      if (_cameras == null || _cameras!.isEmpty) {
+        _showError('No cameras available');
+        return;
+      }
+
+      await _setupCamera(isBack: true);
+    } catch (e) {
+      _showError('Failed to initialize camera');
+    }
+  }
+
+  Future<void> _setupCamera({required bool isBack}) async {
+    if (_cameras == null || _cameras!.isEmpty) return;
+
+    final camera = _cameras!.firstWhere(
+      (camera) =>
+          camera.lensDirection ==
+          (isBack ? CameraLensDirection.back : CameraLensDirection.front),
+      orElse: () => _cameras!.first,
+    );
+
+    _controller = CameraController(
+      camera,
+      ResolutionPreset.max,
+      enableAudio: false,
+      imageFormatGroup: ImageFormatGroup.jpeg,
+    );
 
     try {
-      final String? photoPath = await _cameraService.capturePhoto(
-        isBackCamera: isBackCamera,
-      );
+      await _controller!.initialize();
+      await _controller!.setFlashMode(FlashMode.off);
 
-      if (photoPath != null) {
+      if (mounted) {
         setState(() {
-          _capturedPhotos.add(photoPath);
+          _isFrontCamera = !isBack;
+          _statusMessage = _isFrontCamera
+              ? 'Now take your selfie'
+              : 'Position your shot';
         });
       }
     } catch (e) {
-      if (mounted) {
-        _showErrorDialog('Error taking picture: $e');
+      _showError('Camera initialization failed');
+    }
+  }
+
+  Future<void> _capturePhoto() async {
+    if (_controller == null ||
+        !_controller!.value.isInitialized ||
+        _isProcessing) {
+      return;
+    }
+
+    setState(() => _isProcessing = true);
+
+    try {
+      await HapticFeedback.lightImpact();
+
+      final XFile photo = await _controller!.takePicture();
+      final Directory tempDir = await getTemporaryDirectory();
+      final String fileName = _isFrontCamera
+          ? 'front_${DateTime.now().millisecondsSinceEpoch}.jpg'
+          : 'back_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final String filePath = path.join(tempDir.path, fileName);
+
+      await photo.saveTo(filePath);
+
+      if (_isFrontCamera) {
+        _frontPhotoPath = filePath;
+        _completeCapture();
+      } else {
+        _backPhotoPath = filePath;
+        await _switchToFrontCamera();
       }
-    } finally {
-      setState(() {
-        _isCapturing = false;
-      });
+    } catch (e) {
+      _showError('Failed to capture photo');
+      setState(() => _isProcessing = false);
     }
   }
 
-  void _finishCapture() {
-    if (_capturedPhotos.length >= 2) {
-      Navigator.of(context).pop({
-        'backPhoto': _capturedPhotos[0],
-        'frontPhoto': _capturedPhotos[1],
-      });
-    } else if (_capturedPhotos.length == 1) {
-      Navigator.of(context).pop({
-        'backPhoto': _capturedPhotos[0],
-        'frontPhoto': _capturedPhotos[0], // Use same photo for both
-      });
+  Future<void> _switchToFrontCamera() async {
+    await _controller?.dispose();
+    await _setupCamera(isBack: false);
+    setState(() => _isProcessing = false);
+  }
+
+  void _completeCapture() {
+    if (_backPhotoPath != null && _frontPhotoPath != null) {
+      Navigator.of(
+        context,
+      ).pop({'backPhoto': _backPhotoPath!, 'frontPhoto': _frontPhotoPath!});
     }
   }
 
-  void _retakePhoto(int index) {
-    setState(() {
-      _capturedPhotos.removeAt(index);
-    });
-  }
-
-  void _showErrorDialog(String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getInstructionText() {
-    if (_capturedPhotos.isEmpty) {
-      return 'First, take a photo with the back camera';
-    } else if (_capturedPhotos.length == 1) {
-      return 'Now take a selfie with the front camera';
-    } else {
-      return 'Both photos captured! Tap Done to finish';
+  void _showError(String message) {
+    if (mounted) {
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
   @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final theme = CupertinoTheme.of(context);
+
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: const Text('Take Photos'),
-        leading: CupertinoNavigationBarBackButton(
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        trailing: _capturedPhotos.length >= 2
-            ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _finishCapture,
-                child: const Text('Done'),
-              )
-            : null,
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              // Instructions
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  _getInstructionText(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+      backgroundColor: CupertinoColors.black,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (_controller != null && _controller!.value.isInitialized)
+            ClipRect(
+              child: Transform.scale(
+                scale:
+                    _controller!.value.aspectRatio /
+                    mediaQuery.size.aspectRatio,
+                child: Center(child: CameraPreview(_controller!)),
+              ),
+            )
+          else
+            const Center(
+              child: CupertinoActivityIndicator(
+                radius: 20,
+                color: CupertinoColors.white,
+              ),
+            ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.black.withOpacity(0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            CupertinoIcons.xmark,
+                            color: CupertinoColors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _statusMessage,
+                          style: const TextStyle(
+                            color: CupertinoColors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Photo capture sections
-              Expanded(
-                child: Column(
-                  children: [
-                    // Back camera section
-                    CameraWidget(
-                      title: 'Back Camera Photo',
-                      photoPath: _capturedPhotos.isNotEmpty
-                          ? _capturedPhotos[0]
-                          : null,
-                      isBackCamera: true,
-                      canCapture: true,
-                      isCapturing: _isCapturing,
-                      onCapture: () => _capturePhoto(isBackCamera: true),
-                      onDelete: _capturedPhotos.isNotEmpty
-                          ? () => _retakePhoto(0)
-                          : null,
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 40),
+                  child: GestureDetector(
+                    onTap: _isProcessing ? null : _capturePhoto,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _isProcessing
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.white,
+                        border: Border.all(
+                          color: CupertinoColors.white,
+                          width: 4,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: CupertinoColors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: _isProcessing
+                          ? const CupertinoActivityIndicator()
+                          : Icon(
+                              CupertinoIcons.camera_fill,
+                              color: CupertinoColors.black,
+                              size: 32,
+                            ),
                     ),
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-                    const SizedBox(height: 30),
-
-                    // Front camera section
-                    CameraWidget(
-                      title: 'Front Camera Photo (Selfie)',
-                      photoPath: _capturedPhotos.length > 1
-                          ? _capturedPhotos[1]
-                          : null,
-                      isBackCamera: false,
-                      canCapture: _capturedPhotos.isNotEmpty,
-                      isCapturing: _isCapturing,
-                      onCapture: () => _capturePhoto(isBackCamera: false),
-                      onDelete: _capturedPhotos.length > 1
-                          ? () => _retakePhoto(1)
-                          : null,
-                    ),
-                  ],
+          if (_backPhotoPath != null && !_isFrontCamera)
+            Positioned(
+              bottom: 40,
+              left: 20,
+              child: Container(
+                width: 60,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: CupertinoColors.white, width: 2),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.file(File(_backPhotoPath!), fit: BoxFit.cover),
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }
