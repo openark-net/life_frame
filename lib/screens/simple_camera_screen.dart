@@ -78,7 +78,10 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
 
   Future<ui.Image> _convertXFileToImage(XFile xFile) async {
     final Uint8List bytes = await xFile.readAsBytes();
-    final ui.Codec codec = await ui.instantiateImageCodec(bytes);
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      bytes,
+      allowUpscaling: false, // Prevent any upscaling
+    );
     final ui.FrameInfo frameInfo = await codec.getNextFrame();
     return frameInfo.image;
   }

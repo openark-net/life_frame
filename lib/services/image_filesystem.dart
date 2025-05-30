@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'dart:typed_data';
+import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
 import 'package:intl/intl.dart';
 import 'package:native_exif/native_exif.dart';
 import 'package:path_provider/path_provider.dart';
@@ -7,21 +10,16 @@ import 'package:gal/gal.dart';
 
 class ImageFilesystem {
   static const String _lifeFrameSoftware = 'life_frame';
+  static const int _jpegQuality = 95; // High quality JPEG (0-100)
 
-  /// Saves a ui.Image as JPEG with metadata to app directory and gallery
+  /// Saves a ui.Image as high-quality JPEG with metadata to app directory and gallery
   /// Returns the path where the image was saved in the gallery
   static Future<String> saveImageWithMetadata(
     ui.Image image, {
     double? latitude,
     double? longitude,
   }) async {
-    // Convert image to bytes
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData == null) {
-      throw Exception('Failed to convert image to bytes');
-    }
-
-    final bytes = byteData.buffer.asUint8List();
+    final bytes = await _convertToHighQualityJpeg(image);
 
     // Generate unique filename with current date and time
     final directory = await getApplicationDocumentsDirectory();
@@ -42,6 +40,26 @@ class ImageFilesystem {
     await Gal.putImage(filePath, album: 'LifeFrame');
 
     return filePath;
+  }
+
+  /// Converts ui.Image to high-quality JPEG bytes
+  static Future<Uint8List> _convertToHighQualityJpeg(ui.Image image) async {
+    // First convert to PNG to get lossless byte data
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) {
+      throw Exception('Failed to convert image to bytes');
+    }
+
+    // Decode PNG bytes to image package format
+    final pngBytes = byteData.buffer.asUint8List();
+    final decodedImage = img.decodeImage(pngBytes);
+    if (decodedImage == null) {
+      throw Exception('Failed to decode image');
+    }
+
+    // Encode as high-quality JPEG
+    final jpegBytes = img.encodeJpg(decodedImage, quality: _jpegQuality);
+    return Uint8List.fromList(jpegBytes);
   }
 
   /// Internal method to apply metadata to a saved file
