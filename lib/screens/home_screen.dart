@@ -145,25 +145,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     const SizedBox(height: 60),
 
-                    // CTA button - only show if no photo taken today
-                    if (photoStatus == PhotoStatus.noPhoto) ...[
-                      CupertinoButton.filled(
-                        onPressed: isActionDisabled
-                            ? null
-                            : () => _handleTakePicture(context),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 16,
-                        ),
-                        child: const Text(
-                          'Take Your Daily Picture',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
+                    CupertinoButton.filled(
+                      onPressed: isActionDisabled
+                          ? null
+                          : () => _handleTakePicture(context),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 16,
+                      ),
+                      child: Text(
+                        !controller.hasTodayPhoto
+                            ? 'Take Your Daily Picture'
+                            : 'Take ANOTHER Photo',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
+                    ),
                   ],
                 );
               }),
