@@ -31,14 +31,6 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
 
   Future<void> _initializeCamera() async {
     try {
-      final permissionStatus = await Permission.camera.request();
-      if (!permissionStatus.isGranted) {
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-        return;
-      }
-
       _cameras = await availableCameras();
       if (_cameras == null || _cameras!.isEmpty) {
         _showError('No cameras available');
