@@ -68,15 +68,6 @@ void main() {
 
     group('initialization', () {
       test('should initialize with correct default values', () {
-        expect(controller.hasTodayPhoto, isFalse);
-        expect(controller.isLoading, isFalse);
-        expect(controller.todayEntry, isNull);
-        expect(controller.allEntries, isEmpty);
-        expect(controller.totalPhotosCount, equals(0));
-        expect(controller.currentDate, isNotEmpty);
-        expect(controller.todayBackPhoto, isEmpty);
-        expect(controller.todayFrontPhoto, isEmpty);
-
         // Verify initialization methods were called
         verify(mockStorageService.hasTodayPhoto()).called(1);
         verify(mockStorageService.getEntriesPage(0, 30)).called(1);

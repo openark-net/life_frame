@@ -16,48 +16,21 @@ class PhotoJournalController extends GetxController {
   final RxBool _isLoadingMore = false.obs;
 
   static const int _pageSize = 30;
-  final RxString _currentDate = ''.obs;
-  final RxString _todayBackPhoto = ''.obs;
-  final RxString _todayFrontPhoto = ''.obs;
 
   bool get hasTodayPhoto => _hasTodayPhoto.value;
   bool get isLoading => _isLoading.value;
   DailyEntry? get todayEntry => _todayEntry.value;
   List<DailyEntry> get allEntries => _allEntries;
   List<DailyEntry> get paginatedEntries => _paginatedEntries;
-  int get totalPhotosCount => _totalPhotosCount.value;
-  int get currentPage => _currentPage.value;
   bool get hasMorePages => _hasMorePages.value;
   bool get isLoadingMore => _isLoadingMore.value;
-  String get currentDate => _currentDate.value;
-  String get todayBackPhoto => _todayBackPhoto.value;
-  String get todayFrontPhoto => _todayFrontPhoto.value;
 
   @override
   void onInit() {
     super.onInit();
-    _updateCurrentDate();
     _checkTodayPhoto();
     _loadInitialEntries();
     _loadAllEntries();
-    _startDateUpdateTimer();
-  }
-
-  void _updateCurrentDate() {
-    _currentDate.value = DailyEntry.getTodayKey();
-  }
-
-  void _startDateUpdateTimer() {
-    ever(_currentDate, (String date) {
-      _checkTodayPhoto();
-    });
-
-    Stream.periodic(const Duration(minutes: 1)).listen((_) {
-      final newDate = DailyEntry.getTodayKey();
-      if (newDate != _currentDate.value) {
-        _updateCurrentDate();
-      }
-    });
   }
 
   Future<void> _checkTodayPhoto() async {
@@ -137,33 +110,6 @@ class PhotoJournalController extends GetxController {
     await _loadInitialEntries();
   }
 
-  Future<DailyEntry?> getEntryByDate(DateTime date) async {
-    try {
-      return await _storageService.getDailyEntry(date);
-    } catch (e) {
-      print('PhotoJournalController: Error getting entry by date: $e');
-      return null;
-    }
-  }
-
-  Future<DailyEntry?> getNextEntry(DateTime currentDate) async {
-    try {
-      return await _storageService.getNextEntry(currentDate);
-    } catch (e) {
-      print('PhotoJournalController: Error getting next entry: $e');
-      return null;
-    }
-  }
-
-  Future<DailyEntry?> getPreviousEntry(DateTime currentDate) async {
-    try {
-      return await _storageService.getPreviousEntry(currentDate);
-    } catch (e) {
-      print('PhotoJournalController: Error getting previous entry: $e');
-      return null;
-    }
-  }
-
   Future<DailyEntry?> savePhotoEntry({
     required String photoPath,
     required double latitude,
@@ -207,8 +153,6 @@ class PhotoJournalController extends GetxController {
         if (date == DailyEntry.getTodayKey()) {
           _hasTodayPhoto.value = false;
           _todayEntry.value = null;
-          _todayBackPhoto.value = '';
-          _todayFrontPhoto.value = '';
         }
         await _loadAllEntries();
         await refreshEntries();
@@ -263,23 +207,5 @@ class PhotoJournalController extends GetxController {
     }
 
     return streak;
-  }
-
-  Future<void> clearAllData() async {
-    try {
-      _isLoading.value = true;
-      await _storageService.clearAllData();
-      _hasTodayPhoto.value = false;
-      _todayEntry.value = null;
-      _allEntries.clear();
-      _paginatedEntries.clear();
-      _totalPhotosCount.value = 0;
-      _currentPage.value = 0;
-      _hasMorePages.value = true;
-    } catch (e) {
-      print('PhotoJournalController: Error clearing all data: $e');
-    } finally {
-      _isLoading.value = false;
-    }
   }
 }

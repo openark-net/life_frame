@@ -7,8 +7,6 @@ import '../models/daily_entry.dart';
 
 class StorageService extends GetxService {
   static const String _entriesKey = 'daily_entries';
-  static const String _photosDirectory = 'life_frame_photos';
-
   late SharedPreferences _prefs;
   late Directory _photosDir;
 
@@ -20,39 +18,6 @@ class StorageService extends GetxService {
 
   Future<void> _initializeStorage() async {
     _prefs = await SharedPreferences.getInstance();
-    await _setupPhotosDirectory();
-  }
-
-  Future<void> _setupPhotosDirectory() async {
-    final appDir = await getApplicationDocumentsDirectory();
-    _photosDir = Directory('${appDir.path}/$_photosDirectory');
-
-    if (!await _photosDir.exists()) {
-      await _photosDir.create(recursive: true);
-    }
-  }
-
-  Future<String> getPhotosDirectoryPath() async {
-    final now = DateTime.now();
-    final yearMonth = '${now.year}/${now.month.toString().padLeft(2, '0')}';
-    final monthDir = Directory('${_photosDir.path}/$yearMonth');
-
-    if (!await monthDir.exists()) {
-      await monthDir.create(recursive: true);
-    }
-
-    return monthDir.path;
-  }
-
-  Future<Directory> getPhotosDirectory() async {
-    final path = await getPhotosDirectoryPath();
-    return Directory(path);
-  }
-
-  String generatePhotoFileName() {
-    final now = DateTime.now();
-    final timestamp = now.millisecondsSinceEpoch;
-    return 'photo_$timestamp.jpg';
   }
 
   Future<bool> saveDailyEntry(DailyEntry entry) async {
@@ -150,11 +115,6 @@ class StorageService extends GetxService {
     }
   }
 
-  Future<int> getTotalPages(int pageSize) async {
-    final totalCount = await getTotalEntriesCount();
-    return (totalCount / pageSize).ceil();
-  }
-
   Future<List<DailyEntry>> getEntriesPage(int page, int pageSize) async {
     try {
       final dateKeys = await _getSortedDateKeys();
@@ -183,74 +143,6 @@ class StorageService extends GetxService {
     }
   }
 
-  Future<DailyEntry?> getNextEntry(DateTime currentDate) async {
-    try {
-      final currentDateKey = DailyEntry.formatDate(currentDate);
-      final dateKeys = await _getSortedDateKeys();
-
-      final currentIndex = dateKeys.indexOf(currentDateKey);
-      if (currentIndex == -1 || currentIndex == 0) {
-        return null; // No next entry (already at newest)
-      }
-
-      final nextDateKey = dateKeys[currentIndex - 1];
-      final entriesMap = await _getAllEntries();
-      final entryData = entriesMap[nextDateKey];
-
-      return entryData != null ? DailyEntry.fromJson(entryData) : null;
-    } catch (e) {
-      print('StorageService: Error getting next entry: $e');
-      return null;
-    }
-  }
-
-  Future<DailyEntry?> getPreviousEntry(DateTime currentDate) async {
-    try {
-      final currentDateKey = DailyEntry.formatDate(currentDate);
-      final dateKeys = await _getSortedDateKeys();
-
-      final currentIndex = dateKeys.indexOf(currentDateKey);
-      if (currentIndex == -1 || currentIndex >= dateKeys.length - 1) {
-        return null; // No previous entry (already at oldest)
-      }
-
-      final previousDateKey = dateKeys[currentIndex + 1];
-      final entriesMap = await _getAllEntries();
-      final entryData = entriesMap[previousDateKey];
-
-      return entryData != null ? DailyEntry.fromJson(entryData) : null;
-    } catch (e) {
-      print('StorageService: Error getting previous entry: $e');
-      return null;
-    }
-  }
-
-  Future<List<DailyEntry>> getEntriesInDateRange(
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
-    try {
-      final entriesMap = await _getAllEntries();
-      final entries = <DailyEntry>[];
-
-      for (final entryData in entriesMap.values) {
-        final entry = DailyEntry.fromJson(entryData);
-        final entryDate = DateTime.parse('${entry.date}T00:00:00');
-
-        if (entryDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
-            entryDate.isBefore(endDate.add(const Duration(days: 1)))) {
-          entries.add(entry);
-        }
-      }
-
-      entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      return entries;
-    } catch (e) {
-      print('StorageService: Error getting entries in date range: $e');
-      return [];
-    }
-  }
-
   Future<bool> deleteDailyEntry(String date) async {
     try {
       final entries = await _getAllEntries();
@@ -273,18 +165,6 @@ class StorageService extends GetxService {
     } catch (e) {
       print('StorageService: Error deleting entry: $e');
       return false;
-    }
-  }
-
-  Future<void> clearAllData() async {
-    try {
-      await _prefs.remove(_entriesKey);
-      if (await _photosDir.exists()) {
-        await _photosDir.delete(recursive: true);
-        await _setupPhotosDirectory();
-      }
-    } catch (e) {
-      print('StorageService: Error clearing all data: $e');
     }
   }
 }

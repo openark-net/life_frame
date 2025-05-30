@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../controllers/photo_journal_controller.dart';
-import '../../services/photo_stitching_service.dart';
 
 class ActionButtons extends StatefulWidget {
   final Function(String?) onStitchedPhotoChanged;
@@ -15,33 +14,19 @@ class ActionButtons extends StatefulWidget {
 class _ActionButtonsState extends State<ActionButtons> {
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<PhotoJournalController>();
-
-    return Obx(
-      () => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Actions:',
-            style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-          ),
-          const SizedBox(height: 12),
-
-          CupertinoButton.filled(
-            onPressed: null,
-            child: controller.isLoading
-                ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                : const Text('Capture Photos'),
-          ),
-
-          if (controller.hasTodayPhoto) ...[
-            CupertinoButton(
-              onPressed: _handleDeleteTodayEntry,
-              child: const Text('Delete Today\'s Entry'),
-            ),
-          ],
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Actions:',
+          style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+        ),
+        const SizedBox(height: 12),
+        CupertinoButton(
+          onPressed: _handleDeleteTodayEntry,
+          child: const Text('Delete Today\'s Entry'),
+        ),
+      ],
     );
   }
 
