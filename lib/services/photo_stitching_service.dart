@@ -4,10 +4,10 @@ import '../models/frame_photos.dart';
 import '../utils/location_formatter.dart';
 
 class PhotoStitchingService {
-  static const double frontPhotoScaleFactor = 0.25;
+  static const double frontPhotoScaleFactor = 0.35;
   static const double padding = 16.0;
   static const double textPadding = 8.0;
-  static const double frontPhotoRadius = 12.0;
+  static const double frontPhotoRadius = 50.0; // Increased from 12.0
 
   Future<ui.Image?> stitchPhotos({
     required FramePhotos framePhotos,
