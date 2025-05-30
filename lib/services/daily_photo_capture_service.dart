@@ -81,19 +81,23 @@ class DailyPhotoCaptureService {
     }
   }
 
-  Future<FramePhotos?> _navigateToCameraScreen(BuildContext context) async {
-    return await Navigator.of(context).push<FramePhotos>(
-      CupertinoPageRoute(builder: (context) => const SimpleCameraScreen()),
-    );
-  }
-
   Future<bool?> _navigateToConfirmationScreen(
     BuildContext context,
     ui.Image photo,
   ) async {
     return await Navigator.of(context).push<bool>(
       CupertinoPageRoute(
+        fullscreenDialog: true,
         builder: (context) => PhotoConfirmationScreen(photo: photo),
+      ),
+    );
+  }
+
+  Future<FramePhotos?> _navigateToCameraScreen(BuildContext context) async {
+    return await Navigator.of(context).push<FramePhotos>(
+      CupertinoPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => const SimpleCameraScreen(),
       ),
     );
   }
