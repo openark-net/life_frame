@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:life_frame/services/image_metadata.dart';
+import 'package:life_frame/services/location.dart';
 import '../controllers/photo_journal_controller.dart';
 import '../screens/simple_camera_screen.dart';
 import '../services/photo_stitching_service.dart';
@@ -9,10 +10,10 @@ import '../services/photo_stitching_service.dart';
 class DailyPhotoCaptureService {
   final PhotoJournalController _controller = Get.find<PhotoJournalController>();
   final PhotoStitchingService _stitchingService = PhotoStitchingService();
+  final LocationService _locationService = Get.find<LocationService>();
 
   Future<bool> captureDailyPhoto(BuildContext context) async {
     try {
-      // Step 1: Navigate to camera screen and capture photos
       final result = await _navigateToCameraScreen(context);
       if (result == null ||
           result['backPhoto'] == null ||
@@ -20,10 +21,8 @@ class DailyPhotoCaptureService {
         return false;
       }
 
-      // Step 2: Get current location
-      final position = await _getCurrentLocation();
+      final position = await _getLocationInstantly();
 
-      // Step 3: Automatically stitch photos together
       final stitchedPhotoPath = await _stitchingService.stitchPhotos(
         backPhotoPath: result['backPhoto']!,
         frontPhotoPath: result['frontPhoto']!,
@@ -36,7 +35,6 @@ class DailyPhotoCaptureService {
         return false;
       }
 
-      // Step 4: Save the photo entry with location
       final newEntry = await _controller.savePhotoEntry(
         photoPath: stitchedPhotoPath,
         latitude: position?.latitude ?? 0.0,
@@ -60,34 +58,21 @@ class DailyPhotoCaptureService {
   }
 
   Future<Map<String, String>?> _navigateToCameraScreen(
-    BuildContext context,
-  ) async {
+      BuildContext context,
+      ) async {
     return await Navigator.of(context).push<Map<String, String>>(
       CupertinoPageRoute(builder: (context) => const SimpleCameraScreen()),
     );
   }
 
-  Future<Position?> _getCurrentLocation() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
+  Future<Position?> _getLocationInstantly() async {
+    final cachedPosition = _locationService.cachedPosition;
 
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        print('Location permissions are denied');
-        return null;
-      }
-
-      return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
-      );
-    } catch (e) {
-      print('Error getting location: $e');
-      return null;
+    if (_locationService.hasValidCachedLocation) {
+      return cachedPosition;
     }
+
+    return await _locationService.getCurrentLocationWithFallback();
   }
 
   void _showSuccessSnackbar(String message) {

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:life_frame/services/location.dart';
 import 'services/storage_service.dart';
 import 'services/notification_service.dart';
 import 'controllers/photo_journal_controller.dart';
@@ -20,6 +21,11 @@ void main() async {
     final notificationService = NotificationService();
     await notificationService.onInit();
     return notificationService;
+  });
+  await Get.putAsync<LocationService>(() async {
+    final service = LocationService();
+    await service.onInit();
+    return service;
   });
 
   runApp(const MyApp());
