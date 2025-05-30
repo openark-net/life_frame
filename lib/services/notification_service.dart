@@ -1,221 +1,241 @@
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
-import '../controllers/photo_journal_controller.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 class NotificationService extends GetxService {
-  static final FlutterLocalNotificationsPlugin _notifications =
+  final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
-  static const String _channelId = 'daily_photo_reminder';
-  static const String _channelName = 'Daily Photo Reminders';
-  static const String _channelDescription =
-      'Reminders to take your daily photo';
+  static const String channelId = 'life_frame_daily';
+  static const String channelName = 'Daily Photo Reminder';
+  static const String channelDescription =
+      'Reminds you to take your daily photo';
 
-  @override
-  Future<void> onInit() async {
+  Future<NotificationService> onInit() async {
     super.onInit();
-    tz.initializeTimeZones();
     await _initializeNotifications();
-    await _scheduleDailyReminder();
+    await _initializeTimezone();
+    await _requestPermissions();
+    await _scheduleTestNotifications();
+    return this;
   }
 
-  static Future<void> _initializeNotifications() async {
-    const AndroidInitializationSettings androidInitializationSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+  Future<void> _initializeNotifications() async {
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
 
-    const DarwinInitializationSettings iosInitializationSettings =
-        DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-        );
+    const darwinSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
 
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-          android: androidInitializationSettings,
-          iOS: iosInitializationSettings,
-        );
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: darwinSettings,
+      macOS: darwinSettings,
+    );
 
     await _notifications.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: _onNotificationTapped,
+      initSettings,
+      onDidReceiveNotificationResponse: _handleNotificationTap,
     );
+  }
 
-    // Create notification channel for Android
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      _channelId,
-      _channelName,
-      description: _channelDescription,
+  Future<void> _initializeTimezone() async {
+    tz.initializeTimeZones();
+    final String timeZoneName = tz.local.name;
+    tz.setLocalLocation(tz.getLocation(timeZoneName));
+  }
+
+  Future<void> _requestPermissions() async {
+    if (Platform.isAndroid) {
+      final androidPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+
+      if (androidPlugin != null) {
+        final granted = await androidPlugin.requestNotificationsPermission();
+        debugPrint('Notification permission granted: $granted');
+
+        await androidPlugin.requestExactAlarmsPermission();
+      }
+    } else if (Platform.isIOS) {
+      final iosPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
+
+      if (iosPlugin != null) {
+        final granted = await iosPlugin.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        debugPrint('iOS notification permission granted: $granted');
+      }
+    }
+  }
+
+  Future<void> _scheduleTestNotifications() async {
+    await _cancelAllNotifications();
+
+    const androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDescription,
       importance: Importance.high,
+      priority: Priority.high,
+      showWhen: true,
     );
 
-    await _notifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.createNotificationChannel(channel);
-
-    // Request permissions
-    await _requestPermissions();
-  }
-
-  static Future<void> _requestPermissions() async {
-    final androidPlugin = _notifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-
-    await androidPlugin?.requestNotificationsPermission();
-
-    final iosPlugin = _notifications
-        .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin
-        >();
-
-    await iosPlugin?.requestPermissions(alert: true, badge: true, sound: true);
-  }
-
-  static Future<void> _scheduleDailyReminder() async {
-    await _notifications.cancelAll();
-    print('NotificationService: Canceled all existing notifications');
-
-    // Check if exact alarms are available on Android
-    final androidPlugin = _notifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-
-    bool canScheduleExactNotifications = true;
-    if (androidPlugin != null) {
-      try {
-        canScheduleExactNotifications =
-            await androidPlugin.canScheduleExactNotifications() ?? false;
-        print(
-          'NotificationService: Can schedule exact notifications: $canScheduleExactNotifications',
-        );
-      } catch (e) {
-        print('Error checking exact alarm permission: $e');
-        canScheduleExactNotifications = false;
-      }
-    }
-
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
-        importance: Importance.high,
-        priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
-      ),
-      iOS: DarwinNotificationDetails(sound: 'default.caf', badgeNumber: 1),
+    const darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
     );
 
-    final scheduledTime = _getNext11AM();
-    print('NotificationService: Scheduling notification for: $scheduledTime');
-    print('NotificationService: Current time: ${tz.TZDateTime.now(tz.local)}');
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+      macOS: darwinDetails,
+    );
 
-    try {
-      if (canScheduleExactNotifications) {
-        await _notifications.zonedSchedule(
-          0,
-          'Daily Photo Reminder',
-          'Don\'t forget to capture today\'s moment! 📸',
-          scheduledTime,
-          notificationDetails,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time,
-        );
-        print('NotificationService: Successfully scheduled exact notification');
-      } else {
-        // Fall back to inexact scheduling
-        await _notifications.zonedSchedule(
-          0,
-          'Daily Photo Reminder',
-          'Don\'t forget to capture today\'s moment! 📸',
-          scheduledTime,
-          notificationDetails,
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time,
-        );
-        print(
-          'NotificationService: Successfully scheduled inexact notification',
-        );
-      }
-    } catch (e) {
-      print('Error scheduling notification: $e');
-      // App can still function without notifications
-    }
+    // Schedule notification every 30 seconds for testing
+    await _notifications.periodicallyShow(
+      0,
+      'Time for your daily photo!',
+      'Capture a moment from your life today 📸',
+      RepeatInterval.everyMinute, // Using everyMinute as minimum interval
+      details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+
+    debugPrint('Test notifications scheduled - every minute');
   }
 
-  static tz.TZDateTime _getNext11AM() {
+  Future<void> scheduleDailyNotification({required TimeOfDay time}) async {
+    await _cancelAllNotifications();
+
+    const androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+      showWhen: true,
+    );
+
+    const darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+      macOS: darwinDetails,
+    );
+
     final now = tz.TZDateTime.now(tz.local);
-    var next11AM = tz.TZDateTime(
+    var scheduledDate = tz.TZDateTime(
       tz.local,
       now.year,
       now.month,
       now.day,
-      13,
-      38,
+      time.hour,
+      time.minute,
     );
 
-    if (next11AM.isBefore(now)) {
-      next11AM = next11AM.add(const Duration(days: 1));
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    return next11AM;
+    await _notifications.zonedSchedule(
+      0,
+      'Time for your daily photo!',
+      'Capture a moment from your life today 📸',
+      scheduledDate,
+      details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+
+    debugPrint('Daily notification scheduled for ${time.hour}:${time.minute}');
   }
 
-  static Future<void> _onNotificationTapped(
-    NotificationResponse notificationResponse,
-  ) async {
-    // When notification is tapped, navigate to camera screen
-    // This will be handled by your app's navigation
-  }
+  Future<void> showInstantNotification() async {
+    const androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+    );
 
-  // Method to check if notification should be sent
-  static Future<bool> _shouldSendNotification() async {
-    final photoController = Get.find<PhotoJournalController>();
-    return !photoController.hasTodayPhoto;
-  }
+    const darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
 
-  // Method to manually trigger notification check (for testing)
-  static Future<void> checkAndSendReminder() async {
-    if (await _shouldSendNotification()) {
-      await _sendImmediateNotification();
-    }
-  }
-
-  static Future<void> _sendImmediateNotification() async {
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
-        importance: Importance.high,
-        priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
-      ),
-      iOS: DarwinNotificationDetails(sound: 'default.caf', badgeNumber: 1),
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+      macOS: darwinDetails,
     );
 
     await _notifications.show(
-      1,
-      'Daily Photo Reminder',
-      'Don\'t forget to capture today\'s moment! 📸',
-      notificationDetails,
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      'Test Notification',
+      'This is a test notification from Life Frame',
+      details,
     );
   }
 
-  // Cancel all notifications
-  static Future<void> cancelAllNotifications() async {
+  Future<void> _cancelAllNotifications() async {
     await _notifications.cancelAll();
   }
 
-  // Reschedule notifications (useful when app is updated)
-  static Future<void> rescheduleNotifications() async {
-    await _scheduleDailyReminder();
+  void _handleNotificationTap(NotificationResponse response) {
+    debugPrint('Notification tapped: ${response.payload}');
+    // Navigate to camera screen when notification is tapped
+  }
+
+  Future<void> cancelNotifications() async {
+    await _cancelAllNotifications();
+  }
+
+  Future<bool> areNotificationsEnabled() async {
+    if (Platform.isAndroid) {
+      final androidPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+
+      if (androidPlugin != null) {
+        return await androidPlugin.areNotificationsEnabled() ?? false;
+      }
+    } else if (Platform.isIOS) {
+      final iosPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
+
+      if (iosPlugin != null) {
+        final settings = await iosPlugin.checkPermissions();
+        return settings?.isEnabled ?? false;
+      }
+    }
+
+    return false;
   }
 }
