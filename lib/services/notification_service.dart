@@ -5,7 +5,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:life_frame/controllers/navigation_controller.dart';
 
 class NotificationService extends GetxService {
   final FlutterLocalNotificationsPlugin _notifications =
@@ -21,7 +20,7 @@ class NotificationService extends GetxService {
     await _initializeNotifications();
     await _initializeTimezone();
     await _requestPermissions();
-    await _scheduleTestNotifications();
+    await scheduleDailyNotification(time: const TimeOfDay(hour: 9, minute: 00));
     return this;
   }
 
