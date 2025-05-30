@@ -37,13 +37,7 @@ class GalleryImage extends StatelessWidget {
   Widget _buildPhotoWidget(BuildContext context) {
     String? photoPath;
 
-    // Prefer stitched photo if it exists
-    if (entry.stitchedPhotoPath != null &&
-        entry.stitchedPhotoPath!.isNotEmpty &&
-        File(entry.stitchedPhotoPath!).existsSync()) {
-      photoPath = entry.stitchedPhotoPath;
-    } else if (entry.photoPath.isNotEmpty &&
-        File(entry.photoPath).existsSync()) {
+    if (entry.photoPath.isNotEmpty && File(entry.photoPath).existsSync()) {
       photoPath = entry.photoPath;
     }
 

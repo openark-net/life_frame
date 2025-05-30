@@ -153,14 +153,10 @@ void main() {
           photoPath: '/test/photo.jpg',
           latitude: 37.7749,
           longitude: -122.4194,
-          stitchedPhotoPath: '/test/stitched.jpg',
         );
 
         expect(result, isTrue);
-        expect(
-          controller.todayEntry!.stitchedPhotoPath,
-          equals('/test/stitched.jpg'),
-        );
+        expect(controller.todayEntry!.photoPath, equals('/test/stitched.jpg'));
       });
     });
 
@@ -504,10 +500,7 @@ void main() {
         );
 
         expect(result, isTrue);
-        expect(
-          controller.todayEntry!.stitchedPhotoPath,
-          equals('/test/stitched.jpg'),
-        );
+        expect(controller.todayEntry!.photoPath, equals('/test/stitched.jpg'));
         verify(
           mockStorageService.saveDailyEntry(any),
         ).called(2); // Once for original, once for update

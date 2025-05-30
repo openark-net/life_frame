@@ -32,14 +32,14 @@ class PhotoStack extends StatelessWidget {
           Obx(
             () => PhotoPreview(
               controller: controller,
-              photoPath: controller.nextEntry!.stitchedPhotoPath!,
+              photoPath: controller.nextEntry!.photoPath,
               rotation: controller.nextPhotoRotation.value,
             ),
           ),
         Obx(
           () => AnimatedPhoto(
             controller: controller,
-            photoPath: entry.stitchedPhotoPath!,
+            photoPath: entry.photoPath,
             rotation: controller.currentPhotoRotation.value,
           ),
         ),

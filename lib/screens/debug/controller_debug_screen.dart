@@ -370,8 +370,6 @@ class _ControllerDebugScreenState extends State<ControllerDebugScreen> {
         const SizedBox(height: 4),
         Text('Timestamp: ${entry.timestamp.toString()}'),
         Text('Photo Path: ${entry.photoPath}'),
-        if (entry.stitchedPhotoPath != null)
-          Text('Stitched Path: ${entry.stitchedPhotoPath}'),
         Text(
           'Location: ${getFormattedLocation(entry.latitude, entry.longitude)}',
         ),

@@ -4,7 +4,6 @@ class DailyEntry {
   final double latitude;
   final double longitude;
   final DateTime timestamp;
-  final String? stitchedPhotoPath; // Optional stitched photo path
 
   DailyEntry({
     required this.date,
@@ -12,7 +11,6 @@ class DailyEntry {
     required this.latitude,
     required this.longitude,
     required this.timestamp,
-    this.stitchedPhotoPath,
   });
 
   Map<String, dynamic> toJson() {
@@ -22,7 +20,6 @@ class DailyEntry {
       'latitude': latitude,
       'longitude': longitude,
       'timestamp': timestamp.toIso8601String(),
-      'stitchedPhotoPath': stitchedPhotoPath,
     };
   }
 
@@ -33,7 +30,6 @@ class DailyEntry {
       latitude: json['latitude'],
       longitude: json['longitude'],
       timestamp: DateTime.parse(json['timestamp']),
-      stitchedPhotoPath: json['stitchedPhotoPath'],
     );
   }
 
@@ -63,7 +59,6 @@ class DailyEntry {
     double? latitude,
     double? longitude,
     DateTime? timestamp,
-    String? stitchedPhotoPath,
   }) {
     return DailyEntry(
       date: date ?? this.date,
@@ -71,7 +66,6 @@ class DailyEntry {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       timestamp: timestamp ?? this.timestamp,
-      stitchedPhotoPath: stitchedPhotoPath ?? this.stitchedPhotoPath,
     );
   }
 
@@ -83,8 +77,7 @@ class DailyEntry {
         other.photoPath == photoPath &&
         other.latitude == latitude &&
         other.longitude == longitude &&
-        other.timestamp == timestamp &&
-        other.stitchedPhotoPath == stitchedPhotoPath;
+        other.timestamp == timestamp;
   }
 
   @override
@@ -93,7 +86,6 @@ class DailyEntry {
         photoPath.hashCode ^
         latitude.hashCode ^
         longitude.hashCode ^
-        timestamp.hashCode ^
-        stitchedPhotoPath.hashCode;
+        timestamp.hashCode;
   }
 }

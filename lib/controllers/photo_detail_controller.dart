@@ -104,9 +104,9 @@ class PhotoDetailController extends GetxController
     final allEntries = photoJournalController.allEntries
         .where(
           (entry) =>
-              entry.stitchedPhotoPath != null &&
-              entry.stitchedPhotoPath!.isNotEmpty &&
-              File(entry.stitchedPhotoPath!).existsSync(),
+              entry.photoPath != null &&
+              entry.photoPath!.isNotEmpty &&
+              File(entry.photoPath!).existsSync(),
         )
         .toList();
 
@@ -121,13 +121,13 @@ class PhotoDetailController extends GetxController
     if (context == null) return;
 
     final currentImage = FileImage(
-      File(entries[currentIndex.value].stitchedPhotoPath!),
+      File(entries[currentIndex.value].photoPath!),
     );
     await precacheImage(currentImage, context);
 
     if (currentIndex.value < entries.length - 1) {
       final nextImage = FileImage(
-        File(entries[currentIndex.value + 1].stitchedPhotoPath!),
+        File(entries[currentIndex.value + 1].photoPath!),
       );
       await precacheImage(nextImage, context);
     }
@@ -157,7 +157,7 @@ class PhotoDetailController extends GetxController
     final context = Get.context;
     if (context == null || entries.isEmpty) return;
 
-    final currentImage = FileImage(File(entries[index].stitchedPhotoPath!));
+    final currentImage = FileImage(File(entries[index].photoPath!));
     await precacheImage(currentImage, context);
   }
 

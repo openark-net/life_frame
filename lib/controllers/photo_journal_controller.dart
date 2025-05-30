@@ -168,7 +168,6 @@ class PhotoJournalController extends GetxController {
     required String photoPath,
     required double latitude,
     required double longitude,
-    String? stitchedPhotoPath,
   }) async {
     try {
       _isLoading.value = true;
@@ -180,7 +179,6 @@ class PhotoJournalController extends GetxController {
         latitude: latitude,
         longitude: longitude,
         timestamp: now,
-        stitchedPhotoPath: stitchedPhotoPath,
       );
 
       final success = await _storageService.saveDailyEntry(entry);
@@ -280,40 +278,6 @@ class PhotoJournalController extends GetxController {
       _hasMorePages.value = true;
     } catch (e) {
       print('PhotoJournalController: Error clearing all data: $e');
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<bool> updateTodayEntryWithStitchedPhoto(
-    String stitchedPhotoPath,
-  ) async {
-    try {
-      _isLoading.value = true;
-
-      final currentEntry = _todayEntry.value;
-      if (currentEntry == null) {
-        return false;
-      }
-
-      final updatedEntry = currentEntry.copyWith(
-        stitchedPhotoPath: stitchedPhotoPath,
-      );
-
-      final success = await _storageService.saveDailyEntry(updatedEntry);
-
-      if (success) {
-        _todayEntry.value = updatedEntry;
-        await _loadAllEntries();
-        await refreshEntries();
-      }
-
-      return success;
-    } catch (e) {
-      print(
-        'PhotoJournalController: Error updating entry with stitched photo: $e',
-      );
-      return false;
     } finally {
       _isLoading.value = false;
     }

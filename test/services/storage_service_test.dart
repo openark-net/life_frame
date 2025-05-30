@@ -256,7 +256,6 @@ void main() {
           latitude: 37.7749,
           longitude: -122.4194,
           timestamp: DateTime(2024, 1, 15, 12, 30),
-          stitchedPhotoPath: '/test/stitched.jpg',
         );
 
         final json = entry.toJson();
@@ -267,10 +266,6 @@ void main() {
         expect(deserializedEntry.latitude, equals(entry.latitude));
         expect(deserializedEntry.longitude, equals(entry.longitude));
         expect(deserializedEntry.timestamp, equals(entry.timestamp));
-        expect(
-          deserializedEntry.stitchedPhotoPath,
-          equals(entry.stitchedPhotoPath),
-        );
       });
 
       test('should create copy with modifications', () {
@@ -282,20 +277,14 @@ void main() {
           timestamp: DateTime(2024, 1, 15, 12, 30),
         );
 
-        final modifiedEntry = entry.copyWith(
-          stitchedPhotoPath: '/test/stitched.jpg',
-          latitude: 40.7128,
-        );
+        final modifiedEntry = entry.copyWith(latitude: 40.7128);
 
         expect(modifiedEntry.date, equals(entry.date));
         expect(modifiedEntry.photoPath, equals(entry.photoPath));
         expect(modifiedEntry.latitude, equals(40.7128)); // Modified
         expect(modifiedEntry.longitude, equals(entry.longitude));
         expect(modifiedEntry.timestamp, equals(entry.timestamp));
-        expect(
-          modifiedEntry.stitchedPhotoPath,
-          equals('/test/stitched.jpg'),
-        ); // Modified
+        expect(equals('/test/stitched.jpg')); // Modified
       });
     });
   });

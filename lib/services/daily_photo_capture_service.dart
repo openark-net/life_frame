@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:life_frame/models/frame_photos.dart';
 import 'package:life_frame/services/image_metadata.dart';
 import 'package:life_frame/services/location.dart';
 import '../controllers/photo_journal_controller.dart';
@@ -14,18 +15,14 @@ class DailyPhotoCaptureService {
 
   Future<bool> captureDailyPhoto(BuildContext context) async {
     try {
-      final result = await _navigateToCameraScreen(context);
-      if (result == null ||
-          result['backPhoto'] == null ||
-          result['frontPhoto'] == null) {
+      final framePhotos = await _navigateToCameraScreen(context);
+      if (framePhotos == null) {
         return false;
       }
-
       final position = await _getLocationInstantly();
 
       final stitchedPhotoPath = await _stitchingService.stitchPhotos(
-        backPhotoPath: result['backPhoto']!,
-        frontPhotoPath: result['frontPhoto']!,
+        framePhotos: framePhotos,
         latitude: position?.latitude,
         longitude: position?.longitude,
       );
@@ -35,16 +32,16 @@ class DailyPhotoCaptureService {
         return false;
       }
 
+      // todo: confirm with user
+
       final newEntry = await _controller.savePhotoEntry(
         photoPath: stitchedPhotoPath,
         latitude: position?.latitude ?? 0.0,
         longitude: position?.longitude ?? 0.0,
-        stitchedPhotoPath: stitchedPhotoPath,
       );
 
       if (newEntry != null) {
         _showSuccessSnackbar('Daily photo captured successfully!');
-        ImageMetadata.applyMetadata(newEntry);
         return true;
       } else {
         _showErrorSnackbar('Failed to save photo entry');
@@ -57,10 +54,8 @@ class DailyPhotoCaptureService {
     }
   }
 
-  Future<Map<String, String>?> _navigateToCameraScreen(
-    BuildContext context,
-  ) async {
-    return await Navigator.of(context).push<Map<String, String>>(
+  Future<FramePhotos?> _navigateToCameraScreen(BuildContext context) async {
+    return await Navigator.of(context).push<FramePhotos>(
       CupertinoPageRoute(builder: (context) => const SimpleCameraScreen()),
     );
   }
