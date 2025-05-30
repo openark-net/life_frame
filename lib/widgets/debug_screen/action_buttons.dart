@@ -35,12 +35,6 @@ class _ActionButtonsState extends State<ActionButtons> {
           ),
 
           if (controller.hasTodayPhoto) ...[
-            const SizedBox(height: 12),
-            CupertinoButton.filled(
-              onPressed: _handleStitchPhotos,
-              child: const Text('Stitch Today\'s Photos'),
-            ),
-            const SizedBox(height: 12),
             CupertinoButton(
               onPressed: _handleDeleteTodayEntry,
               child: const Text('Delete Today\'s Entry'),
@@ -49,45 +43,6 @@ class _ActionButtonsState extends State<ActionButtons> {
         ],
       ),
     );
-  }
-
-  Future<void> _handleStitchPhotos() async {
-    final controller = Get.find<PhotoJournalController>();
-
-    if (controller.todayBackPhoto.isEmpty ||
-        controller.todayFrontPhoto.isEmpty) {
-      _showSnackbar(
-        'Error',
-        'Both front and back photos are required for stitching',
-        CupertinoColors.systemRed,
-      );
-      return;
-    }
-
-    final stitchingService = PhotoStitchingService();
-
-    final stitchedPath = await stitchingService.stitchPhotos(
-      backPhotoPath: controller.todayBackPhoto,
-      frontPhotoPath: controller.todayFrontPhoto,
-      latitude: controller.todayEntry?.latitude,
-      longitude: controller.todayEntry?.longitude,
-    );
-
-    if (stitchedPath != null) {
-      widget.onStitchedPhotoChanged(stitchedPath);
-      await controller.updateTodayEntryWithStitchedPhoto(stitchedPath);
-      _showSnackbar(
-        'Success',
-        'Photos stitched successfully!',
-        CupertinoColors.systemGreen,
-      );
-    } else {
-      _showSnackbar(
-        'Error',
-        'Failed to stitch photos',
-        CupertinoColors.systemRed,
-      );
-    }
   }
 
   Future<void> _handleDeleteTodayEntry() async {

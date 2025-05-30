@@ -21,21 +21,27 @@ class DailyPhotoCaptureService {
       }
       final position = await _getLocationInstantly();
 
-      final stitchedPhotoPath = await _stitchingService.stitchPhotos(
+      final photo = await _stitchingService.stitchPhotos(
         framePhotos: framePhotos,
         latitude: position?.latitude,
         longitude: position?.longitude,
       );
 
-      if (stitchedPhotoPath == null) {
+      if (photo == null) {
         _showErrorSnackbar('Failed to process photos');
         return false;
       }
 
       // todo: confirm with user
 
+      final photoPath = await ImageMetadata.saveImageWithMetadata(
+        photo,
+        latitude: position?.latitude,
+        longitude: position?.longitude,
+      );
+
       final newEntry = await _controller.savePhotoEntry(
-        photoPath: stitchedPhotoPath,
+        photoPath: photoPath,
         latitude: position?.latitude ?? 0.0,
         longitude: position?.longitude ?? 0.0,
       );

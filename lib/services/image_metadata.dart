@@ -1,6 +1,9 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
 import 'package:native_exif/native_exif.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:gal/gal.dart';
 import '../models/daily_entry.dart';
 
 class ImageMetadata {
@@ -16,130 +19,116 @@ class ImageMetadata {
     return [degrees, minutes, seconds];
   }
 
-  /// Applies EXIF metadata to an image file based on DailyEntry data
-  static Future<void> applyMetadata(DailyEntry entry) async {
-    final exif = await Exif.fromPath(entry.photoPath);
+  /// Saves a ui.Image as JPEG with metadata to app directory and gallery
+  /// Returns the path where the image was saved in the gallery
+  static Future<String> saveImageWithMetadata(
+    ui.Image image, {
+    double? latitude,
+    double? longitude,
+  }) async {
+    // Convert image to bytes
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) {
+      throw Exception('Failed to convert image to bytes');
+    }
+
+    final bytes = byteData.buffer.asUint8List();
+
+    // Generate unique filename with current date and time
+    final directory = await getApplicationDocumentsDirectory();
+    final now = DateTime.now();
+    final dateString = DateFormat('yyyy-MM-dd').format(now);
+    final timeString = DateFormat('HHmmss').format(now);
+    final fileName = 'life_frame_${dateString}_$timeString.jpg';
+    final filePath = '${directory.path}/$fileName';
+
+    // Save image file
+    final file = File(filePath);
+    await file.writeAsBytes(bytes);
+
+    // Apply metadata to the saved file
+    await _applyMetadataToFile(filePath, now, latitude, longitude);
+
+    // Save to gallery and return the gallery path
+    await Gal.putImage(filePath, album: 'LifeFrame');
+
+    return filePath;
+  }
+
+  /// Internal method to apply metadata to a saved file
+  static Future<void> _applyMetadataToFile(
+    String filePath,
+    DateTime timestamp,
+    double? latitude,
+    double? longitude,
+  ) async {
+    final exif = await Exif.fromPath(filePath);
 
     try {
       // Format timestamp for EXIF (YYYY:MM:DD HH:mm:ss format)
       final dateFormat = DateFormat("yyyy:MM:dd HH:mm:ss");
-      final formattedTimestamp = dateFormat.format(entry.timestamp);
+      final formattedTimestamp = dateFormat.format(timestamp);
 
-      // Format GPS date and time
-      final gpsDateFormat = DateFormat("yyyy:MM:dd");
-      final gpsTimeFormat = DateFormat("HH:mm:ss");
-      final gpsDate = gpsDateFormat.format(entry.timestamp);
-      final gpsTime = gpsTimeFormat.format(entry.timestamp);
-
-      // Prepare GPS coordinates with proper references
-      final latRef = entry.latitude >= 0 ? 'N' : 'S';
-      final lngRef = entry.longitude >= 0 ? 'E' : 'W';
-
-      // Convert coordinates to DMS format
-      final latDMS = _decimalToDMS(entry.latitude);
-      final lngDMS = _decimalToDMS(entry.longitude);
-
-      // Write all metadata at once with proper GPS formatting
-      await exif.writeAttributes({
+      // Base metadata that's always applied
+      final metadata = <String, Object>{
         'Software': _lifeFrameSoftware,
         'DateTimeOriginal': formattedTimestamp,
         'DateTime': formattedTimestamp,
         'DateTimeDigitized': formattedTimestamp,
+      };
 
-        // GPS Version - required by many parsers
-        'GPSVersionID': '2.3.0.0',
+      // Add GPS metadata only if coordinates are provided
+      if (latitude != null && longitude != null) {
+        final gpsMetadata = _buildGpsMetadata(latitude, longitude, timestamp);
+        metadata.addAll(gpsMetadata);
+      }
 
-        // GPS coordinates in DMS format
-        'GPSLatitude': latDMS,
-        'GPSLatitudeRef': latRef,
-        'GPSLongitude': lngDMS,
-        'GPSLongitudeRef': lngRef,
-
-        // GPS timestamp
-        'GPSTimeStamp': gpsTime,
-        'GPSDateStamp': gpsDate,
-
-        // GPS map datum (standard)
-        'GPSMapDatum': 'WGS-84',
-      });
+      // Write all metadata at once
+      await exif.writeAttributes(metadata);
     } finally {
       await exif.close();
     }
   }
 
-  /// Alternative method using decimal degrees if DMS doesn't work
-  static Future<void> applyMetadataDecimal(DailyEntry entry) async {
-    final exif = await Exif.fromPath(entry.photoPath);
+  /// Builds GPS metadata map from coordinates and timestamp
+  static Map<String, Object> _buildGpsMetadata(
+    double latitude,
+    double longitude,
+    DateTime timestamp,
+  ) {
+    // Format GPS date and time
+    final gpsDateFormat = DateFormat("yyyy:MM:dd");
+    final gpsTimeFormat = DateFormat("HH:mm:ss");
+    final gpsDate = gpsDateFormat.format(timestamp);
+    final gpsTime = gpsTimeFormat.format(timestamp);
 
-    try {
-      final dateFormat = DateFormat("yyyy:MM:dd HH:mm:ss");
-      final formattedTimestamp = dateFormat.format(entry.timestamp);
+    // Prepare GPS coordinates with proper references
+    final latRef = latitude >= 0 ? 'N' : 'S';
+    final lngRef = longitude >= 0 ? 'E' : 'W';
 
-      final latRef = entry.latitude >= 0 ? 'N' : 'S';
-      final lngRef = entry.longitude >= 0 ? 'E' : 'W';
+    // Convert coordinates to DMS format
+    final latDMS = _decimalToDMS(latitude);
+    final lngDMS = _decimalToDMS(longitude);
 
-      // Some parsers prefer this format
-      await exif.writeAttributes({
-        'Software': _lifeFrameSoftware,
-        'DateTimeOriginal': formattedTimestamp,
-        'DateTime': formattedTimestamp,
-        'DateTimeDigitized': formattedTimestamp,
-
-        // Essential GPS tags
-        'GPSVersionID': '2.3.0.0',
-        'GPSLatitude': entry.latitude.abs(),
-        'GPSLatitudeRef': latRef,
-        'GPSLongitude': entry.longitude.abs(),
-        'GPSLongitudeRef': lngRef,
-        'GPSMapDatum': 'WGS-84',
-
-        // Additional GPS tags that some apps expect
-        'GPSAltitudeRef': '0', // Above sea level
-        'GPSAltitude': 0.0, // Default altitude
-      });
-    } finally {
-      await exif.close();
-    }
+    return {
+      'GPSVersionID': '2.3.0.0',
+      'GPSLatitude': latDMS,
+      'GPSLatitudeRef': latRef,
+      'GPSLongitude': lngDMS,
+      'GPSLongitudeRef': lngRef,
+      'GPSTimeStamp': gpsTime,
+      'GPSDateStamp': gpsDate,
+      'GPSMapDatum': 'WGS-84',
+    };
   }
 
-  /// Checks if an image was created by life_frame and returns DailyEntry if valid
-  static Future<DailyEntry?> loadDailyEntry(String path) async {
-    if (!await File(path).exists()) {
-      return null;
-    }
-
-    final exif = await Exif.fromPath(path);
-
-    try {
-      // Check if software tag matches our app
-      final software = await exif.getAttribute<String>('Software');
-      if (software != _lifeFrameSoftware) {
-        return null;
-      }
-
-      // Extract required data
-      final timestamp = await exif.getOriginalDate();
-      final latLong = await exif.getLatLong();
-
-      if (timestamp == null || latLong == null) {
-        return null;
-      }
-
-      // Format date as YYYY-MM-DD
-      final dateFormat = DateFormat("yyyy-MM-dd");
-      final dateString = dateFormat.format(timestamp);
-
-      return DailyEntry(
-        date: dateString,
-        photoPath: path,
-        timestamp: timestamp,
-        latitude: latLong.latitude,
-        longitude: latLong.longitude,
-      );
-    } catch (e) {
-      return null;
-    } finally {
-      await exif.close();
-    }
+  /// Legacy method - applies EXIF metadata to an image file based on DailyEntry data
+  static Future<void> applyMetadata(DailyEntry entry) async {
+    await _applyMetadataToFile(
+      entry.photoPath,
+      entry.timestamp,
+      entry.latitude,
+      entry.longitude,
+    );
   }
 }
