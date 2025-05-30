@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
@@ -26,6 +25,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _initializeCamera();
   }
 
@@ -33,14 +33,6 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     try {
       final permissionStatus = await Permission.camera.request();
       if (!permissionStatus.isGranted) {
-        Get.snackbar(
-          'Error',
-          "No permission to access camera",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: CupertinoColors.systemRed,
-          colorText: CupertinoColors.white,
-          duration: const Duration(seconds: 3),
-        );
         if (mounted) {
           Navigator.of(context).pop();
         }
@@ -63,15 +55,14 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     if (_cameras == null || _cameras!.isEmpty) return;
 
     final camera = _cameras!.firstWhere(
-      (camera) =>
-          camera.lensDirection ==
+          (camera) => camera.lensDirection ==
           (isBack ? CameraLensDirection.back : CameraLensDirection.front),
       orElse: () => _cameras!.first,
     );
 
     _controller = CameraController(
       camera,
-      ResolutionPreset.max,
+      ResolutionPreset.veryHigh,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
@@ -79,6 +70,9 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     try {
       await _controller!.initialize();
       await _controller!.setFlashMode(FlashMode.off);
+
+      // Lock to portrait orientation for consistent photos
+      await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
 
       if (mounted) {
         setState(() {
@@ -94,9 +88,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
   }
 
   Future<void> _capturePhoto() async {
-    if (_controller == null ||
-        !_controller!.value.isInitialized ||
-        _isProcessing) {
+    if (_controller == null || !_controller!.value.isInitialized || _isProcessing) {
       return;
     }
 
@@ -135,9 +127,10 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
 
   void _completeCapture() {
     if (_backPhotoPath != null && _frontPhotoPath != null) {
-      Navigator.of(
-        context,
-      ).pop({'backPhoto': _backPhotoPath!, 'frontPhoto': _frontPhotoPath!});
+      Navigator.of(context).pop({
+        'backPhoto': _backPhotoPath!,
+        'frontPhoto': _frontPhotoPath!,
+      });
     }
   }
 
@@ -163,15 +156,53 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     }
   }
 
+  Widget _buildCameraPreview() {
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return const Center(
+        child: CupertinoActivityIndicator(
+          radius: 20,
+          color: CupertinoColors.white,
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = MediaQuery.of(context).size;
+        var scale = size.aspectRatio * _controller!.value.aspectRatio;
+
+        // If the camera preview is wider than the screen,
+        // scale it to fill the height instead
+        if (scale < 1) {
+          scale = 1 / scale;
+        }
+
+        return ClipRect(
+          child: Transform.scale(
+            scale: scale,
+            child: Center(
+              child: CameraPreview(_controller!),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
     final theme = CupertinoTheme.of(context);
 
     return CupertinoPageScaffold(
@@ -179,31 +210,13 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (_controller != null && _controller!.value.isInitialized)
-            ClipRect(
-              child: Transform.scale(
-                scale:
-                    _controller!.value.aspectRatio /
-                    mediaQuery.size.aspectRatio,
-                child: Center(child: CameraPreview(_controller!)),
-              ),
-            )
-          else
-            const Center(
-              child: CupertinoActivityIndicator(
-                radius: 20,
-                color: CupertinoColors.white,
-              ),
-            ),
+          _buildCameraPreview(),
 
           SafeArea(
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -224,10 +237,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: CupertinoColors.black.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(20),
@@ -273,10 +283,10 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
                       child: _isProcessing
                           ? const CupertinoActivityIndicator()
                           : Icon(
-                              CupertinoIcons.camera_fill,
-                              color: CupertinoColors.black,
-                              size: 32,
-                            ),
+                        CupertinoIcons.camera_fill,
+                        color: CupertinoColors.black,
+                        size: 32,
+                      ),
                     ),
                   ),
                 ),
@@ -293,11 +303,17 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
                 height: 80,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: CupertinoColors.white, width: 2),
+                  border: Border.all(
+                    color: CupertinoColors.white,
+                    width: 2,
+                  ),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Image.file(File(_backPhotoPath!), fit: BoxFit.cover),
+                  child: Image.file(
+                    File(_backPhotoPath!),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
