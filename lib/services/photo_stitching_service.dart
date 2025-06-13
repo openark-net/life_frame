@@ -152,7 +152,7 @@ class PhotoStitchingService {
       color: Color(0xFFFFFFFF),
       fontSize: fontSize,
       fontWeight: FontWeight.w600,
-      fontFamily: 'PeaceSans',
+      fontFamily: 'Comfortaa-Bold',
       shadows: [
         Shadow(
           offset: Offset(1.0, 1.0),

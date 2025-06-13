@@ -40,6 +40,9 @@ flutter:
   uses-material-design: true
   
   fonts:
-    - family: PeaceSans
+    - family: Comfortaa-Bold
       fonts:
-        - asset: assets/fonts/PeaceSans.ttf
+        - asset: assets/fonts/Comfortaa-Bold.ttf
+    - family: Comfortaa-Light
+      fonts:
+        - asset: assets/fonts/Comfortaa-Light.ttf

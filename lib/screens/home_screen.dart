@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         'Life Frame 📸',
                         style: TextStyle(
-                          fontFamily: 'PeaceSans',
+                          fontFamily: 'Comfortaa-Bold',
                           fontSize: 38,
                           fontWeight: FontWeight.bold,
                           color: CupertinoTheme.of(context).primaryColor,
