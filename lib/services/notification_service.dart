@@ -1,14 +1,18 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
+import '../controllers/settings_controller.dart';
+import 'permissions_service.dart';
 
 class NotificationService extends GetxService {
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
+
+  late final PermissionsService _permissionsService;
+  late final SettingsController _settingsController;
 
   static const String channelId = 'life_frame_daily';
   static const String channelName = 'Daily Photo Reminder';
@@ -17,10 +21,19 @@ class NotificationService extends GetxService {
 
   Future<NotificationService> onInit() async {
     super.onInit();
+    _permissionsService = Get.find<PermissionsService>();
+    _settingsController = Get.find<SettingsController>();
+
+    if (!await _shouldDoNotifications()) {
+      return this;
+    }
+
     await _initializeNotifications();
     await _initializeTimezone();
-    await _requestPermissions();
-    await scheduleDailyNotification(time: const TimeOfDay(hour: 9, minute: 00));
+    await _permissionsService.requestNotificationPermissions();
+    await _scheduleDailyNotification(
+      time: const TimeOfDay(hour: 9, minute: 00),
+    );
     return this;
   }
 
@@ -53,38 +66,14 @@ class NotificationService extends GetxService {
     tz.setLocalLocation(tz.getLocation(timeZoneName));
   }
 
-  Future<void> _requestPermissions() async {
-    if (Platform.isAndroid) {
-      final androidPlugin = _notifications
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >();
-
-      if (androidPlugin != null) {
-        final granted = await androidPlugin.requestNotificationsPermission();
-        debugPrint('Notification permission granted: $granted');
-
-        // Request exact alarm permission for Android 12+
-        await androidPlugin.requestExactAlarmsPermission();
-      }
-    } else if (Platform.isIOS) {
-      final iosPlugin = _notifications
-          .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin
-          >();
-
-      if (iosPlugin != null) {
-        final granted = await iosPlugin.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-        debugPrint('iOS notification permission granted: $granted');
-      }
+  Future<bool> _shouldDoNotifications() async {
+    if (!_settingsController.notificationsEnabled) {
+      return false;
     }
+    return await _permissionsService.areNotificationsEnabled();
   }
 
-  Future<void> _scheduleTestNotifications() async {
+  Future<void> scheduleTestNotifications() async {
     await _cancelAllNotifications();
 
     const androidDetails = AndroidNotificationDetails(
@@ -108,12 +97,10 @@ class NotificationService extends GetxService {
       macOS: darwinDetails,
     );
 
-    // Schedule notification every minute for testing
-    // Note: 30 seconds is not supported, minimum is everyMinute
     await _notifications.periodicallyShow(
-      0,
-      'Time for your daily photo!',
-      'Capture a moment from your life today 📸',
+      1,
+      'TEST!',
+      '📸',
       RepeatInterval.everyMinute,
       details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -122,7 +109,7 @@ class NotificationService extends GetxService {
     debugPrint('Test notifications scheduled - every minute');
   }
 
-  Future<void> scheduleDailyNotification({required TimeOfDay time}) async {
+  Future<void> _scheduleDailyNotification({required TimeOfDay time}) async {
     await _cancelAllNotifications();
 
     const androidDetails = AndroidNotificationDetails(
@@ -213,30 +200,5 @@ class NotificationService extends GetxService {
 
   Future<void> cancelNotifications() async {
     await _cancelAllNotifications();
-  }
-
-  Future<bool> areNotificationsEnabled() async {
-    if (Platform.isAndroid) {
-      final androidPlugin = _notifications
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >();
-
-      if (androidPlugin != null) {
-        return await androidPlugin.areNotificationsEnabled() ?? false;
-      }
-    } else if (Platform.isIOS) {
-      final iosPlugin = _notifications
-          .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin
-          >();
-
-      if (iosPlugin != null) {
-        final settings = await iosPlugin.checkPermissions();
-        return settings?.isEnabled ?? false;
-      }
-    }
-
-    return false;
   }
 }

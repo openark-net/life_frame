@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:life_frame/services/location.dart';
+import 'package:life_frame/services/permissions_service.dart';
 import 'package:life_frame/theme.dart';
 import 'services/storage_service.dart';
 import 'services/notification_service.dart';
@@ -20,6 +21,7 @@ void main() async {
   Get.put(PhotoJournalController());
   Get.put(NavigationController());
   Get.put(SettingsController());
+  Get.put(PermissionsService());
   await Get.putAsync(() async {
     final notificationService = NotificationService();
     await notificationService.onInit();
