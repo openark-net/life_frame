@@ -4,6 +4,7 @@ import '../controllers/photo_journal_controller.dart';
 import '../controllers/navigation_controller.dart';
 import '../services/daily_photo_capture_service.dart';
 import '../widgets/home/photo_status_indicator.dart';
+import '../widgets/life_frame_logo.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,17 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    GestureDetector(
+                    LifeFrameLogo(
                       onDoubleTap: () => navController.toggleDebugMode(),
-                      child: Text(
-                        'Life Frame',
-                        style: TextStyle(
-                          fontFamily: 'Comfortaa-Bold',
-                          fontSize: 38,
-                          fontWeight: FontWeight.bold,
-                          color: CupertinoTheme.of(context).primaryColor,
-                        ),
-                      ),
                     ),
 
                     const SizedBox(height: 60),

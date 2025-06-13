@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:life_frame/services/location.dart';
+import 'package:life_frame/theme.dart';
 import 'services/storage_service.dart';
 import 'services/notification_service.dart';
 import 'controllers/photo_journal_controller.dart';
@@ -39,13 +40,7 @@ class MyApp extends StatelessWidget {
     return GetCupertinoApp(
       title: 'Life Frame',
       debugShowCheckedModeBanner: false,
-      theme: CupertinoThemeData(
-        brightness: MediaQuery.platformBrightnessOf(context),
-        primaryColor: CupertinoColors.systemBlue,
-        scaffoldBackgroundColor: CupertinoColors.systemBackground,
-        barBackgroundColor: CupertinoColors.systemBackground,
-        textTheme: CupertinoTextThemeData(primaryColor: CupertinoColors.label),
-      ),
+      theme: getTheme(context),
       home: const RootScreen(),
     );
   }
