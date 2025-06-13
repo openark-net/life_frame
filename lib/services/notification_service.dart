@@ -26,7 +26,7 @@ class NotificationService extends GetxService {
 
   Future<void> _initializeNotifications() async {
     const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+      '@drawable/ic_notification',
     );
 
     const darwinSettings = DarwinInitializationSettings(
