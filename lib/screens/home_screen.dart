@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     GestureDetector(
                       onDoubleTap: () => navController.toggleDebugMode(),
                       child: Text(
-                        'Life Frame 📸',
+                        'Life Frame',
                         style: TextStyle(
                           fontFamily: 'Comfortaa-Bold',
                           fontSize: 38,
