@@ -28,7 +28,7 @@ class LifeFrameLogo extends StatelessWidget {
             fontFamily: 'Comfortaa-Bold',
             fontSize: fontSize,
             fontWeight: FontWeight.bold,
-            color: AppColors.primaryYellow,
+            color: AppColors.primary,
           ),
         ),
         const SizedBox(width: 12),

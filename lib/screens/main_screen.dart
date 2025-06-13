@@ -70,7 +70,6 @@ class MainScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 4),
                 child: Icon(tab.icon),
               ),
-              label: tab.label,
             ),
           )
           .toList();

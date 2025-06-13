@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
     return GetCupertinoApp(
       title: 'Life Frame',
       debugShowCheckedModeBanner: false,
-      theme: getTheme(context),
+      theme: getTheme(),
       home: const RootScreen(),
     );
   }

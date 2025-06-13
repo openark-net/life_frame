@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
+import '../../theme.dart';
+
 enum PhotoStatus { loading, noPhoto, photoTaken }
 
 class PhotoStatusIndicator extends StatelessWidget {
@@ -31,7 +33,7 @@ class PhotoStatusIndicator extends StatelessWidget {
           child: const Center(
             child: CupertinoActivityIndicator(
               radius: 24,
-              color: CupertinoColors.systemBlue,
+              color: AppColors.secondary,
             ),
           ),
         );
@@ -39,13 +41,13 @@ class PhotoStatusIndicator extends StatelessWidget {
         return const Icon(
           CupertinoIcons.xmark_circle_fill,
           size: 120,
-          color: CupertinoColors.systemRed,
+          color: AppColors.red,
         );
       case PhotoStatus.photoTaken:
         return const Icon(
           CupertinoIcons.checkmark_circle_fill,
           size: 120,
-          color: CupertinoColors.systemGreen,
+          color: AppColors.secondary,
         );
     }
   }

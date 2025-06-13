@@ -11,12 +11,9 @@ class DayStreakWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
       decoration: BoxDecoration(
-        color: AppColors.primaryYellow.withOpacity(0.1),
+        color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.primaryYellow.withOpacity(0.3),
-          width: 2,
-        ),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 2),
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -25,7 +22,7 @@ class DayStreakWidget extends StatelessWidget {
             child: Icon(
               CupertinoIcons.flame_fill,
               size: 80,
-              color: AppColors.primaryYellow.withOpacity(0.3),
+              color: AppColors.primary.withOpacity(0.3),
             ),
           ),
           Column(
@@ -38,7 +35,7 @@ class DayStreakWidget extends StatelessWidget {
                     .copyWith(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryYellow,
+                      color: AppColors.primary,
                     ),
               ),
               Text(
@@ -46,7 +43,7 @@ class DayStreakWidget extends StatelessWidget {
                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primaryYellow,
+                  color: AppColors.primary,
                   fontFamily: TITLE_FONT,
                 ),
               ),

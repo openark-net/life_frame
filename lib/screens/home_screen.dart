@@ -74,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     const SizedBox(height: 60),
 
-                    // Photo status indicator
                     PhotoStatusIndicator(status: photoStatus),
 
                     const SizedBox(height: 40),
@@ -97,7 +96,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             : 'Take ANOTHER Photo',
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                          color: AppColors.yellowContrast,
+                          fontFamily: TITLE_FONT,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
