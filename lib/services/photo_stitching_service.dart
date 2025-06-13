@@ -8,7 +8,7 @@ class PhotoStitchingService {
   static const double padding = 16.0;
   static const double textPadding = 8.0;
   static const double frontPhotoRadius = 50.0; // Increased from 12.0
-  static const double fontSize = 80.0;
+  static const double fontSize = 50.0;
 
   Future<ui.Image?> stitchPhotos({
     required FramePhotos framePhotos,
