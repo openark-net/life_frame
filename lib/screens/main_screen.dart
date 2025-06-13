@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../controllers/navigation_controller.dart';
 import 'home_screen.dart';
 import 'gallery_screen.dart';
+import 'settings_screen.dart';
 import 'debug_screen.dart';
 
 class TabDefinition {
@@ -41,6 +42,12 @@ class MainScreen extends StatelessWidget {
           icon: CupertinoIcons.photo_on_rectangle,
           label: 'Gallery',
           screen: const GalleryScreen(),
+          shouldShow: () => true, // Always show
+        ),
+        TabDefinition(
+          icon: CupertinoIcons.settings,
+          label: 'Settings',
+          screen: const SettingsScreen(),
           shouldShow: () => true, // Always show
         ),
         TabDefinition(

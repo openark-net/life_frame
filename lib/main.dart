@@ -6,6 +6,7 @@ import 'services/storage_service.dart';
 import 'services/notification_service.dart';
 import 'controllers/photo_journal_controller.dart';
 import 'controllers/navigation_controller.dart';
+import 'controllers/settings_controller.dart';
 import 'screens/root_screen.dart';
 
 void main() async {
@@ -18,6 +19,7 @@ void main() async {
   });
   Get.put(PhotoJournalController());
   Get.put(NavigationController());
+  Get.put(SettingsController());
   await Get.putAsync(() async {
     final notificationService = NotificationService();
     await notificationService.onInit();
