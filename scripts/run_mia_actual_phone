@@ -1,0 +1,2 @@
+#!/bin/bash
+flutter run -d 00008140-001A71161482801C --release $@
