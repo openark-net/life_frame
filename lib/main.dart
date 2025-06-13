@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:life_frame/screens/main_screen.dart';
 import 'package:life_frame/services/location.dart';
 import 'package:life_frame/services/permissions_service.dart';
 import 'package:life_frame/theme.dart';
+import 'package:life_frame/widgets/permissions_checker.dart';
 import 'services/storage_service.dart';
 import 'services/notification_service.dart';
 import 'controllers/photo_journal_controller.dart';
 import 'controllers/navigation_controller.dart';
 import 'controllers/settings_controller.dart';
-import 'screens/root_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +46,10 @@ class MyApp extends StatelessWidget {
       title: 'Life Frame',
       debugShowCheckedModeBanner: false,
       theme: getTheme(),
-      home: const RootScreen(),
+      home: AndroidPermissionsScreen(
+        onAllPermissionsGranted: () {},
+        child: MainScreen(),
+      ),
     );
   }
 }

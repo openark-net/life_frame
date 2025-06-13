@@ -4,6 +4,7 @@ import 'package:life_frame/theme.dart';
 import 'package:life_frame/widgets/life_frame_logo.dart';
 import '../controllers/settings_controller.dart';
 import '../services/notification_service.dart';
+import '../widgets/permissions_checker.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -30,6 +31,19 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   Obx(
                     () => CupertinoListTile(
+                      leading: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemRed,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.bell_fill,
+                          color: CupertinoColors.white,
+                          size: 16,
+                        ),
+                      ),
                       title: const Text('Daily Notifications'),
                       trailing: CupertinoSwitch(
                         value: settingsController.notificationsEnabled,
@@ -43,6 +57,34 @@ class SettingsScreen extends StatelessWidget {
                         },
                       ),
                     ),
+                  ),
+                  CupertinoListTile(
+                    leading: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemBlue,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.lock_shield_fill,
+                        color: CupertinoColors.white,
+                        size: 16,
+                      ),
+                    ),
+                    title: const Text('App Permissions'),
+                    trailing: const Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 18,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        CupertinoPageRoute<void>(
+                          builder: (context) =>
+                              const AndroidPermissionsScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
