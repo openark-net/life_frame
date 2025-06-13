@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../theme.dart';
 
 class LifeFrameLogo extends StatelessWidget {
   final double? fontSize;
@@ -27,7 +28,7 @@ class LifeFrameLogo extends StatelessWidget {
             fontFamily: 'Comfortaa-Bold',
             fontSize: fontSize,
             fontWeight: FontWeight.bold,
-            color: CupertinoTheme.of(context).primaryColor,
+            color: AppColors.primaryYellow,
           ),
         ),
         const SizedBox(width: 12),

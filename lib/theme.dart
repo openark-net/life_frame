@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AppColors {
   // Background
@@ -8,7 +9,7 @@ class AppColors {
 
   // Primary Colors
   static const Color primaryYellow = Color(0xFFFFB74D);
-  static const Color yellowContrast = Color(0xFFFFF7DD);
+  static const Color yellowContrast = Color(0xFFFFF3E0);
 
   // Accent Colors
   static const Color brightGreen = Color(0xFF3AEF30);
@@ -27,5 +28,8 @@ CupertinoThemeData getTheme(BuildContext context) {
     primaryColor: AppColors.primaryYellow,
     scaffoldBackgroundColor: AppColors.background,
     barBackgroundColor: AppColors.background,
+    textTheme: CupertinoTextThemeData(
+      textStyle: TextStyle(fontFamily: TEXT_FONT),
+    ),
   );
 }

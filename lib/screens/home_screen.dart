@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:life_frame/theme.dart';
 import '../controllers/photo_journal_controller.dart';
 import '../controllers/navigation_controller.dart';
 import '../services/daily_photo_capture_service.dart';
 import '../widgets/home/photo_status_indicator.dart';
+import '../widgets/home/day_streak_widget.dart';
 import '../widgets/life_frame_logo.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -77,63 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     const SizedBox(height: 40),
 
-                    // Day streak with fire icon background
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 24,
-                      ),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemOrange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: CupertinoColors.systemOrange.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Fire icon background
-                          Positioned(
-                            child: Icon(
-                              CupertinoIcons.flame_fill,
-                              size: 80,
-                              color: CupertinoColors.systemOrange.withOpacity(
-                                0.3,
-                              ),
-                            ),
-                          ),
-                          // Streak counter in front
-                          Column(
-                            children: [
-                              Text(
-                                '${controller.getStreak()}',
-                                style: CupertinoTheme.of(context)
-                                    .textTheme
-                                    .navLargeTitleTextStyle
-                                    .copyWith(
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.bold,
-                                      color: CupertinoColors.systemOrange,
-                                    ),
-                              ),
-                              Text(
-                                'Day Streak',
-                                style: CupertinoTheme.of(context)
-                                    .textTheme
-                                    .textStyle
-                                    .copyWith(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: CupertinoColors.systemOrange,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    DayStreakWidget(streakCount: controller.getStreak()),
 
                     const SizedBox(height: 60),
 
