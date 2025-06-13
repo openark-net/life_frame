@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           color: AppColors.yellowContrast,
-                          fontFamily: TITLE_FONT,
+                          fontFamily: fontFamily,
                           fontWeight: FontWeight.w900,
                         ),
                       ),

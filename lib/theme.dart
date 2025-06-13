@@ -28,8 +28,7 @@ class AppColors {
   static const Color secondary = blue;
 }
 
-const TITLE_FONT = "Comfortaa-Bold";
-const TEXT_FONT = "Comfortaa-Light";
+const fontFamily = "Comfortaa-Bold";
 
 CupertinoThemeData getTheme() {
   return CupertinoThemeData(
@@ -40,35 +39,38 @@ CupertinoThemeData getTheme() {
     barBackgroundColor: AppColors.background,
     textTheme: CupertinoTextThemeData(
       primaryColor: AppColors.primaryText,
-      textStyle: TextStyle(fontFamily: TEXT_FONT, color: AppColors.primaryText),
+      textStyle: TextStyle(
+        fontFamily: fontFamily,
+        color: AppColors.primaryText,
+      ),
       actionTextStyle: TextStyle(
-        fontFamily: TEXT_FONT,
+        fontFamily: fontFamily,
         color: AppColors.primary,
       ),
       tabLabelTextStyle: TextStyle(
-        fontFamily: TEXT_FONT,
+        fontFamily: fontFamily,
         color: AppColors.secondaryText,
       ),
       navTitleTextStyle: TextStyle(
-        fontFamily: TITLE_FONT,
+        fontFamily: fontFamily,
         color: AppColors.primaryText,
         fontWeight: FontWeight.bold,
       ),
       navLargeTitleTextStyle: TextStyle(
-        fontFamily: TITLE_FONT,
+        fontFamily: fontFamily,
         color: AppColors.primaryText,
         fontWeight: FontWeight.bold,
       ),
       navActionTextStyle: TextStyle(
-        fontFamily: TEXT_FONT,
+        fontFamily: fontFamily,
         color: AppColors.primary,
       ),
       pickerTextStyle: TextStyle(
-        fontFamily: TEXT_FONT,
+        fontFamily: fontFamily,
         color: AppColors.primaryText,
       ),
       dateTimePickerTextStyle: TextStyle(
-        fontFamily: TEXT_FONT,
+        fontFamily: fontFamily,
         color: AppColors.primaryText,
       ),
     ),

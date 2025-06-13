@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:life_frame/theme.dart';
 import 'package:life_frame/widgets/life_frame_logo.dart';
 import '../controllers/settings_controller.dart';
+import '../services/notification_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -9,6 +11,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsController = Get.find<SettingsController>();
+    final notifications = Get.find<NotificationService>();
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(middle: Text('Settings')),
@@ -23,6 +26,7 @@ class SettingsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: CupertinoListSection.insetGrouped(
+                backgroundColor: AppColors.background,
                 children: [
                   Obx(
                     () => CupertinoListTile(
@@ -31,6 +35,11 @@ class SettingsScreen extends StatelessWidget {
                         value: settingsController.notificationsEnabled,
                         onChanged: (bool value) {
                           settingsController.setNotificationsEnabled(value);
+                          if (value) {
+                            notifications.enableNotifications();
+                          } else {
+                            notifications.cancelAllNotifications();
+                          }
                         },
                       ),
                     ),

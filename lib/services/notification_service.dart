@@ -31,9 +31,7 @@ class NotificationService extends GetxService {
     await _initializeNotifications();
     await _initializeTimezone();
     await _permissionsService.requestNotificationPermissions();
-    await _scheduleDailyNotification(
-      time: const TimeOfDay(hour: 9, minute: 00),
-    );
+    await scheduleDailyNotification(time: const TimeOfDay(hour: 9, minute: 00));
     return this;
   }
 
@@ -74,7 +72,7 @@ class NotificationService extends GetxService {
   }
 
   Future<void> scheduleTestNotifications() async {
-    await _cancelAllNotifications();
+    await cancelAllNotifications();
 
     const androidDetails = AndroidNotificationDetails(
       channelId,
@@ -109,8 +107,8 @@ class NotificationService extends GetxService {
     debugPrint('Test notifications scheduled - every minute');
   }
 
-  Future<void> _scheduleDailyNotification({required TimeOfDay time}) async {
-    await _cancelAllNotifications();
+  Future<void> scheduleDailyNotification({required TimeOfDay time}) async {
+    await cancelAllNotifications();
 
     const androidDetails = AndroidNotificationDetails(
       channelId,
@@ -189,16 +187,17 @@ class NotificationService extends GetxService {
     );
   }
 
-  Future<void> _cancelAllNotifications() async {
+  Future<void> cancelAllNotifications() async {
     await _notifications.cancelAll();
+  }
+
+  Future<void> enableNotifications() async {
+    await cancelAllNotifications();
+    await scheduleDailyNotification(time: const TimeOfDay(hour: 9, minute: 00));
   }
 
   void _handleNotificationTap(NotificationResponse response) {
     debugPrint('Notification tapped: ${response.payload}');
     // Navigate to camera screen when notification is tapped
-  }
-
-  Future<void> cancelNotifications() async {
-    await _cancelAllNotifications();
   }
 }

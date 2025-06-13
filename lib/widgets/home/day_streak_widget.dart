@@ -44,7 +44,7 @@ class DayStreakWidget extends StatelessWidget {
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,
-                  fontFamily: TITLE_FONT,
+                  fontFamily: fontFamily,
                 ),
               ),
             ],

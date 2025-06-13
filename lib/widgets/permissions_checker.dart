@@ -5,6 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
+import '../theme.dart';
+
 class AndroidPermissionsScreen extends StatefulWidget {
   final VoidCallback? onAllPermissionsGranted;
   final Widget? child;
@@ -215,7 +217,13 @@ class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen> {
 
   Widget _buildSettingsButton() {
     return CupertinoButton.filled(
-      child: const Text('Open Settings'),
+      child: const Text(
+        'Open Settings',
+        style: TextStyle(
+          fontWeight: FontWeight.w900,
+          color: AppColors.yellowContrast,
+        ),
+      ),
       onPressed: () => openAppSettings(),
     );
   }

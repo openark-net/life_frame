@@ -68,7 +68,7 @@ class _NotificationsDebugScreenState extends State<NotificationsDebugScreen> {
 
   Future<void> _stopTestNotifications() async {
     try {
-      await _notificationService.cancelNotifications();
+      await _notificationService.cancelAllNotifications();
       setState(() => _testNotificationsRunning = false);
       _showAlert('Success', 'Test notifications stopped');
     } catch (e) {
