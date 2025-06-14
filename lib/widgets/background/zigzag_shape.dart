@@ -19,7 +19,7 @@ class ZigZagShape extends StatelessWidget {
     this.rotation = 0,
     this.shadowOffset = 4,
     this.lineWidth = 8,
-    this.segments = 3,
+    this.segments = 5,
     this.opacity = 1.0,
   });
 

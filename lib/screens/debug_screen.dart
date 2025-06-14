@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'debug/photo_debug_screen.dart';
 import 'debug/exif_debug_screen.dart';
 import 'debug/notifications_debug_screen.dart';
+import '../widgets/debug/shapes_showcase.dart';
 
 class DebugScreen extends StatefulWidget {
   const DebugScreen({super.key});
@@ -17,9 +18,10 @@ class _DebugScreenState extends State<DebugScreen> {
     const PhotoDebugScreen(),
     const ExifViewerWidget(),
     const NotificationsDebugScreen(),
+    const ShapesShowcase(),
   ];
 
-  final List<String> _tabTitles = ['Photos', 'Exif', 'Notifications'];
+  final List<String> _tabTitles = ['Photos', 'Exif', 'Notifications', 'Shapes'];
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,10 @@ class _DebugScreenState extends State<DebugScreen> {
                 2: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Text('Notifications'),
+                ),
+                3: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text('Shapes'),
                 ),
               },
             ),

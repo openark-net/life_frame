@@ -58,6 +58,51 @@ Future dependencies will likely include:
 
 The project currently contains the default Flutter counter app template and is ready for implementing the daily photo journaling features.
 
+## Debug Screen Structure
+
+The app includes a comprehensive debug screen system for development and testing:
+
+### Adding a New Debug Screen
+
+1. **Create the debug widget**:
+   - Place debug widgets in `lib/widgets/debug/`
+   - Use CupertinoPageScaffold for consistent UI
+   - Import necessary dependencies
+
+2. **Add to debug navigation**:
+   - Import your widget in `lib/screens/debug_screen.dart`
+   - Add the widget to the `_screens` list
+   - Add the tab title to the `_tabTitles` list
+   - Add the corresponding tab to the `CupertinoSlidingSegmentedControl`
+
+3. **Example structure**:
+   ```dart
+   // lib/widgets/debug/my_debug_widget.dart
+   import 'package:flutter/cupertino.dart';
+   
+   class MyDebugWidget extends StatelessWidget {
+     const MyDebugWidget({super.key});
+   
+     @override
+     Widget build(BuildContext context) {
+       return CupertinoPageScaffold(
+         navigationBar: const CupertinoNavigationBar(
+           middle: Text('My Debug Feature'),
+         ),
+         child: SafeArea(
+           child: // Your debug content here
+         ),
+       );
+     }
+   }
+   ```
+
+### Current Debug Tabs
+- **Photos**: Photo debugging and testing
+- **Exif**: EXIF data viewer
+- **Notifications**: Notification system testing
+- **Shapes**: Shape widget showcase
+
 # Expectations for Code Quality
 
 All the following are expected in a response, most of these are not
