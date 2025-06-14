@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:life_frame/theme.dart';
 import 'package:life_frame/widgets/life_frame_logo.dart';
 import '../controllers/settings_controller.dart';
 import '../services/notification_service.dart';
 import '../widgets/permissions_checker.dart';
+import 'support_developer_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -57,6 +59,30 @@ class SettingsScreen extends StatelessWidget {
                         },
                       ),
                     ),
+                  ),
+                  CupertinoListTile(
+                    leading: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.app,
+                        color: CupertinoColors.white,
+                        size: 16,
+                      ),
+                    ),
+                    title: const Text('Support the developer'),
+                    trailing: const Icon(
+                      CupertinoIcons.chevron_right,
+                      color: CupertinoColors.systemGrey,
+                      size: 16,
+                    ),
+                    onTap: () {
+                      Get.to(() => const SupportDeveloperScreen());
+                    },
                   ),
                 ],
               ),

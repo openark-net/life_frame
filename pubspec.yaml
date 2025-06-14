@@ -47,6 +47,6 @@ flutter:
     - family: Comfortaa-Bold
       fonts:
         - asset: assets/fonts/Comfortaa-Bold.ttf
-    - family: Comfortaa-Light
+    - family: DMSerif
       fonts:
-        - asset: assets/fonts/Comfortaa-Light.ttf
+        - asset: assets/fonts/DMSerif.ttf
