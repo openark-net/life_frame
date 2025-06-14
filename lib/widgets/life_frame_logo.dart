@@ -10,7 +10,7 @@ class LifeFrameLogo extends StatelessWidget {
 
   const LifeFrameLogo({
     super.key,
-    this.fontSize = 38,
+    this.fontSize = 33,
     this.logoSize = 48,
     this.alignment = MainAxisAlignment.center,
     this.onDoubleTap,
@@ -31,7 +31,7 @@ class LifeFrameLogo extends StatelessWidget {
             color: AppColors.primary,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         SvgPicture.asset(
           'assets/logo/logo.svg',
           width: logoSize,

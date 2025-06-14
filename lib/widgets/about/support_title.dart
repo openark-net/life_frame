@@ -17,7 +17,7 @@ class SupportDescription extends StatelessWidget {
             fontFamily: dmSansFont,
             fontSize: 16,
             color: OpenArkColors.foreground.withOpacity(0.7),
-            height: 1.5,
+            height: 1.2,
           ),
         ),
       ],

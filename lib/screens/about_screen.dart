@@ -36,7 +36,7 @@ class _SupportDeveloperScreenState extends State<SupportDeveloperScreen> {
                     const OpenArkLogo(),
                     const SizedBox(height: 24),
                     const WebsiteBadge(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
                     const SupportDescription(),
                   ],
                 ),
