@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   // Background
   static const Color background = Color(0xFFECF4F7);
+  static const Color surface = Color(0xCCD4DCDF);
 
   // Accent Colors
   static const Color yellow = Color(0xFFFFB74D);

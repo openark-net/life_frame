@@ -21,8 +21,16 @@ class AbstractBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return animated
-        ? _AnimatedBackground(density: density, seed: seed, radialDistribution: radialDistribution)
-        : _StaticBackground(density: density, seed: seed, radialDistribution: radialDistribution);
+        ? _AnimatedBackground(
+            density: density,
+            seed: seed,
+            radialDistribution: radialDistribution,
+          )
+        : _StaticBackground(
+            density: density,
+            seed: seed,
+            radialDistribution: radialDistribution,
+          );
   }
 }
 
@@ -31,7 +39,11 @@ class _StaticBackground extends StatelessWidget {
   final int seed;
   final bool radialDistribution;
 
-  const _StaticBackground({required this.density, required this.seed, required this.radialDistribution});
+  const _StaticBackground({
+    required this.density,
+    required this.seed,
+    required this.radialDistribution,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -62,20 +74,21 @@ class _StaticBackground extends StatelessWidget {
       for (int col = 0; col < cols; col++) {
         final cellX = col * cellSize;
         final cellY = row * cellSize;
-        
+
         final cellCenterX = cellX + cellSize / 2;
         final cellCenterY = cellY + cellSize / 2;
-        
+
         double currentDensity = density;
-        
+
         if (radialDistribution) {
           final distanceFromCenter = math.sqrt(
-            math.pow(cellCenterX - centerX, 2) + math.pow(cellCenterY - centerY, 2)
+            math.pow(cellCenterX - centerX, 2) +
+                math.pow(cellCenterY - centerY, 2),
           );
           final normalizedDistance = distanceFromCenter / maxDistance;
           currentDensity = density * normalizedDistance * 2.0;
         }
-        
+
         if (random.nextDouble() > currentDensity) continue;
 
         final x = cellX + random.nextDouble() * cellSize * 0.8 + cellSize * 0.1;
@@ -97,7 +110,11 @@ class _AnimatedBackground extends StatefulWidget {
   final int seed;
   final bool radialDistribution;
 
-  const _AnimatedBackground({required this.density, required this.seed, required this.radialDistribution});
+  const _AnimatedBackground({
+    required this.density,
+    required this.seed,
+    required this.radialDistribution,
+  });
 
   @override
   State<_AnimatedBackground> createState() => _AnimatedBackgroundState();
@@ -184,20 +201,21 @@ class _AnimatedBackgroundState extends State<_AnimatedBackground>
       for (int col = 0; col < cols; col++) {
         final cellX = col * cellSize;
         final cellY = row * cellSize;
-        
+
         final cellCenterX = cellX + cellSize / 2;
         final cellCenterY = cellY + cellSize / 2;
-        
+
         double currentDensity = widget.density * 0.6;
-        
+
         if (widget.radialDistribution) {
           final distanceFromCenter = math.sqrt(
-            math.pow(cellCenterX - centerX, 2) + math.pow(cellCenterY - centerY, 2)
+            math.pow(cellCenterX - centerX, 2) +
+                math.pow(cellCenterY - centerY, 2),
           );
           final normalizedDistance = distanceFromCenter / maxDistance;
           currentDensity = widget.density * 0.6 * normalizedDistance * 2.0;
         }
-        
+
         if (random.nextDouble() > currentDensity) continue;
 
         final startX =

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:life_frame/theme.dart';
 import '../models/daily_entry.dart';
 import '../utils/location_formatter.dart';
 import '../controllers/photo_journal_controller.dart';
@@ -87,7 +88,7 @@ class GalleryImage extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 24),
         decoration: BoxDecoration(
-          color: CupertinoColors.systemGrey.withOpacity(0.1),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -109,15 +110,7 @@ class GalleryImage extends StatelessWidget {
                   Text(
                     _formatDateForDisplay(entry.date),
                     style: CupertinoTheme.of(context).textTheme.textStyle
-                        .copyWith(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color:
-                              CupertinoTheme.of(context).brightness ==
-                                  Brightness.dark
-                              ? CupertinoColors.white
-                              : CupertinoColors.black,
-                        ),
+                        .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   FutureBuilder<String>(
                     future: getFormattedLocation(

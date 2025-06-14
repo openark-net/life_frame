@@ -1,5 +1,9 @@
 // lib/widgets/gallery/gallery_pagination_footer.dart
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
+
+import '../background/background_utils.dart';
 
 class GalleryPaginationFooter extends StatelessWidget {
   final bool hasMorePages;
@@ -23,10 +27,7 @@ class GalleryPaginationFooter extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(32),
       child: Center(
-        child: Text(
-          '📸',
-          style: TextStyle(color: CupertinoColors.systemGrey2, fontSize: 16),
-        ),
+        child: BackgroundUtils.buildRandomShape(math.Random(3), 1.0),
       ),
     );
   }

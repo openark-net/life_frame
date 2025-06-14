@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../controllers/photo_journal_controller.dart';
 import '../widgets/gallery/empty_gallery_state.dart';
 import '../widgets/gallery/gallery_list.dart';
+import '../widgets/background/AbstractBackground.dart';
+import '../theme.dart';
 
 class GalleryScreen extends StatelessWidget {
   const GalleryScreen({super.key});
@@ -12,19 +14,26 @@ class GalleryScreen extends StatelessWidget {
     final controller = Get.find<PhotoJournalController>();
 
     return CupertinoPageScaffold(
+      backgroundColor: AppColors.background,
       navigationBar: const CupertinoNavigationBar(middle: Text('Gallery')),
-      child: SafeArea(
-        child: Obx(() {
-          if (controller.isLoading && controller.paginatedEntries.isEmpty) {
-            return const Center(child: CupertinoActivityIndicator());
-          }
+      child: Stack(
+        children: [
+          const AbstractBackground(density: 0.4, seed: 54321),
+          SafeArea(
+            child: Obx(() {
+              if (controller.isLoading && controller.paginatedEntries.isEmpty) {
+                return const Center(child: CupertinoActivityIndicator());
+              }
 
-          if (controller.paginatedEntries.isEmpty && !controller.isLoading) {
-            return const EmptyGalleryState();
-          }
+              if (controller.paginatedEntries.isEmpty &&
+                  !controller.isLoading) {
+                return const EmptyGalleryState();
+              }
 
-          return const GalleryList();
-        }),
+              return const GalleryList();
+            }),
+          ),
+        ],
       ),
     );
   }
