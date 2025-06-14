@@ -44,18 +44,19 @@ class DiagonalWavyRainbowPainter extends CustomPainter {
       paint.color = colors[i].withOpacity(0.15);
 
       final path = Path();
-      
+
       // Calculate diagonal stripe position
       final double offset = i * stripeWidth - size.width * 0.5;
-      
+
       // Start from top-left and create diagonal wavy stripe
       for (double y = -size.height * 0.5; y < size.height * 1.5; y += 2) {
         final double wave1 = math.sin(y * waveFrequency) * waveAmplitude;
-        final double wave2 = math.sin((y + stripeWidth) * waveFrequency) * waveAmplitude;
-        
+        final double wave2 =
+            math.sin((y + stripeWidth) * waveFrequency) * waveAmplitude;
+
         final double x1 = offset + y * 0.7 + wave1;
         final double x2 = offset + stripeWidth + y * 0.7 + wave2;
-        
+
         if (y == -size.height * 0.5) {
           path.moveTo(x1, y);
           path.lineTo(x2, y);
@@ -63,21 +64,23 @@ class DiagonalWavyRainbowPainter extends CustomPainter {
           path.lineTo(x1, y);
         }
       }
-      
+
       // Complete the stripe
       final double endY = size.height * 1.5;
       final double endWave1 = math.sin(endY * waveFrequency) * waveAmplitude;
-      final double endWave2 = math.sin((endY + stripeWidth) * waveFrequency) * waveAmplitude;
-      
+      final double endWave2 =
+          math.sin((endY + stripeWidth) * waveFrequency) * waveAmplitude;
+
       path.lineTo(offset + stripeWidth + endY * 0.7 + endWave2, endY);
-      
+
       // Create the other side of the stripe
       for (double y = size.height * 1.5; y >= -size.height * 0.5; y -= 2) {
-        final double wave = math.sin((y + stripeWidth) * waveFrequency) * waveAmplitude;
+        final double wave =
+            math.sin((y + stripeWidth) * waveFrequency) * waveAmplitude;
         final double x = offset + stripeWidth + y * 0.7 + wave;
         path.lineTo(x, y);
       }
-      
+
       path.close();
       canvas.drawPath(path, paint);
     }

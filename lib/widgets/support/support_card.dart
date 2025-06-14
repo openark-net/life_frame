@@ -12,8 +12,8 @@ class SupportCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(40),
       decoration: BoxDecoration(
-        color: OpenArkColors.background,
-        borderRadius: BorderRadius.circular(16),
+        color: OpenArkColors.background.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
             color: OpenArkColors.foreground.withOpacity(0.1),
