@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import '../../theme.dart';
+import '../../openark_theme.dart';
 
 class SupportDescription extends StatelessWidget {
   const SupportDescription({super.key});
@@ -11,20 +11,22 @@ class SupportDescription extends StatelessWidget {
         Text(
           'Support the developer',
           style: TextStyle(
-            fontFamily: fontFamily,
+            fontFamily: dmSerifFont,
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: AppColors.primaryText,
+            color: OpenArkColors.foreground,
           ),
         ),
         const SizedBox(height: 16),
         Text(
-          'Life Frame is a completely free app with no ads that doesn\'t connect to the internet. Your privacy and photos stay on your device.\n\nIf you\'d like to support the developer, you can do so below!',
+          'Life Frame is a completely free and open source app with no ads that doesn\'t connect '
+          'to the internet. Your privacy and photos stay on your device.\n\n'
+          'If you\'d like to make a donation to support the app store fees, you can do so below!',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontFamily: fontFamily,
+            fontFamily: dmSansFont,
             fontSize: 16,
-            color: AppColors.secondaryText,
+            color: OpenArkColors.foreground.withOpacity(0.7),
             height: 1.5,
           ),
         ),

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../theme.dart';
+import '../../openark_theme.dart';
 
 class OpenArkLogo extends StatelessWidget {
   const OpenArkLogo({super.key});
@@ -19,10 +19,10 @@ class OpenArkLogo extends StatelessWidget {
         Text(
           'OpenArk',
           style: TextStyle(
-            fontFamily: 'DMSerif',
-            fontSize: 24,
+            fontFamily: dmSerifFont,
+            fontSize: 54,
             fontWeight: FontWeight.normal,
-            color: AppColors.primaryText,
+            color: OpenArkColors.secondary,
           ),
         ),
       ],

@@ -1,19 +1,26 @@
 import 'package:flutter/cupertino.dart';
-import '../theme.dart';
+import '../openark_theme.dart';
 import '../widgets/support/support_card.dart';
 import '../widgets/support/openark_logo.dart';
 import '../widgets/support/support_title.dart';
 import '../widgets/support/website_badge.dart';
 import '../widgets/support/donation_buttons.dart';
 
-class SupportDeveloperScreen extends StatelessWidget {
+class SupportDeveloperScreen extends StatefulWidget {
   const SupportDeveloperScreen({super.key});
+
+  @override
+  State<SupportDeveloperScreen> createState() => _SupportDeveloperScreenState();
+}
+
+class _SupportDeveloperScreenState extends State<SupportDeveloperScreen> {
+  String selectedAmount = '1';
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(middle: Text('Support')),
-      backgroundColor: AppColors.background,
+      backgroundColor: OpenArkColors.background,
       child: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -24,7 +31,7 @@ class SupportDeveloperScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const OpenArkLogo(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 32),
                   const WebsiteBadge(),
                   const SizedBox(height: 24),
                   const SupportDescription(),
@@ -32,7 +39,13 @@ class SupportDeveloperScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            const DonationButtons(),
+            DonationButtons(
+              onAmountSelected: (amount) {
+                setState(() {
+                  selectedAmount = amount;
+                });
+              },
+            ),
             const Spacer(),
           ],
         ),

@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import '../../theme.dart';
+import '../../openark_theme.dart';
 
 class SupportCard extends StatelessWidget {
   final Widget child;
@@ -12,11 +12,11 @@ class SupportCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(40),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: OpenArkColors.background,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.1),
+            color: OpenArkColors.foreground.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
