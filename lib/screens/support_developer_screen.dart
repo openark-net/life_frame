@@ -12,9 +12,7 @@ class SupportDeveloperScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Support'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Support')),
       backgroundColor: AppColors.background,
       child: SafeArea(
         child: Column(

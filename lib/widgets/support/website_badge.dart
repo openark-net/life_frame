@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../theme.dart';
 
 class WebsiteBadge extends StatelessWidget {
@@ -8,9 +9,12 @@ class WebsiteBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         HapticFeedback.lightImpact();
-        // TODO: Open URL when functionality is needed
+        final uri = Uri.parse('https://openark.net/');
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -32,11 +36,7 @@ class WebsiteBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              CupertinoIcons.globe,
-              color: AppColors.white,
-              size: 16,
-            ),
+            const Icon(CupertinoIcons.globe, color: AppColors.white, size: 16),
             const SizedBox(width: 8),
             Text(
               'openark.net',
