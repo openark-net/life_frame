@@ -8,6 +8,7 @@ import '../widgets/home/photo_status_indicator.dart';
 import '../widgets/home/day_streak_widget.dart';
 import '../widgets/life_frame_logo.dart';
 import '../widgets/common/content_card.dart';
+import '../widgets/background/AbstractBackground.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,68 +55,69 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      child: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/logo/background.jpg'),
-            fit: BoxFit.cover,
+      child: Stack(
+        children: [
+          const AbstractBackground(
+            density: 0.6,
+            seed: 99983,
+            radialDistribution: false,
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(),
-              ContentCard(
-                child: Obx(() {
-                  final photoStatus = _getPhotoStatus(controller);
-                  final isActionDisabled = _isTakingPicture;
+          SafeArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Spacer(),
+                ContentCard(
+                  child: Obx(() {
+                    final photoStatus = _getPhotoStatus(controller);
+                    final isActionDisabled = _isTakingPicture;
 
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      LifeFrameLogo(
-                        onDoubleTap: () => navController.toggleDebugMode(),
-                      ),
-
-                      const SizedBox(height: 40),
-
-                      PhotoStatusIndicator(status: photoStatus),
-
-                      const SizedBox(height: 30),
-
-                      DayStreakWidget(streakCount: controller.getStreak()),
-
-                      const SizedBox(height: 40),
-
-                      CupertinoButton.filled(
-                        onPressed: isActionDisabled
-                            ? null
-                            : () => _handleTakePicture(context),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 16,
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        LifeFrameLogo(
+                          onDoubleTap: () => navController.toggleDebugMode(),
                         ),
-                        child: Text(
-                          !controller.hasTodayPhoto
-                              ? 'Take Your Daily Picture'
-                              : 'Take ANOTHER Photo',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: AppColors.yellowContrast,
-                            fontFamily: fontFamily,
-                            fontWeight: FontWeight.w900,
+
+                        const SizedBox(height: 40),
+
+                        PhotoStatusIndicator(status: photoStatus),
+
+                        const SizedBox(height: 30),
+
+                        DayStreakWidget(streakCount: controller.getStreak()),
+
+                        const SizedBox(height: 40),
+
+                        CupertinoButton.filled(
+                          onPressed: isActionDisabled
+                              ? null
+                              : () => _handleTakePicture(context),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 16,
+                          ),
+                          child: Text(
+                            !controller.hasTodayPhoto
+                                ? 'Take Your Daily Picture'
+                                : 'Take ANOTHER Photo',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: AppColors.yellowContrast,
+                              fontFamily: fontFamily,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                }),
-              ),
-              const Spacer(),
-            ],
+                      ],
+                    );
+                  }),
+                ),
+                const Spacer(),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
