@@ -28,9 +28,12 @@ class DiagonalWavyRainbowPainter extends CustomPainter {
       OpenArkColors.secondary,
       OpenArkColors.blueAlt,
       OpenArkColors.tertiary,
+      OpenArkColors.primary,
+      OpenArkColors.secondary,
       OpenArkColors.greenAlt,
-      OpenArkColors.warning,
-      OpenArkColors.error,
+      OpenArkColors.blueAlt,
+      // OpenArkColors.warning,
+      // OpenArkColors.error,
     ];
 
     final paint = Paint()..style = PaintingStyle.fill;
@@ -41,7 +44,7 @@ class DiagonalWavyRainbowPainter extends CustomPainter {
     const double waveFrequency = 0.02;
 
     for (int i = 0; i < colors.length; i++) {
-      paint.color = colors[i].withOpacity(0.15);
+      paint.color = colors[i].withOpacity(0.55);
 
       final path = Path();
 

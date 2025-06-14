@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import '../../theme.dart';
+import 'dart:ui';
+import '../../openark_theme.dart';
 
 class ContentCard extends StatelessWidget {
   final Widget child;
@@ -10,19 +11,22 @@ class ContentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(40),
-      decoration: BoxDecoration(
-        color: AppColors.background,
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryText.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.all(40),
+            decoration: BoxDecoration(
+              color: OpenArkColors.background.withValues(
+                alpha: 0.84,
+              ), // Very transparent
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: child,
           ),
-        ],
+        ),
       ),
-      child: child,
     );
   }
 }

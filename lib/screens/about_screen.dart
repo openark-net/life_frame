@@ -34,7 +34,7 @@ class _SupportDeveloperScreenState extends State<SupportDeveloperScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const OpenArkLogo(),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                     const WebsiteBadge(),
                     const SizedBox(height: 24),
                     const SupportDescription(),
