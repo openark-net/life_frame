@@ -3,7 +3,7 @@ import '../../openark_theme.dart';
 
 class DonationButtons extends StatefulWidget {
   final Function(String) onAmountSelected;
-  
+
   const DonationButtons({super.key, required this.onAmountSelected});
 
   @override
@@ -12,7 +12,7 @@ class DonationButtons extends StatefulWidget {
 
 class _DonationButtonsState extends State<DonationButtons> {
   String selectedAmount = '1';
-  final List<String> amounts = ['1', '2', '5', '10'];
+  final List<String> amounts = ['1', '2', '5', '10', '30'];
 
   @override
   void initState() {
@@ -30,25 +30,33 @@ class _DonationButtonsState extends State<DonationButtons> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: amounts.map((amount) => _buildDonationButton(amount)).toList(),
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: amounts
+                .map((amount) => _buildDonationButton(amount))
+                .toList(),
           ),
         ),
         const SizedBox(height: 24),
-        CupertinoButton(
-          padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 16),
-          color: OpenArkColors.primary,
-          borderRadius: BorderRadius.circular(12),
-          onPressed: () {
-            // TODO: Implement actual donation functionality
-          },
-          child: Text(
-            'Donate \$$selectedAmount',
-            style: TextStyle(
-              fontFamily: dmSansFont,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: OpenArkColors.primaryContrast,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SizedBox(
+            width: double.infinity,
+            child: CupertinoButton(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              color: OpenArkColors.primary,
+              borderRadius: BorderRadius.circular(12),
+              onPressed: () {
+                // TODO: Implement actual donation functionality
+              },
+              child: Text(
+                'Donate \$$selectedAmount',
+                style: TextStyle(
+                  fontFamily: dmSansFont,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: OpenArkColors.primaryContrast,
+                ),
+              ),
             ),
           ),
         ),
@@ -58,7 +66,7 @@ class _DonationButtonsState extends State<DonationButtons> {
 
   Widget _buildDonationButton(String amount) {
     final bool isSelected = selectedAmount == amount;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -71,7 +79,9 @@ class _DonationButtonsState extends State<DonationButtons> {
         decoration: BoxDecoration(
           color: isSelected ? OpenArkColors.tertiary : OpenArkColors.background,
           border: Border.all(
-            color: isSelected ? OpenArkColors.tertiary : OpenArkColors.foreground.withOpacity(0.3),
+            color: isSelected
+                ? OpenArkColors.tertiary
+                : OpenArkColors.foreground.withOpacity(0.3),
             width: 2,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -82,7 +92,9 @@ class _DonationButtonsState extends State<DonationButtons> {
             fontFamily: dmSansFont,
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: isSelected ? OpenArkColors.tertiaryContrast : OpenArkColors.foreground,
+            color: isSelected
+                ? OpenArkColors.tertiaryContrast
+                : OpenArkColors.foreground,
           ),
         ),
       ),
