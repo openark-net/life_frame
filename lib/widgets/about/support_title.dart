@@ -9,16 +9,6 @@ class SupportDescription extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Support the developer',
-          style: TextStyle(
-            fontFamily: dmSerifFont,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: OpenArkColors.foreground,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
           'Life Frame is a completely free and open source app with no ads that doesn\'t connect '
           'to the internet. Your privacy and photos stay on your device.\n\n'
           'If you\'d like to make a donation to support the app store fees, you can do so below!',

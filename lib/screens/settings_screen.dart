@@ -4,9 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:life_frame/theme.dart';
 import 'package:life_frame/widgets/life_frame_logo.dart';
 import '../controllers/settings_controller.dart';
+import '../openark_theme.dart';
 import '../services/notification_service.dart';
 import '../widgets/permissions_checker.dart';
-import 'support_developer_screen.dart';
+import 'about_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -65,7 +66,7 @@ class SettingsScreen extends StatelessWidget {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: OpenArkColors.primary,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Icon(
@@ -74,10 +75,10 @@ class SettingsScreen extends StatelessWidget {
                         size: 16,
                       ),
                     ),
-                    title: const Text('Support the developer'),
+                    title: const Text('About OpenArk'),
                     trailing: const Icon(
                       CupertinoIcons.chevron_right,
-                      color: CupertinoColors.systemGrey,
+                      color: OpenArkColors.primary,
                       size: 16,
                     ),
                     onTap: () {

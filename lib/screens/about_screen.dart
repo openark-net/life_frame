@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../openark_theme.dart';
-import '../widgets/support/support_card.dart';
-import '../widgets/support/openark_logo.dart';
-import '../widgets/support/support_title.dart';
-import '../widgets/support/website_badge.dart';
-import '../widgets/support/donation_buttons.dart';
-import '../widgets/support/rainbow_background.dart';
+import '../widgets/about/support_card.dart';
+import '../widgets/about/openark_logo.dart';
+import '../widgets/about/support_title.dart';
+import '../widgets/about/website_badge.dart';
+import '../widgets/about/donation_buttons.dart';
+import '../widgets/about/rainbow_background.dart';
 
 class SupportDeveloperScreen extends StatefulWidget {
   const SupportDeveloperScreen({super.key});
@@ -20,7 +21,7 @@ class _SupportDeveloperScreenState extends State<SupportDeveloperScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Support')),
+      navigationBar: const CupertinoNavigationBar(middle: Text('About')),
       backgroundColor: OpenArkColors.background,
       child: RainbowBackground(
         child: SafeArea(

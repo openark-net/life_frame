@@ -83,14 +83,18 @@ class WebsiteBadge extends StatelessWidget {
                 ),
               ],
             ),
-            child: SvgPicture.asset(
-              'assets/logo/github-mark-white.svg',
-              width: 20,
-              height: 20,
-            ),
+            child: _buildGitHubIcon(),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildGitHubIcon() {
+    return SvgPicture.asset(
+      'assets/logo/github-mark-white.svg',
+      width: 20,
+      height: 20,
     );
   }
 }
