@@ -15,7 +15,6 @@ class OpenArkLogo extends StatelessWidget {
           height: 80,
           fit: BoxFit.contain,
         ),
-        const SizedBox(height: 12),
         Text(
           'OpenArk',
           style: TextStyle(
