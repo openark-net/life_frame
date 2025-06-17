@@ -16,17 +16,19 @@ class NotificationService extends GetxService {
 
   PermissionsService? _permissionsService;
   SettingsController? _settingsController;
-  late final Talker talker;
+  Talker? _talker;
 
   static const String channelId = 'life_frame_daily';
   static const String channelName = 'Daily Photo Reminder';
   static const String channelDescription =
       'Reminds you to take your daily photo';
 
+  Talker get talker => _talker!;
+
   @override
   Future<NotificationService> onInit() async {
     super.onInit();
-    talker = Get.find<Talker>();
+    _talker ??= Get.find<Talker>();
     _permissionsService ??= Get.find<PermissionsService>();
     _settingsController ??= Get.find<SettingsController>();
 

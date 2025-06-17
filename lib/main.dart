@@ -13,30 +13,33 @@ import 'controllers/navigation_controller.dart';
 import 'controllers/settings_controller.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   final talker = TalkerFlutter.init();
   Get.put<Talker>(talker);
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  await Get.putAsync(() async {
-    final service = StorageService();
-    await service.onInit();
-    return service;
-  });
-  Get.put(PhotoJournalController());
-  Get.put(NavigationController());
-  Get.put(SettingsController());
-  Get.put(PermissionsService());
-  await Get.putAsync(() async {
-    final notificationService = NotificationService();
-    await notificationService.onInit();
-    return notificationService;
-  });
-  await Get.putAsync<LocationService>(() async {
-    final service = LocationService();
-    await service.onInit();
-    return service;
-  });
+    await Get.putAsync(() async {
+      final service = StorageService();
+      await service.onInit();
+      return service;
+    });
+    Get.put(PhotoJournalController());
+    Get.put(NavigationController());
+    Get.put(SettingsController());
+    Get.put(PermissionsService());
+    await Get.putAsync(() async {
+      final notificationService = NotificationService();
+      await notificationService.onInit();
+      return notificationService;
+    });
+    await Get.putAsync<LocationService>(() async {
+      final service = LocationService();
+      await service.onInit();
+      return service;
+    });
+  } catch (e, st) {
+    talker.handle(e, st, "ERROR INITIALIZING");
+  }
 
   runApp(const MyApp());
 }
