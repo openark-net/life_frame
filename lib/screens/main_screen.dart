@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:talker/talker.dart';
 import '../controllers/navigation_controller.dart';
 import 'home_screen.dart';
 import 'gallery_screen.dart';
@@ -22,12 +23,29 @@ class TabDefinition {
   });
 }
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final talker = Get.find<Talker>();
+      talker.info('App launched - Initial screen: Home');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final navController = Get.find<NavigationController>();
+    final talker = Get.find<Talker>();
 
     return Obx(() {
       // Define all possible tabs with their show conditions
@@ -62,6 +80,11 @@ class MainScreen extends StatelessWidget {
       // Filter tabs based on their show conditions
       final visibleTabs = allTabs.where((tab) => tab.shouldShow()).toList();
 
+      // Ensure current index is within bounds when tabs change
+      if (_currentIndex >= visibleTabs.length) {
+        _currentIndex = 0;
+      }
+
       // Generate bottom navigation items
       final items = visibleTabs
           .map(
@@ -77,6 +100,17 @@ class MainScreen extends StatelessWidget {
       return CupertinoTabScaffold(
         tabBar: CupertinoTabBar(
           items: items,
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            if (index != _currentIndex) {
+              final newScreen = visibleTabs[index].label;
+              final oldScreen = visibleTabs[_currentIndex].label;
+              talker.info('Screen switch: $oldScreen -> $newScreen');
+              setState(() {
+                _currentIndex = index;
+              });
+            }
+          },
           border: Border(
             top: BorderSide(
               color: CupertinoTheme.of(context).brightness == Brightness.dark

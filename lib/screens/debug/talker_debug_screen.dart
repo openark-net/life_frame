@@ -9,7 +9,6 @@ class TalkerDebugScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final talker = Get.find<Talker>();
-    final brightness = CupertinoTheme.brightnessOf(context);
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(middle: Text('Talker Logs')),

@@ -23,7 +23,13 @@ class _DebugScreenState extends State<DebugScreen> {
     const ShapesShowcase(),
   ];
 
-  final List<String> _tabTitles = ['Photos', 'Exif', 'Notifications', 'Logs', 'Shapes'];
+  final List<String> _tabTitles = [
+    'Photos',
+    'Exif',
+    'Notifications',
+    'Logs',
+    'Shapes',
+  ];
 
   @override
   Widget build(BuildContext context) {
