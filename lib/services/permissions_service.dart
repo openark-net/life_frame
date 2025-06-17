@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:get/get.dart';
+import 'package:talker/talker.dart';
 
 enum PermissionType { location, camera, storage, notifications }
 
@@ -76,8 +77,17 @@ class LFPermission {
 class PermissionsService extends GetxService {
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
+  late final Talker _talker;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _talker = Get.find<Talker>();
+  }
 
   Future<bool> requestNotificationPermissions() async {
+    _talker.info('Requesting notification permissions');
+
     if (Platform.isAndroid) {
       final androidPlugin = _notifications
           .resolvePlatformSpecificImplementation<
@@ -86,7 +96,9 @@ class PermissionsService extends GetxService {
 
       if (androidPlugin != null) {
         final granted = await androidPlugin.requestNotificationsPermission();
-        debugPrint('Notification permission granted: $granted');
+        _talker.info('Android notification permission result', {
+          'granted': granted,
+        });
 
         await androidPlugin.requestExactAlarmsPermission();
         return granted ?? false;
@@ -103,7 +115,9 @@ class PermissionsService extends GetxService {
           badge: true,
           sound: true,
         );
-        debugPrint('iOS notification permission granted: $granted');
+        _talker.info('iOS notification permission result', {
+          'granted': granted,
+        });
         return granted ?? false;
       }
     }
@@ -211,17 +225,31 @@ class PermissionsService extends GetxService {
   }
 
   Future<PermissionStatus> requestPermission(LFPermission permission) async {
+    _talker.info('Requesting permission', {'type': permission.type.toString()});
+
+    PermissionStatus result;
     switch (permission.type) {
       case PermissionType.location:
-        return await Permission.location.request();
+        result = await Permission.location.request();
+        break;
       case PermissionType.camera:
-        return await Permission.camera.request();
+        result = await Permission.camera.request();
+        break;
       case PermissionType.storage:
-        return await _requestStoragePermission();
+        result = await _requestStoragePermission();
+        break;
       case PermissionType.notifications:
         final granted = await requestNotificationPermissions();
-        return granted ? PermissionStatus.granted : PermissionStatus.denied;
+        result = granted ? PermissionStatus.granted : PermissionStatus.denied;
+        break;
     }
+
+    _talker.info('Permission request result', {
+      'type': permission.type.toString(),
+      'status': result.toString(),
+    });
+
+    return result;
   }
 
   Future<PermissionStatus> _requestStoragePermission() async {
@@ -244,16 +272,21 @@ class PermissionsService extends GetxService {
   }
 
   Future<bool> checkAndRequestAllPermissions() async {
+    _talker.info('Checking and requesting all permissions');
+
     if (Platform.isIOS) {
+      _talker.info('iOS platform detected, skipping permission checks');
       return true;
     }
 
     final statuses = await getAllPermissionStatuses();
 
     if (areAllPermissionsGranted(statuses)) {
+      _talker.info('All permissions already granted');
       return true;
     }
 
+    _talker.info('Some permissions missing, requesting them');
     for (final permission in LFPermission.all) {
       final status = statuses[permission];
       if (status != null && !permission.isGranted(status)) {
@@ -262,6 +295,9 @@ class PermissionsService extends GetxService {
     }
 
     final updatedStatuses = await getAllPermissionStatuses();
-    return areAllPermissionsGranted(updatedStatuses);
+    final allGranted = areAllPermissionsGranted(updatedStatuses);
+
+    _talker.info('All permissions check result', {'allGranted': allGranted});
+    return allGranted;
   }
 }

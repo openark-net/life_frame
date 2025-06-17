@@ -1,5 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
+import 'package:get/get.dart';
+import 'package:talker/talker.dart';
 import '../models/frame_photos.dart';
 import '../utils/location_formatter.dart';
 
@@ -9,6 +11,8 @@ class PhotoStitchingService {
   static const double textPadding = 8.0;
   static const double frontPhotoRadius = 50.0; // Increased from 12.0
   static const double fontSize = 50.0;
+
+  final Talker _talker = Get.find<Talker>();
 
   Future<ui.Image?> stitchPhotos({
     required FramePhotos framePhotos,
@@ -25,17 +29,27 @@ class PhotoStitchingService {
         dateText: dateText,
         locationText: locationText,
       );
-
       return stitchedImage;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _talker.handle(e, stackTrace, 'Photo stitching failed');
       return null;
     }
   }
 
   Future<String> _getLocationText(double? latitude, double? longitude) async {
-    return (latitude == null || longitude == null)
-        ? ""
-        : await getFormattedLocation(latitude, longitude);
+    if (latitude == null || longitude == null) {
+      _talker.info('No location coordinates provided');
+      return "";
+    }
+
+    try {
+      final locationText = await getFormattedLocation(latitude, longitude);
+      _talker.info('Location text generated', {'locationText': locationText});
+      return locationText;
+    } catch (e, stackTrace) {
+      _talker.handle(e, stackTrace, 'Failed to get formatted location');
+      return "";
+    }
   }
 
   String _formatCurrentDate() {

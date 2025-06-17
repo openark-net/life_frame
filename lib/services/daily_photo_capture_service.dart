@@ -9,24 +9,47 @@ import '../controllers/photo_journal_controller.dart';
 import '../screens/simple_camera_screen.dart';
 import '../screens/photo_confirmation_screen.dart';
 import '../services/photo_stitching_service.dart';
+import 'package:talker/talker.dart';
 
 class DailyPhotoCaptureService {
   final PhotoJournalController _controller = Get.find<PhotoJournalController>();
   final PhotoStitchingService _stitchingService = PhotoStitchingService();
   final LocationService _locationService = Get.find<LocationService>();
+  final Talker _talker = Get.find<Talker>();
 
   Future<bool> captureDailyPhoto(BuildContext context) async {
+    _talker.info('Starting daily photo capture');
+
     try {
       final result = await _captureAndConfirmPhoto(context);
-      if (!result.success || result.photo == null || result.position == null) {
+
+      if (!result.success) {
+        _talker.warning('Photo capture was not successful');
         return false;
       }
+
+      if (result.photo == null) {
+        _talker.error('Photo capture result is null');
+        return false;
+      }
+
+      if (result.position == null) {
+        _talker.warning('Position is null for photo capture');
+      }
+
+      _talker.info('Saving image with metadata', {
+        'hasPosition': result.position != null,
+        'latitude': result.position?.latitude,
+        'longitude': result.position?.longitude,
+      });
 
       final photoPath = await ImageFilesystem.saveImageWithMetadata(
         result.photo!,
         latitude: result.position?.latitude,
         longitude: result.position?.longitude,
       );
+
+      _talker.info('Image saved to filesystem', {'photoPath': photoPath});
 
       final newEntry = await _controller.savePhotoEntry(
         photoPath: photoPath,
@@ -35,23 +58,36 @@ class DailyPhotoCaptureService {
       );
 
       if (newEntry != null) {
+        _talker.info('Daily photo captured and saved successfully', {
+          'photoPath': photoPath,
+          'lat': newEntry.latitude,
+          'lng': newEntry.longitude,
+        });
         _showSuccessSnackbar('Daily photo captured successfully!');
         return true;
       } else {
+        _talker.error('Failed to save photo entry to controller');
         _showErrorSnackbar('Failed to save photo entry');
         return false;
       }
-    } catch (e) {
-      print('DailyPhotoCaptureService: Error capturing daily photo: $e');
+    } catch (e, stackTrace) {
+      _talker.error('Error capturing daily photo', e, stackTrace);
       _showErrorSnackbar('An error occurred while capturing your photo');
       return false;
     }
   }
 
   Future<_CaptureResult> _captureAndConfirmPhoto(BuildContext context) async {
+    _talker.info('Starting capture and confirm photo flow');
+
+    int attemptCount = 0;
     while (true) {
+      attemptCount++;
+      _talker.info('Photo capture attempt', {'attemptNumber': attemptCount});
+
       final framePhotos = await _navigateToCameraScreen(context);
       if (framePhotos == null) {
+        _talker.info('User cancelled camera screen');
         return _CaptureResult.cancelled();
       }
 
@@ -64,20 +100,27 @@ class DailyPhotoCaptureService {
       );
 
       if (photo == null) {
+        _talker.error('Photo stitching failed, returning null');
         _showErrorSnackbar('Failed to process photos');
         return _CaptureResult.failed();
       }
 
+      _talker.info('Photo stitching successful, navigating to confirmation');
+
       final shouldKeep = await _navigateToConfirmationScreen(context, photo);
       if (shouldKeep == null) {
+        _talker.info('User cancelled confirmation screen');
         return _CaptureResult.cancelled();
       }
 
       if (shouldKeep) {
+        _talker.info('User confirmed photo, capture successful', {
+          'attempts': attemptCount,
+        });
         return _CaptureResult.success(photo, position);
       }
 
-      // User wants to retake, continue the loop
+      _talker.info('User chose to retake photo, continuing loop');
     }
   }
 
@@ -85,31 +128,45 @@ class DailyPhotoCaptureService {
     BuildContext context,
     ui.Image photo,
   ) async {
-    return await Navigator.of(context).push<bool>(
+    final result = await Navigator.of(context).push<bool>(
       CupertinoPageRoute(
         fullscreenDialog: true,
         builder: (context) => PhotoConfirmationScreen(photo: photo),
       ),
     );
+    return result;
   }
 
   Future<FramePhotos?> _navigateToCameraScreen(BuildContext context) async {
-    return await Navigator.of(context).push<FramePhotos>(
+    _talker.info('Navigating to camera screen');
+
+    final result = await Navigator.of(context).push<FramePhotos>(
       CupertinoPageRoute(
         fullscreenDialog: true,
         builder: (context) => const SimpleCameraScreen(),
       ),
     );
+
+    _talker.info('Returned from camera screen', {
+      'hasResult': result != null,
+      'hasFrontPhoto': result?.front != null,
+      'hasBackPhoto': result?.back != null,
+    });
+
+    return result;
   }
 
   Future<Position?> _getLocationInstantly() async {
-    final cachedPosition = _locationService.cachedPosition;
+    final position = await _locationService.getCurrentLocationWithFallback();
 
-    if (_locationService.hasValidCachedLocation) {
-      return cachedPosition;
-    }
+    _talker.info('Received location', {
+      'hasPosition': position != null,
+      'latitude': position?.latitude,
+      'longitude': position?.longitude,
+      'accuracy': position?.accuracy,
+    });
 
-    return await _locationService.getCurrentLocationWithFallback();
+    return position;
   }
 
   void _showSuccessSnackbar(String message) {

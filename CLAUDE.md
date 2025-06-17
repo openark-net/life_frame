@@ -96,13 +96,6 @@ The app includes a comprehensive debug screen system for development and testing
      }
    }
    ```
-
-### Current Debug Tabs
-- **Photos**: Photo debugging and testing
-- **Exif**: EXIF data viewer
-- **Notifications**: Notification system testing
-- **Shapes**: Shape widget showcase
-
 # Expectations for Code Quality
 
 All the following are expected in a response, most of these are not
@@ -129,3 +122,12 @@ do this.
 
 Follow existing patterns in the codebase.
 
+
+## Logging
+
+We use the Talker library for logging, be sure to have frequent logging at the appropriate level. 
+
+You can get the Talker instance with:
+```dart 
+Talker talker = Get.find<Talker>();
+```
