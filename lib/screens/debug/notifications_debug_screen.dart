@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:life_frame/notifications.dart';
 import '../../controllers/settings_controller.dart';
 import '../../services/notification_service.dart';
 import '../../services/permissions_service.dart';
@@ -49,7 +50,7 @@ class _NotificationsDebugScreenState extends State<NotificationsDebugScreen> {
 
   Future<void> _scheduleInstantNotification() async {
     try {
-      await _notificationService.showInstantNotification();
+      await _notificationService.showInstantNotification(instantNotification);
       _showAlert('Success', 'Instant notification scheduled');
     } catch (e) {
       _showAlert('Error', 'Failed to schedule notification: $e');
@@ -58,7 +59,9 @@ class _NotificationsDebugScreenState extends State<NotificationsDebugScreen> {
 
   Future<void> _startTestNotifications() async {
     try {
-      await _notificationService.scheduleTestNotifications();
+      await _notificationService.registerNotifications([
+        testEveryMinuteNotification,
+      ]);
       setState(() => _testNotificationsRunning = true);
       _showAlert('Success', 'Test notifications started (every minute)');
     } catch (e) {

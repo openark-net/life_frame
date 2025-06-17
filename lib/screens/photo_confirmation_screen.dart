@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
+
+import 'package:talker/talker.dart';
 
 class PhotoConfirmationScreen extends StatefulWidget {
   final ui.Image photo;
@@ -15,11 +19,13 @@ class PhotoConfirmationScreen extends StatefulWidget {
 class _PhotoConfirmationScreenState extends State<PhotoConfirmationScreen> {
   Uint8List? _imageBytes;
   bool _isLoading = true;
+  late Talker talker;
 
   @override
   void initState() {
     super.initState();
     _convertImageToBytes();
+    talker = Get.find<Talker>();
   }
 
   Future<void> _convertImageToBytes() async {
@@ -41,10 +47,12 @@ class _PhotoConfirmationScreenState extends State<PhotoConfirmationScreen> {
   }
 
   void _onKeepPhoto() {
+    talker.info("Chose to keep photo");
     Navigator.of(context).pop(true);
   }
 
   void _onRetakePhoto() {
+    talker.info("Chose to retake photo");
     Navigator.of(context).pop(false);
   }
 

@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
+import 'package:get/get.dart';
+import 'package:talker/talker.dart';
 import '../models/frame_photos.dart';
 
 class SimpleCameraScreen extends StatefulWidget {
@@ -20,10 +22,12 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
   bool _isProcessing = false;
   bool _isFrontCamera = false;
   String _statusMessage = 'Position your shot';
+  late Talker talker;
 
   @override
   void initState() {
     super.initState();
+    talker = Get.find<Talker>();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _initializeCamera();
   }
@@ -33,11 +37,13 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
       _cameras = await availableCameras();
       if (_cameras == null || _cameras!.isEmpty) {
         _showError('No cameras available');
+        talker.error("No cameras available!");
         return;
       }
 
       await _setupCamera(isBack: true);
-    } catch (e) {
+    } catch (e, st) {
+      talker.handle(e, st, "Failed to initialize camera!");
       _showError('Failed to initialize camera');
     }
   }
@@ -78,6 +84,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
   }
 
   Future<ui.Image> _convertXFileToImage(XFile xFile) async {
+    talker.debug("Converting XFile to image");
     final Uint8List bytes = await xFile.readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(
       bytes,
@@ -109,7 +116,12 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
         _backPhoto = image;
         await _switchToFrontCamera();
       }
-    } catch (e) {
+    } catch (e, st) {
+      talker.handle(
+        e,
+        st,
+        "Failed to capture photo isFrontCamera=$_isFrontCamera",
+      );
       _showError('Failed to capture photo');
       setState(() => _isProcessing = false);
     }
@@ -119,12 +131,18 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     await _controller?.dispose();
     await _setupCamera(isBack: false);
     setState(() => _isProcessing = false);
+    talker.debug("Switched to front camera");
   }
 
   void _completeCapture() {
     if (_backPhoto != null && _frontPhoto != null) {
       final framePhotos = FramePhotos(front: _frontPhoto!, back: _backPhoto!);
+      talker.info("Completed capture of both photos!");
       Navigator.of(context).pop(framePhotos);
+    } else {
+      talker.warning(
+        "Tried to complete capture without both photos! _backPhoto=$_backPhoto, _frontPhoto=$_frontPhoto",
+      );
     }
   }
 

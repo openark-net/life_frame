@@ -21,10 +21,7 @@ class TabDefinition {
 class TabBarWidget extends StatefulWidget {
   final List<TabDefinition> tabs;
 
-  const TabBarWidget({
-    super.key,
-    required this.tabs,
-  });
+  const TabBarWidget({super.key, required this.tabs});
 
   @override
   State<TabBarWidget> createState() => _TabBarWidgetState();
