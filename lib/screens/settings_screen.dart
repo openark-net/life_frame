@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:life_frame/theme.dart';
-import 'package:life_frame/widgets/common/content_card.dart';
 import 'package:life_frame/widgets/life_frame_logo.dart';
 import '../controllers/settings_controller.dart';
+import '../models/settings_option.dart';
 import '../openark_theme.dart';
 import '../services/notification_service.dart';
-import '../widgets/permissions_checker.dart';
 import '../widgets/background/AbstractBackground.dart';
-import 'about_screen.dart';
+import '../widgets/settings/settings_list.dart';
+import 'settings/about_screen.dart';
+import 'settings/submit_a_bug.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -19,6 +19,44 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final settingsController = Get.find<SettingsController>();
     final notifications = Get.find<NotificationService>();
+
+    final List<SettingsOption> settingsOptions = [
+      SettingsOption(
+        title: 'Daily Notifications',
+        icon: CupertinoIcons.bell_fill,
+        iconColor: CupertinoColors.white,
+        iconBackgroundColor: CupertinoColors.systemRed,
+        trailing: Obx(
+          () => CupertinoSwitch(
+            value: settingsController.notificationsEnabled,
+            onChanged: (bool value) {
+              settingsController.setNotificationsEnabled(value);
+              if (value) {
+                notifications.enableNotifications();
+              } else {
+                notifications.cancelAllNotifications();
+              }
+            },
+          ),
+        ),
+      ),
+      SettingsOption(
+        title: 'About OpenArk',
+        icon: CupertinoIcons.app,
+        iconColor: CupertinoColors.white,
+        iconBackgroundColor: OpenArkColors.primary,
+        isLink: true,
+        onTap: () => Get.to(() => const AboutScreen()),
+      ),
+      SettingsOption(
+        title: 'Submit a Bug',
+        icon: CupertinoIcons.ant,
+        iconColor: CupertinoColors.white,
+        iconBackgroundColor: CupertinoColors.systemOrange,
+        isLink: true,
+        onTap: () => Get.to(() => const SubmitABugScreen()),
+      ),
+    ];
 
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
@@ -31,71 +69,8 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 40),
                 LifeFrameLogo(),
-
                 const SizedBox(height: 60),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: CupertinoListSection.insetGrouped(
-                    backgroundColor: Colors.transparent,
-                    children: [
-                      Obx(
-                        () => CupertinoListTile(
-                          leading: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: CupertinoColors.systemRed,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Icon(
-                              CupertinoIcons.bell_fill,
-                              color: CupertinoColors.white,
-                              size: 16,
-                            ),
-                          ),
-                          title: const Text('Daily Notifications'),
-                          trailing: CupertinoSwitch(
-                            value: settingsController.notificationsEnabled,
-                            onChanged: (bool value) {
-                              settingsController.setNotificationsEnabled(value);
-                              if (value) {
-                                notifications.enableNotifications();
-                              } else {
-                                notifications.cancelAllNotifications();
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                      CupertinoListTile(
-                        leading: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: OpenArkColors.primary,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.app,
-                            color: CupertinoColors.white,
-                            size: 16,
-                          ),
-                        ),
-                        title: const Text('About OpenArk'),
-                        trailing: const Icon(
-                          CupertinoIcons.chevron_right,
-                          color: OpenArkColors.primary,
-                          size: 16,
-                        ),
-                        onTap: () {
-                          Get.to(() => const SupportDeveloperScreen());
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
+                SettingsList(options: settingsOptions),
                 const Spacer(),
               ],
             ),

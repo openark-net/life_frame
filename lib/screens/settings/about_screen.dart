@@ -1,22 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:talker/talker.dart';
-import '../openark_theme.dart';
-import '../widgets/about/support_card.dart';
-import '../widgets/about/openark_logo.dart';
-import '../widgets/about/support_title.dart';
-import '../widgets/about/website_badge.dart';
-import '../widgets/about/donation_buttons.dart';
-import '../widgets/about/rainbow_background.dart';
+import '../../openark_theme.dart';
+import '../../widgets/about/support_card.dart';
+import '../../widgets/about/openark_logo.dart';
+import '../../widgets/about/support_title.dart';
+import '../../widgets/about/website_badge.dart';
+import '../../widgets/about/donation_buttons.dart';
+import '../../widgets/about/rainbow_background.dart';
 
-class SupportDeveloperScreen extends StatefulWidget {
-  const SupportDeveloperScreen({super.key});
+class AboutScreen extends StatefulWidget {
+  const AboutScreen({super.key});
 
   @override
-  State<SupportDeveloperScreen> createState() => _SupportDeveloperScreenState();
+  State<AboutScreen> createState() => _AboutScreenState();
 }
 
-class _SupportDeveloperScreenState extends State<SupportDeveloperScreen> {
+class _AboutScreenState extends State<AboutScreen> {
   String selectedAmount = '1';
 
   @override
