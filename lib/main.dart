@@ -5,6 +5,7 @@ import 'package:life_frame/services/location.dart';
 import 'package:life_frame/services/permissions_service.dart';
 import 'package:life_frame/theme.dart';
 import 'package:life_frame/widgets/permissions_checker.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 import 'services/storage_service.dart';
 import 'services/notification_service.dart';
 import 'controllers/photo_journal_controller.dart';
@@ -13,6 +14,9 @@ import 'controllers/settings_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final talker = TalkerFlutter.init();
+  Get.put<Talker>(talker);
 
   await Get.putAsync(() async {
     final service = StorageService();
