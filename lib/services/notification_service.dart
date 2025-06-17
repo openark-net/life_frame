@@ -11,18 +11,19 @@ class NotificationService extends GetxService {
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
-  late final PermissionsService _permissionsService;
-  late final SettingsController _settingsController;
+  PermissionsService? _permissionsService;
+  SettingsController? _settingsController;
 
   static const String channelId = 'life_frame_daily';
   static const String channelName = 'Daily Photo Reminder';
   static const String channelDescription =
       'Reminds you to take your daily photo';
 
+  @override
   Future<NotificationService> onInit() async {
     super.onInit();
-    _permissionsService = Get.find<PermissionsService>();
-    _settingsController = Get.find<SettingsController>();
+    _permissionsService ??= Get.find<PermissionsService>();
+    _settingsController ??= Get.find<SettingsController>();
 
     if (!await _shouldDoNotifications()) {
       return this;
@@ -30,7 +31,7 @@ class NotificationService extends GetxService {
 
     await _initializeNotifications();
     await _initializeTimezone();
-    await _permissionsService.requestNotificationPermissions();
+    await _permissionsService!.requestNotificationPermissions();
     await scheduleDailyNotification(time: const TimeOfDay(hour: 9, minute: 00));
     return this;
   }
@@ -65,10 +66,10 @@ class NotificationService extends GetxService {
   }
 
   Future<bool> _shouldDoNotifications() async {
-    if (!_settingsController.notificationsEnabled) {
+    if (!_settingsController!.notificationsEnabled) {
       return false;
     }
-    return await _permissionsService.areNotificationsEnabled();
+    return await _permissionsService!.areNotificationsEnabled();
   }
 
   Future<void> scheduleTestNotifications() async {
