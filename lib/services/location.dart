@@ -8,7 +8,7 @@ class LocationService extends GetxService {
   Position? _cachedPosition;
   DateTime? _lastLocationUpdate;
   Timer? _backgroundLocationTimer;
-  late final Talker _talker;
+  Talker? _talker;
 
   static const Duration _locationUpdateInterval = Duration(minutes: 5);
   static const Duration _locationCacheTimeout = Duration(minutes: 10);
@@ -22,7 +22,7 @@ class LocationService extends GetxService {
   @override
   Future<void> onInit() async {
     super.onInit();
-    _talker = Get.find<Talker>();
+    _talker ??= Get.find<Talker>();
     await _initializeLocationService();
   }
 
@@ -33,11 +33,11 @@ class LocationService extends GetxService {
   }
 
   Future<void> _initializeLocationService() async {
-    _talker.info('Initializing location service');
+    _talker!.info('Initializing location service');
     await _requestLocationPermissions();
     await _fetchLocationInBackground();
     _startBackgroundLocationUpdates();
-    _talker.info('Location service initialized');
+    _talker!.info('Location service initialized');
   }
 
   Future<bool> _requestLocationPermissions() async {
@@ -45,7 +45,7 @@ class LocationService extends GetxService {
       LocationPermission permission = await Geolocator.checkPermission();
 
       if (permission == LocationPermission.denied) {
-        _talker.info('Requesting location permission');
+        _talker!.info('Requesting location permission');
         permission = await Geolocator.requestPermission();
       }
 
@@ -53,14 +53,14 @@ class LocationService extends GetxService {
           permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always;
 
-      _talker.info('Location permission result', {
+      _talker!.info('Location permission result', {
         'permission': permission.toString(),
         'granted': granted,
       });
 
       return granted;
     } catch (e, stackTrace) {
-      _talker.handle(e, stackTrace, 'Error requesting location permissions');
+      _talker!.handle(e, stackTrace, 'Error requesting location permissions');
       return false;
     }
   }
@@ -69,7 +69,7 @@ class LocationService extends GetxService {
     try {
       final hasPermission = await _requestLocationPermissions();
       if (!hasPermission) {
-        _talker.warning('Location permission denied, skipping fetch');
+        _talker!.warning('Location permission denied, skipping fetch');
         return;
       }
 
@@ -81,13 +81,13 @@ class LocationService extends GetxService {
       );
 
       _lastLocationUpdate = DateTime.now();
-      _talker.info('Location cached successfully', {
+      _talker!.info('Location cached successfully', {
         'latitude': _cachedPosition?.latitude,
         'longitude': _cachedPosition?.longitude,
         'accuracy': _cachedPosition?.accuracy,
       });
     } catch (e, stackTrace) {
-      _talker.handle(e, stackTrace, 'Error fetching location in background');
+      _talker!.handle(e, stackTrace, 'Error fetching location in background');
     }
   }
 
@@ -99,16 +99,16 @@ class LocationService extends GetxService {
 
   Future<Position?> getCurrentLocationWithFallback() async {
     if (hasValidCachedLocation) {
-      _talker.info('Using valid cached location');
+      _talker!.info('Using valid cached location');
       return _cachedPosition;
     }
 
-    _talker.info('Cached location invalid, fetching fresh location');
+    _talker!.info('Cached location invalid, fetching fresh location');
     try {
       await _fetchLocationInBackground();
       return _cachedPosition;
     } catch (e, stackTrace) {
-      _talker.handle(e, stackTrace, 'Fallback location fetch failed');
+      _talker!.handle(e, stackTrace, 'Fallback location fetch failed');
       return _cachedPosition;
     }
   }
