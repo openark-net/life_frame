@@ -1,4 +1,3 @@
-// lib/widgets/gallery/gallery_list.dart
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../controllers/daily_entry_controller.dart';

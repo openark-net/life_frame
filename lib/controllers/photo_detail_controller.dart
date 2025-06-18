@@ -101,8 +101,7 @@ class PhotoDetailController extends GetxController
   }
 
   Future<List<DailyEntry>> _getAllEntriesWithPhotos() async {
-    return await photoJournalController.list();
-    ;
+    return (await photoJournalController.list()).results;
   }
 
   Future<void> _preloadInitialImages() async {

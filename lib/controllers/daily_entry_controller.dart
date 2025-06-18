@@ -9,6 +9,7 @@ import 'package:talker/talker.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:life_frame/models/daily_entry.dart';
+import 'package:life_frame/models/pagination_result.dart';
 
 class DailyEntryController extends GetxController {
   static const _tableName = 'daily_entry';
@@ -143,8 +144,32 @@ class DailyEntryController extends GetxController {
     return streak;
   }
 
-  Future<List<DailyEntry>> list({int? cursor, int pageSize = 10}) async {
+  Future<int> _getTotalCount() async {
+    final result = await _db.rawQuery('SELECT COUNT(*) FROM $_tableName');
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<bool> _hasMoreEntries(int? afterTimestamp) async {
+    if (afterTimestamp == null) return false;
+
+    final result = await _db.rawQuery(
+      'SELECT COUNT(*) FROM $_tableName WHERE timestamp < ?',
+      [afterTimestamp],
+    );
+    return (Sqflite.firstIntValue(result) ?? 0) > 0;
+  }
+
+  Future<PaginationResult<DailyEntry>> list({
+    int? cursor,
+    int pageSize = 10,
+  }) async {
     try {
+      _talker.debug('Fetching entries: cursor=$cursor, pageSize=$pageSize');
+
+      // Get total count
+      final total = await _getTotalCount();
+
+      // Build query
       final whereClause = cursor != null ? 'WHERE timestamp < ?' : '';
       final args = <dynamic>[];
       if (cursor != null) args.add(cursor);
@@ -158,11 +183,30 @@ class DailyEntryController extends GetxController {
       ''', args);
 
       final entries = rows.map(DailyEntry.fromMap).toList(growable: false);
-      _talker.info('Loaded ${entries.length} entries (cursor=$cursor)');
-      return entries;
+
+      // Determine pagination flags
+      final hasPreviousPage = cursor != null;
+      final hasNextPage = entries.isNotEmpty
+          ? await _hasMoreEntries(entries.last.timestamp.millisecondsSinceEpoch)
+          : false;
+
+      final result = PaginationResult<DailyEntry>(
+        results: entries,
+        hasNextPage: hasNextPage,
+        hasPreviousPage: hasPreviousPage,
+        total: total,
+      );
+
+      _talker.info('Loaded pagination result: ${result.toString()}');
+      return result;
     } catch (e, st) {
-      _talker.handle(e, st, 'Error listing daily entries');
-      return [];
+      _talker.handle(e, st, 'Error creating paginated daily entries list');
+      return const PaginationResult<DailyEntry>(
+        results: [],
+        hasNextPage: false,
+        hasPreviousPage: false,
+        total: 0,
+      );
     }
   }
 
