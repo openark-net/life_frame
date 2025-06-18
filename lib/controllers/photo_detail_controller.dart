@@ -101,17 +101,8 @@ class PhotoDetailController extends GetxController
   }
 
   Future<List<DailyEntry>> _getAllEntriesWithPhotos() async {
-    final allEntries = photoJournalController.allEntries
-        .where(
-          (entry) =>
-              entry.photoPath != null &&
-              entry.photoPath!.isNotEmpty &&
-              File(entry.photoPath!).existsSync(),
-        )
-        .toList();
-
-    allEntries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return allEntries;
+    return await photoJournalController.list();
+    ;
   }
 
   Future<void> _preloadInitialImages() async {

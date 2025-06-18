@@ -47,7 +47,7 @@ class DailyEntryController extends GetxController {
   }
 
   /// 1) insertDailyEntry
-  Future<void> insertDailyEntry(DailyEntry entry) async {
+  Future<bool> insertDailyEntry(DailyEntry entry) async {
     try {
       await _db.insert(
         _tableName,
@@ -55,8 +55,10 @@ class DailyEntryController extends GetxController {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
       _talker.info('Inserted entry for ${entry.timestamp.toIso8601String()}');
+      return true;
     } catch (e, st) {
       _talker.handle(e, st, 'Error inserting daily entry');
+      return false;
     }
   }
 

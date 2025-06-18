@@ -6,6 +6,7 @@ import 'package:life_frame/models/frame_photos.dart';
 import 'package:life_frame/services/image_filesystem.dart';
 import 'package:life_frame/services/location.dart';
 import '../controllers/daily_entry_controller.dart';
+import '../models/daily_entry.dart';
 import '../screens/simple_camera_screen.dart';
 import '../screens/photo_confirmation_screen.dart';
 import '../services/photo_stitching_service.dart';
@@ -51,18 +52,21 @@ class DailyPhotoCaptureService {
 
       _talker.info('Image saved to filesystem', {'photoPath': photoPath});
 
-      final newEntry = await _controller.savePhotoEntry(
+      final entry = DailyEntry(
+        timestamp: DateTime.now(),
         photoPath: photoPath,
         latitude: result.position?.latitude ?? 0.0,
         longitude: result.position?.longitude ?? 0.0,
+        locationName: 'todo',
       );
 
-      if (newEntry != null) {
-        _talker.info('Daily photo captured and saved successfully', {
-          'photoPath': photoPath,
-          'lat': newEntry.latitude,
-          'lng': newEntry.longitude,
-        });
+      final success = await _controller.insertDailyEntry(entry);
+
+      if (success) {
+        _talker.info(
+          'Daily photo captured and saved successfully',
+          entry.toMap(),
+        );
         _showSuccessSnackbar('Daily photo captured successfully!');
         return true;
       } else {
