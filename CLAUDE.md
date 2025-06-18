@@ -132,4 +132,10 @@ You can get the Talker instance with:
 Talker talker = Get.find<Talker>();
 ```
 
+Handle exceptions with
+```dart 
+} catch (e, st) {
+_talker.handle(e, st, 'ahhhh a problem!');
+```
+
 There is no talker.good function.

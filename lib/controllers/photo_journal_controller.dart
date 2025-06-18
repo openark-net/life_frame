@@ -1,211 +1,163 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:get/get.dart';
-import '../models/daily_entry.dart';
-import '../services/storage_service.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:talker/talker.dart';
+import 'package:sqflite/sqflite.dart';
+
+import 'package:life_frame/models/daily_entry.dart';
 
 class PhotoJournalController extends GetxController {
-  final StorageService _storageService = Get.find<StorageService>();
-
-  final RxBool _hasTodayPhoto = false.obs;
-  final RxBool _isLoading = false.obs;
-  final Rx<DailyEntry?> _todayEntry = Rx<DailyEntry?>(null);
-  final RxList<DailyEntry> _allEntries = <DailyEntry>[].obs;
-  final RxList<DailyEntry> _paginatedEntries = <DailyEntry>[].obs;
-  final RxInt _totalPhotosCount = 0.obs;
-  final RxInt _currentPage = 0.obs;
-  final RxBool _hasMorePages = true.obs;
-  final RxBool _isLoadingMore = false.obs;
-
-  static const int _pageSize = 30;
-
-  bool get hasTodayPhoto => _hasTodayPhoto.value;
-  bool get isLoading => _isLoading.value;
-  DailyEntry? get todayEntry => _todayEntry.value;
-  List<DailyEntry> get allEntries => _allEntries;
-  List<DailyEntry> get paginatedEntries => _paginatedEntries;
-  bool get hasMorePages => _hasMorePages.value;
-  bool get isLoadingMore => _isLoadingMore.value;
+  static const _tableName = 'daily_entry';
+  late final Database _db;
+  final Talker _talker = Get.find<Talker>();
 
   @override
   void onInit() {
     super.onInit();
-    _checkTodayPhoto();
-    _loadInitialEntries();
-    _loadAllEntries();
+    _initializeDatabase();
   }
 
-  Future<void> _checkTodayPhoto() async {
+  Future<void> _initializeDatabase() async {
     try {
-      _isLoading.value = true;
-      final hasPhoto = await _storageService.hasTodayPhoto();
-      _hasTodayPhoto.value = hasPhoto;
-
-      if (hasPhoto) {
-        _todayEntry.value = await _storageService.getTodayEntry();
-      } else {
-        _todayEntry.value = null;
-      }
-    } catch (e) {
-      print('PhotoJournalController: Error checking today photo: $e');
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> _loadAllEntries() async {
-    try {
-      final entries = await _storageService.getAllEntries();
-      _allEntries.value = entries;
-      _totalPhotosCount.value = entries.length;
-    } catch (e) {
-      print('PhotoJournalController: Error loading all entries: $e');
-    }
-  }
-
-  Future<void> _loadInitialEntries() async {
-    try {
-      _isLoading.value = true;
-      _currentPage.value = 0;
-
-      final entries = await _storageService.getEntriesPage(0, _pageSize);
-      final totalCount = await _storageService.getTotalEntriesCount();
-
-      _paginatedEntries.value = entries;
-      _totalPhotosCount.value = totalCount;
-      _hasMorePages.value =
-          entries.length == _pageSize && totalCount > _pageSize;
-    } catch (e) {
-      print('PhotoJournalController: Error loading initial entries: $e');
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> loadMoreEntries() async {
-    if (_isLoadingMore.value || !_hasMorePages.value) return;
-
-    try {
-      _isLoadingMore.value = true;
-      final nextPage = _currentPage.value + 1;
-
-      final newEntries = await _storageService.getEntriesPage(
-        nextPage,
-        _pageSize,
+      final docsDir = await getApplicationDocumentsDirectory();
+      final path = join(docsDir.path, 'life_frame.db');
+      _db = await openDatabase(
+        path,
+        version: 1,
+        onCreate: (db, version) async {
+          await db.execute('''
+            CREATE TABLE $_tableName (
+              timestamp   INTEGER PRIMARY KEY,
+              photoPath   TEXT    NOT NULL,
+              location_name TEXT  NOT NULL,
+              lat         REAL    NOT NULL,
+              lng         REAL    NOT NULL
+            )
+          ''');
+          _talker.info('Created table $_tableName');
+        },
       );
-
-      if (newEntries.isNotEmpty) {
-        _paginatedEntries.addAll(newEntries);
-        _currentPage.value = nextPage;
-        _hasMorePages.value = newEntries.length == _pageSize;
-      } else {
-        _hasMorePages.value = false;
-      }
-    } catch (e) {
-      print('PhotoJournalController: Error loading more entries: $e');
-    } finally {
-      _isLoadingMore.value = false;
+      _talker.info('Database opened at $path');
+    } catch (e, st) {
+      _talker.handle(e, st, 'Failed to open/init database');
     }
   }
 
-  Future<void> refreshEntries() async {
-    await _loadInitialEntries();
+  /// 1) insertDailyEntry
+  Future<void> insertDailyEntry(DailyEntry entry) async {
+    try {
+      await _db.insert(
+        _tableName,
+        entry.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      _talker.info('Inserted entry for ${entry.timestamp.toIso8601String()}');
+    } catch (e, st) {
+      _talker.handle(e, st, 'Error inserting daily entry');
+    }
   }
 
-  Future<DailyEntry?> savePhotoEntry({
-    required String photoPath,
-    required double latitude,
-    required double longitude,
-  }) async {
+  /// 2) hasPhotoToday
+  Future<bool> hasPhotoToday() async {
     try {
-      _isLoading.value = true;
-
       final now = DateTime.now();
-      final entry = DailyEntry(
-        date: DailyEntry.formatDate(now),
-        photoPath: photoPath,
-        latitude: latitude,
-        longitude: longitude,
-        timestamp: now,
+      final startOfDay = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).millisecondsSinceEpoch;
+      final endOfDay = startOfDay + Duration(days: 1).inMilliseconds;
+
+      final count = Sqflite.firstIntValue(
+        await _db.rawQuery(
+          '''
+          SELECT COUNT(*) FROM $_tableName
+          WHERE timestamp >= ? AND timestamp < ?
+        ''',
+          [startOfDay, endOfDay],
+        ),
       );
-
-      final success = await _storageService.saveDailyEntry(entry);
-
-      if (success) {
-        _hasTodayPhoto.value = true;
-        _todayEntry.value = entry;
-        await _loadAllEntries();
-        await refreshEntries();
-        return entry;
-      }
-    } catch (e) {
-      print('PhotoJournalController: Error saving photo entry: $e');
-    } finally {
-      _isLoading.value = false;
-    }
-    return null;
-  }
-
-  Future<bool> deleteEntry(String date) async {
-    try {
-      _isLoading.value = true;
-      final success = await _storageService.deleteDailyEntry(date);
-
-      if (success) {
-        if (date == DailyEntry.getTodayKey()) {
-          _hasTodayPhoto.value = false;
-          _todayEntry.value = null;
-        }
-        await _loadAllEntries();
-        await refreshEntries();
-      }
-
-      return success;
-    } catch (e) {
-      print('PhotoJournalController: Error deleting entry: $e');
+      final result = (count ?? 0) > 0;
+      _talker.info('hasPhotoToday => $result');
+      return result;
+    } catch (e, st) {
+      _talker.handle(e, st, 'Error checking hasPhotoToday');
       return false;
-    } finally {
-      _isLoading.value = false;
     }
   }
 
-  Future<bool> deleteTodayEntry() async {
-    final today = DailyEntry.getTodayKey();
-    return await deleteEntry(today);
-  }
+  /// 3) getStreak
+  ///
+  /// Count consecutive days with an entry. If today is missing, starts from yesterday.
+  Future<int> getStreak() async {
+    try {
+      final now = DateTime.now();
+      final todayStart = DateTime(now.year, now.month, now.day);
+      // determine whether to include today in the streak
+      final includeToday = await hasPhotoToday();
+      DateTime cursorDay = includeToday
+          ? todayStart
+          : todayStart.subtract(Duration(days: 1));
 
-  int getStreak() {
-    if (_allEntries.isEmpty) return 0;
+      int streak = 0;
+      while (true) {
+        final startMs = cursorDay.millisecondsSinceEpoch;
+        final endMs = startMs + Duration(days: 1).inMilliseconds;
 
-    final sortedEntries = List<DailyEntry>.from(_allEntries)
-      ..sort((a, b) => b.date.compareTo(a.date));
+        final count = Sqflite.firstIntValue(
+          await _db.rawQuery(
+            '''
+            SELECT COUNT(*) FROM $_tableName
+            WHERE timestamp >= ? AND timestamp < ?
+          ''',
+            [startMs, endMs],
+          ),
+        );
 
-    int streak = 0;
-    DateTime checkDate = DateTime.now();
-
-    // Check if we have a photo for today
-    final todayKey = DailyEntry.getTodayKey();
-    final hasTodayPhoto = sortedEntries.any((entry) => entry.date == todayKey);
-
-    // If no photo today, start counting from yesterday
-    if (!hasTodayPhoto) {
-      checkDate = checkDate.subtract(const Duration(days: 1));
-    }
-
-    for (final entry in sortedEntries) {
-      final entryDate = DateTime.parse('${entry.date}T00:00:00');
-      final expectedDate = DateTime(
-        checkDate.year,
-        checkDate.month,
-        checkDate.day,
-      );
-
-      if (entryDate.isAtSameMomentAs(expectedDate)) {
-        streak++;
-        checkDate = checkDate.subtract(const Duration(days: 1));
-      } else {
-        break;
+        if ((count ?? 0) > 0) {
+          streak++;
+          cursorDay = cursorDay.subtract(Duration(days: 1));
+        } else {
+          break;
+        }
       }
+      _talker.info('Current streak: $streak');
+      return streak;
+    } catch (e, st) {
+      _talker.handle(e, st, 'Error computing streak');
+      return 0;
     }
+  }
 
-    return streak;
+  /// 4) list(cursor, pageSize)
+  ///
+  /// Returns the newest entries first. If [cursor] is given, returns entries
+  /// with timestamp < cursor. Useful for infinite‐scroll pagination.
+  Future<List<DailyEntry>> list({int? cursor, int pageSize = 10}) async {
+    try {
+      final whereClause = cursor != null ? 'WHERE timestamp < ?' : '';
+      final args = <dynamic>[];
+      if (cursor != null) args.add(cursor);
+      args.add(pageSize);
+
+      final rows = await _db.rawQuery('''
+        SELECT * FROM $_tableName
+        $whereClause
+        ORDER BY timestamp DESC
+        LIMIT ?
+      ''', args);
+
+      final entries = rows
+          .map((r) => DailyEntry.fromMap(r))
+          .toList(growable: false);
+      _talker.info('Loaded ${entries.length} entries (cursor=$cursor)');
+      return entries;
+    } catch (e, st) {
+      _talker.handle(e, st, 'Error listing daily entries');
+      return [];
+    }
   }
 }
