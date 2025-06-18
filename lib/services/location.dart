@@ -76,7 +76,7 @@ class LocationService extends GetxService {
       _cachedPosition = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
           accuracy: LocationAccuracy.high,
-          timeLimit: const Duration(seconds: 15),
+          timeLimit: const Duration(seconds: 5),
         ),
       );
 

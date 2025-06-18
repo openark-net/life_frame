@@ -10,7 +10,10 @@ import '../models/daily_entry.dart';
 import '../screens/capture/camera_screen.dart';
 import '../screens/capture/photo_confirmation_screen.dart';
 import '../services/photo_stitching_service.dart';
+import '../widgets/capture/location_selection_modal.dart';
 import 'package:talker/talker.dart';
+
+import '../utils/location_formatter.dart';
 
 class DailyPhotoCaptureService {
   final DailyEntryController _controller = Get.find<DailyEntryController>();
@@ -52,12 +55,14 @@ class DailyPhotoCaptureService {
 
       _talker.info('Image saved to filesystem', {'photoPath': photoPath});
 
+      final locationName = result.locationName ?? 'Unknown Location';
+
       final entry = DailyEntry(
         timestamp: DateTime.now(),
         photoPath: photoPath,
         latitude: result.position?.latitude ?? 0.0,
         longitude: result.position?.longitude ?? 0.0,
-        locationName: 'todo',
+        locationName: locationName,
       );
 
       final success = await _controller.insertDailyEntry(entry);
@@ -96,11 +101,23 @@ class DailyPhotoCaptureService {
       }
 
       final position = await _getLocationInstantly();
+      var locationName = await getFormattedLocation(position);
+
+      if (locationName == null) {
+        _talker.info('Location name is null, opening location selection modal');
+        locationName = await _showLocationSelectionModal(context);
+        if (locationName == null) {
+          _talker.info('User cancelled location selection');
+        } else {
+          _talker.info('User provided location name', {
+            'locationName': locationName,
+          });
+        }
+      }
 
       final ui.Image? photo = await _stitchingService.stitchPhotos(
         framePhotos: framePhotos,
-        latitude: position?.latitude,
-        longitude: position?.longitude,
+        locationName: locationName ?? '',
       );
 
       if (photo == null) {
@@ -121,7 +138,7 @@ class DailyPhotoCaptureService {
         _talker.info('User confirmed photo, capture successful', {
           'attempts': attemptCount,
         });
-        return _CaptureResult.success(photo, position);
+        return _CaptureResult.success(photo, position, locationName);
       }
 
       _talker.info('User chose to retake photo, continuing loop');
@@ -173,6 +190,19 @@ class DailyPhotoCaptureService {
     return position;
   }
 
+  Future<String?> _showLocationSelectionModal(BuildContext context) async {
+    _talker.info('Showing location selection modal');
+
+    final result = await Navigator.of(context).push<String>(
+      CupertinoPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => const LocationSelectionModal(),
+      ),
+    );
+
+    return result;
+  }
+
   void _showSuccessSnackbar(String message) {
     Get.snackbar(
       'Success',
@@ -200,13 +230,18 @@ class _CaptureResult {
   final bool success;
   final ui.Image? photo;
   final Position? position;
+  final String? locationName;
 
-  _CaptureResult._(this.success, this.photo, this.position);
+  _CaptureResult._(this.success, this.photo, this.position, this.locationName);
 
-  factory _CaptureResult.success(ui.Image photo, Position? position) =>
-      _CaptureResult._(true, photo, position);
+  factory _CaptureResult.success(
+    ui.Image photo,
+    Position? position,
+    String? locationName,
+  ) => _CaptureResult._(true, photo, position, locationName);
 
-  factory _CaptureResult.cancelled() => _CaptureResult._(false, null, null);
+  factory _CaptureResult.cancelled() =>
+      _CaptureResult._(false, null, null, null);
 
-  factory _CaptureResult.failed() => _CaptureResult._(false, null, null);
+  factory _CaptureResult.failed() => _CaptureResult._(false, null, null, null);
 }

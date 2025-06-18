@@ -17,39 +17,21 @@ class PhotoStitchingService {
 
   Future<ui.Image?> stitchPhotos({
     required FramePhotos framePhotos,
-    double? latitude,
-    double? longitude,
+    required String locationName,
   }) async {
     try {
-      final locationText = await _getLocationText(latitude, longitude);
       final dateText = formatDateForDisplay(DateTime.now());
 
       final stitchedImage = await _createStitchedImage(
         backImage: framePhotos.back,
         frontImage: framePhotos.front,
         dateText: dateText,
-        locationText: locationText,
+        locationText: locationName,
       );
       return stitchedImage;
     } catch (e, stackTrace) {
       _talker.handle(e, stackTrace, 'Photo stitching failed');
       return null;
-    }
-  }
-
-  Future<String> _getLocationText(double? latitude, double? longitude) async {
-    if (latitude == null || longitude == null) {
-      _talker.info('No location coordinates provided');
-      return "";
-    }
-
-    try {
-      final locationText = await getFormattedLocation(latitude, longitude);
-      _talker.info('Location text generated', {'locationText': locationText});
-      return locationText;
-    } catch (e, stackTrace) {
-      _talker.handle(e, stackTrace, 'Failed to get formatted location');
-      return "";
     }
   }
 

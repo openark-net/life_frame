@@ -34,13 +34,11 @@ class _LocationSelectionModalState extends State<LocationSelectionModal> {
   }
 
   void _onCancel() {
-    _talker.info('Location selection cancelled');
     Navigator.of(context).pop(null);
   }
 
   void _onSave() {
     final location = _locationController.text.trim();
-    _talker.info('Location selection saved', {'location': location});
     Navigator.of(context).pop(location.isEmpty ? null : location);
   }
 
@@ -105,7 +103,7 @@ class _LocationSelectionModalState extends State<LocationSelectionModal> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'Examples: "Central Park, NYC", "Home", "Coffee shop downtown"',
+                'Examples: "Vancouver Island", "Tofino", "Strathcona", Home',
                 style: TextStyle(
                   fontSize: 13,
                   color: CupertinoColors.secondaryLabel,

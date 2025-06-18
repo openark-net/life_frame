@@ -1,4 +1,7 @@
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:talker/talker.dart';
 
 /// Converts latitude and longitude coordinates to a formatted location string.
 /// Returns a string in the format "City, Province/State" using short province codes.
@@ -11,22 +14,36 @@ import 'package:geocoding/geocoding.dart';
 ///
 /// Returns:
 /// - A formatted string like "City, Province" on success
-/// - "Unknown Location" if geocoding fails
-/// - "City, Unknown" if only city is available
-/// - "Unknown, Province" if only province is available
-Future<String> getFormattedLocation(double latitude, double longitude) async {
+/// - Just "City" if only city is available
+/// - Just "Province" if only province is available
+/// - null if geocoding fails or no location data is available
+Future<String?> getFormattedLocation(Position? position) async {
+  final Talker talker = Get.find<Talker>();
+
+  if (position == null) {
+    return null;
+  }
+
   try {
+    talker.debug(
+      'Getting formatted location for coordinates: ${position.latitude}, ${position.longitude}',
+    );
+
     // Perform reverse geocoding to get address information
     List<Placemark> placemarks = await placemarkFromCoordinates(
-      latitude,
-      longitude,
+      position.latitude,
+      position.longitude,
     );
 
     if (placemarks.isEmpty) {
-      return 'Unknown Location';
+      talker.warning(
+        'No placemarks found for coordinates: ${position.latitude}, ${position.longitude}',
+      );
+      return null;
     }
 
     final placemark = placemarks.first;
+    talker.debug('Found placemark: ${placemark.toString()}');
 
     // Extract city (locality) and province/state (administrativeArea)
     final city = placemark.locality ?? '';
@@ -37,17 +54,28 @@ Future<String> getFormattedLocation(double latitude, double longitude) async {
 
     // Format the location string based on available data
     if (city.isNotEmpty && shortProvince.isNotEmpty) {
-      return '$city, $shortProvince';
+      final result = '$city, $shortProvince';
+      talker.debug('Formatted location: $result');
+      return result;
     } else if (city.isNotEmpty) {
-      return '$city, Unknown';
+      talker.debug('Only city available: $city');
+      return city;
     } else if (shortProvince.isNotEmpty) {
-      return 'Unknown, $shortProvince';
+      talker.debug('Only province available: $shortProvince');
+      return shortProvince;
     } else {
-      return 'Unknown Location';
+      talker.warning(
+        'No city or province data available for coordinates:  ${position.latitude}, ${position.longitude}',
+      );
+      return null;
     }
-  } catch (e) {
-    print('Error getting formatted location: $e');
-    return 'Unknown Location';
+  } catch (e, st) {
+    talker.handle(
+      e,
+      st,
+      'Error getting formatted location for coordinates: ${position.latitude}, ${position.longitude}',
+    );
+    return null;
   }
 }
 

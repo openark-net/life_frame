@@ -90,21 +90,13 @@ class GalleryImage extends StatelessWidget {
                     style: CupertinoTheme.of(context).textTheme.textStyle
                         .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
-                  FutureBuilder<String>(
-                    future: getFormattedLocation(
-                      entry.latitude,
-                      entry.longitude,
-                    ),
-                    builder: (context, snapshot) {
-                      return Text(
-                        snapshot.data ?? 'Loading...',
-                        style: CupertinoTheme.of(context).textTheme.textStyle
-                            .copyWith(
-                              fontSize: 14,
-                              color: CupertinoColors.systemGrey,
-                            ),
-                      );
-                    },
+                  Text(
+                    entry.locationName,
+                    style: CupertinoTheme.of(context).textTheme.textStyle
+                        .copyWith(
+                          fontSize: 14,
+                          color: CupertinoColors.systemGrey,
+                        ),
                   ),
                 ],
               ),
