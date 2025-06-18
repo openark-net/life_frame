@@ -18,6 +18,7 @@ class DailyEntryController extends GetxController {
 
   final RxBool hasPhotoToday$ = false.obs;
   final RxInt streak$ = 0.obs;
+  final RxInt entriesVersion$ = 0.obs; // Increments when entries are modified
 
   @override
   void onInit() {
@@ -56,6 +57,10 @@ class DailyEntryController extends GetxController {
     }
   }
 
+  void _incrementEntriesVersion() {
+    entriesVersion$.value = entriesVersion$.value + 1;
+  }
+
   Future<void> _refreshStats() async {
     try {
       final today = await _computeHasPhotoToday();
@@ -80,6 +85,7 @@ class DailyEntryController extends GetxController {
       _talker.info('Inserted entry for ${entry.timestamp.toIso8601String()}');
 
       await _refreshStats();
+      _incrementEntriesVersion();
       return true;
     } catch (e, st) {
       _talker.handle(e, st, 'Error inserting daily entry');

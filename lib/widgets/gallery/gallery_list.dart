@@ -19,6 +19,7 @@ class _GalleryListState extends State<GalleryList> {
   final ScrollController _scrollController = ScrollController();
   late DailyEntryController _controller;
   late Talker _talker;
+  late Worker _entriesWorker;
 
   List<DailyEntry> entries = [];
   bool isLoading = false;
@@ -34,6 +35,13 @@ class _GalleryListState extends State<GalleryList> {
     _controller = Get.find<DailyEntryController>();
     _talker = Get.find<Talker>();
     _scrollController.addListener(_onScroll);
+
+    // Listen for changes to entries and refresh gallery
+    _entriesWorker = ever(_controller.entriesVersion$, (_) {
+      _talker.debug('Entries changed, refreshing gallery');
+      _loadInitialEntries();
+    });
+
     _loadInitialEntries();
   }
 
@@ -41,6 +49,7 @@ class _GalleryListState extends State<GalleryList> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _entriesWorker.dispose();
     super.dispose();
   }
 
