@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_isTakingPicture) {
       return PhotoStatus.loading;
     }
-    return controller.hasTodayPhoto
+    return controller.hasPhotoToday$.value
         ? PhotoStatus.photoTaken
         : PhotoStatus.noPhoto;
   }
@@ -71,6 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Obx(() {
                     final photoStatus = _getPhotoStatus(controller);
                     final isActionDisabled = _isTakingPicture;
+                    final hasPhoto = controller.hasPhotoToday$.value;
+                    final streak = controller.streak$.value;
 
                     return Column(
                       mainAxisSize: MainAxisSize.min,
@@ -85,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         const SizedBox(height: 30),
 
-                        DayStreakWidget(streakCount: controller.getStreak()),
+                        DayStreakWidget(streakCount: streak),
 
                         const SizedBox(height: 40),
 
@@ -98,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             vertical: 16,
                           ),
                           child: Text(
-                            !controller.hasTodayPhoto
+                            !hasPhoto
                                 ? 'Take Your Daily Picture'
                                 : 'Take ANOTHER Photo',
                             style: TextStyle(
