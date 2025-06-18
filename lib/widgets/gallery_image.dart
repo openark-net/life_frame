@@ -12,27 +12,22 @@ class GalleryImage extends StatelessWidget {
 
   const GalleryImage({super.key, required this.entry});
 
-  String _formatDateForDisplay(String date) {
-    try {
-      final dateTime = DateTime.parse(date);
-      const months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ];
-      return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
-    } catch (e) {
-      return date;
-    }
+  String _formatDateForDisplay(DateTime dateTime) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
   }
 
   Widget _buildPhotoWidget(BuildContext context) {
@@ -108,7 +103,7 @@ class GalleryImage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _formatDateForDisplay(entry.date),
+                    _formatDateForDisplay(entry.timestamp),
                     style: CupertinoTheme.of(context).textTheme.textStyle
                         .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
@@ -123,11 +118,7 @@ class GalleryImage extends StatelessWidget {
                         style: CupertinoTheme.of(context).textTheme.textStyle
                             .copyWith(
                               fontSize: 14,
-                              color:
-                                  CupertinoTheme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? CupertinoColors.systemGrey2
-                                  : CupertinoColors.systemGrey,
+                              color: CupertinoColors.systemGrey,
                             ),
                       );
                     },

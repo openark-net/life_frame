@@ -83,7 +83,7 @@ class PhotoDetailController extends GetxController
     try {
       final allEntries = await _getAllEntriesWithPhotos();
       final initialIndex = allEntries.indexWhere(
-        (entry) => entry.date == initialEntry.date,
+        (entry) => entry.timestamp == initialEntry.timestamp,
       );
 
       entries.value = allEntries;
@@ -110,7 +110,7 @@ class PhotoDetailController extends GetxController
         )
         .toList();
 
-    allEntries.sort((a, b) => b.date.compareTo(a.date));
+    allEntries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     return allEntries;
   }
 

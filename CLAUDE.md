@@ -131,3 +131,5 @@ You can get the Talker instance with:
 ```dart 
 Talker talker = Get.find<Talker>();
 ```
+
+There is no talker.good function.
