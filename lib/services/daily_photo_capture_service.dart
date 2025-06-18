@@ -145,17 +145,17 @@ class DailyPhotoCaptureService {
     }
   }
 
-  Future<bool?> _navigateToConfirmationScreen(
+  Future<PhotoConfirmationResult> _navigateToConfirmationScreen(
     BuildContext context,
     ui.Image photo,
   ) async {
-    final result = await Navigator.of(context).push<bool>(
+    final result = await Navigator.of(context).push<PhotoConfirmationResult>(
       CupertinoPageRoute(
         fullscreenDialog: true,
         builder: (context) => PhotoConfirmationScreen(photo: photo),
       ),
     );
-    return result;
+    return result ?? PhotoConfirmationResult.cancel;
   }
 
   Future<FramePhotos?> _navigateToCameraScreen(BuildContext context) async {

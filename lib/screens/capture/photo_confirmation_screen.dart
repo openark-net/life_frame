@@ -7,7 +7,7 @@ import 'package:talker/talker.dart';
 import '../../widgets/capture/confirm/action_buttons.dart';
 import '../../widgets/capture/confirm/image_preview.dart';
 
-enum PhotoConfirmationResult { retake, keep, updateLocation }
+enum PhotoConfirmationResult { retake, keep, updateLocation, cancel }
 
 class PhotoConfirmationScreen extends StatefulWidget {
   final ui.Image photo;
