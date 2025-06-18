@@ -5,14 +5,14 @@ import 'package:geolocator/geolocator.dart';
 import 'package:life_frame/models/frame_photos.dart';
 import 'package:life_frame/services/image_filesystem.dart';
 import 'package:life_frame/services/location.dart';
-import '../controllers/photo_journal_controller.dart';
+import '../controllers/daily_entry_controller.dart';
 import '../screens/simple_camera_screen.dart';
 import '../screens/photo_confirmation_screen.dart';
 import '../services/photo_stitching_service.dart';
 import 'package:talker/talker.dart';
 
 class DailyPhotoCaptureService {
-  final PhotoJournalController _controller = Get.find<PhotoJournalController>();
+  final DailyEntryController _controller = Get.find<DailyEntryController>();
   final PhotoStitchingService _stitchingService = PhotoStitchingService();
   final LocationService _locationService = Get.find<LocationService>();
   final Talker _talker = Get.find<Talker>();

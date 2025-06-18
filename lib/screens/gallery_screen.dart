@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import '../controllers/photo_journal_controller.dart';
+import '../controllers/daily_entry_controller.dart';
 import '../widgets/gallery/empty_gallery_state.dart';
 import '../widgets/gallery/gallery_list.dart';
 import '../widgets/background/AbstractBackground.dart';
@@ -11,7 +11,7 @@ class GalleryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<PhotoJournalController>();
+    final controller = Get.find<DailyEntryController>();
 
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background,

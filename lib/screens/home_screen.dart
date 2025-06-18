@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:life_frame/theme.dart';
-import '../controllers/photo_journal_controller.dart';
+import '../controllers/daily_entry_controller.dart';
 import '../controllers/navigation_controller.dart';
 import '../services/daily_photo_capture_service.dart';
 import '../widgets/home/photo_status_indicator.dart';
@@ -20,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _isTakingPicture = false;
 
-  PhotoStatus _getPhotoStatus(PhotoJournalController controller) {
+  PhotoStatus _getPhotoStatus(DailyEntryController controller) {
     if (_isTakingPicture) {
       return PhotoStatus.loading;
     }
@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<PhotoJournalController>();
+    final controller = Get.find<DailyEntryController>();
     final navController = Get.find<NavigationController>();
 
     return CupertinoPageScaffold(

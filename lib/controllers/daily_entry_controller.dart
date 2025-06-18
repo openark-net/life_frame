@@ -9,7 +9,7 @@ import 'package:sqflite/sqflite.dart';
 
 import 'package:life_frame/models/daily_entry.dart';
 
-class PhotoJournalController extends GetxController {
+class DailyEntryController extends GetxController {
   static const _tableName = 'daily_entry';
   late final Database _db;
   final Talker _talker = Get.find<Talker>();

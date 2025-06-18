@@ -1,7 +1,7 @@
 // lib/widgets/gallery/gallery_list.dart
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import '../../controllers/photo_journal_controller.dart';
+import '../../controllers/daily_entry_controller.dart';
 import '../gallery_image.dart';
 import 'gallery_pagination_footer.dart';
 
@@ -14,12 +14,12 @@ class GalleryList extends StatefulWidget {
 
 class _GalleryListState extends State<GalleryList> {
   final ScrollController _scrollController = ScrollController();
-  late PhotoJournalController _controller;
+  late DailyEntryController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = Get.find<PhotoJournalController>();
+    _controller = Get.find<DailyEntryController>();
     _scrollController.addListener(_onScroll);
   }
 

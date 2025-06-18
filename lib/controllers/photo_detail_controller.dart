@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../models/daily_entry.dart';
-import '../controllers/photo_journal_controller.dart';
+import '../controllers/daily_entry_controller.dart';
 
 class PhotoDetailController extends GetxController
     with GetTickerProviderStateMixin {
-  final PhotoJournalController photoJournalController;
+  final DailyEntryController photoJournalController;
   final DailyEntry initialEntry;
 
   PhotoDetailController({

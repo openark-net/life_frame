@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:life_frame/theme.dart';
 import '../models/daily_entry.dart';
 import '../utils/location_formatter.dart';
-import '../controllers/photo_journal_controller.dart';
+import '../controllers/daily_entry_controller.dart';
 import '../screens/photo_detail_screen.dart';
 
 class GalleryImage extends StatelessWidget {
@@ -73,7 +73,7 @@ class GalleryImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        final controller = Get.find<PhotoJournalController>();
+        final controller = Get.find<DailyEntryController>();
         Get.to(
           () => PhotoDetailScreen(controller: controller, initialEntry: entry),
           transition: Transition.fadeIn,
