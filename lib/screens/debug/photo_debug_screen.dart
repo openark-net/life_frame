@@ -22,10 +22,6 @@ class _PhotoDebugScreenState extends State<PhotoDebugScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Obx(() {
-          if (controller.isLoading) {
-            return const Center(child: CupertinoActivityIndicator());
-          }
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -69,7 +69,6 @@ class DailyEntryController extends GetxController {
     }
   }
 
-  // PUBLIC API #1: insert & then refresh the observables
   Future<bool> insertDailyEntry(DailyEntry entry) async {
     try {
       await _db.insert(
@@ -87,7 +86,7 @@ class DailyEntryController extends GetxController {
     }
   }
 
-  Future<bool> _computeHasPhotoToday() async {
+  Future<List<DailyEntry>> _getTodaysEntries() async {
     final now = DateTime.now();
     final startOfDay = DateTime(
       now.year,
@@ -96,17 +95,19 @@ class DailyEntryController extends GetxController {
     ).millisecondsSinceEpoch;
     final endOfDay = startOfDay + Duration(days: 1).inMilliseconds;
 
-    final count = Sqflite.firstIntValue(
-      await _db.rawQuery(
-        '''
-      SELECT COUNT(*) FROM $_tableName
-      WHERE timestamp >= ? AND timestamp < ?
-    ''',
-        [startOfDay, endOfDay],
-      ),
+    final rows = await _db.query(
+      _tableName,
+      where: 'timestamp >= ? AND timestamp < ?',
+      whereArgs: [startOfDay, endOfDay],
+      orderBy: 'timestamp DESC',
     );
 
-    return (count ?? 0) > 0;
+    return rows.map(DailyEntry.fromMap).toList();
+  }
+
+  Future<bool> _computeHasPhotoToday() async {
+    final entries = await _getTodaysEntries();
+    return entries.isNotEmpty;
   }
 
   Future<int> _computeStreak() async {
@@ -162,6 +163,36 @@ class DailyEntryController extends GetxController {
     } catch (e, st) {
       _talker.handle(e, st, 'Error listing daily entries');
       return [];
+    }
+  }
+
+  Future<bool> deleteTodayEntry() async {
+    try {
+      final todaysEntries = await _getTodaysEntries();
+      if (todaysEntries.isEmpty) {
+        _talker.info('No entries for today, nothing to delete.');
+        return false;
+      }
+
+      var deletedCount = 0;
+      for (final entry in todaysEntries) {
+        final ts = entry.timestamp.millisecondsSinceEpoch;
+        final count = await _db.delete(
+          _tableName,
+          where: 'timestamp = ?',
+          whereArgs: [ts],
+        );
+        deletedCount += count;
+      }
+
+      _talker.info(
+        'Deleted $deletedCount today\'s DB entr${deletedCount == 1 ? 'y' : 'ies'}.',
+      );
+      await _refreshStats();
+      return true;
+    } catch (e, st) {
+      _talker.handle(e, st, 'Error deleting today\'s photo entries');
+      return false;
     }
   }
 }

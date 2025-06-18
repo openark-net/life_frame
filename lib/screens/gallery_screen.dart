@@ -19,20 +19,7 @@ class GalleryScreen extends StatelessWidget {
       child: Stack(
         children: [
           const AbstractBackground(density: 0.4, seed: 54321),
-          SafeArea(
-            child: Obx(() {
-              if (controller.isLoading && controller.paginatedEntries.isEmpty) {
-                return const Center(child: CupertinoActivityIndicator());
-              }
-
-              if (controller.paginatedEntries.isEmpty &&
-                  !controller.isLoading) {
-                return const EmptyGalleryState();
-              }
-
-              return const GalleryList();
-            }),
-          ),
+          SafeArea(child: const GalleryList()),
         ],
       ),
     );
