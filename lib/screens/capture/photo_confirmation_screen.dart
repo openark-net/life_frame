@@ -6,6 +6,8 @@ import 'dart:typed_data';
 
 import 'package:talker/talker.dart';
 
+import '../../theme.dart';
+
 class PhotoConfirmationScreen extends StatefulWidget {
   final ui.Image photo;
 

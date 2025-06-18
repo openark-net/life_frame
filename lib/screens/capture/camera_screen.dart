@@ -5,16 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:get/get.dart';
 import 'package:talker/talker.dart';
-import '../models/frame_photos.dart';
+import '../../models/frame_photos.dart';
 
-class SimpleCameraScreen extends StatefulWidget {
-  const SimpleCameraScreen({super.key});
+class CameraScreen extends StatefulWidget {
+  const CameraScreen({super.key});
 
   @override
-  State<SimpleCameraScreen> createState() => _SimpleCameraScreenState();
+  State<CameraScreen> createState() => _CameraScreenState();
 }
 
-class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
+class _CameraScreenState extends State<CameraScreen> {
   CameraController? _controller;
   List<CameraDescription>? _cameras;
   ui.Image? _backPhoto;
