@@ -4,7 +4,6 @@ import 'package:talker/talker.dart';
 import 'package:life_frame/widgets/gallery/empty_gallery_state.dart';
 import '../../controllers/daily_entry_controller.dart';
 import '../../models/daily_entry.dart';
-import '../../models/pagination_result.dart';
 import '../gallery_image.dart';
 import 'gallery_pagination_footer.dart';
 

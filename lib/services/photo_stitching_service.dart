@@ -3,6 +3,7 @@ import 'package:flutter/painting.dart';
 import 'package:get/get.dart';
 import 'package:talker/talker.dart';
 import '../models/frame_photos.dart';
+import '../utils/date_formatter.dart';
 import '../utils/location_formatter.dart';
 
 class PhotoStitchingService {
@@ -21,7 +22,7 @@ class PhotoStitchingService {
   }) async {
     try {
       final locationText = await _getLocationText(latitude, longitude);
-      final dateText = _formatCurrentDate();
+      final dateText = formatDateForDisplay(DateTime.now());
 
       final stitchedImage = await _createStitchedImage(
         backImage: framePhotos.back,
@@ -50,26 +51,6 @@ class PhotoStitchingService {
       _talker.handle(e, stackTrace, 'Failed to get formatted location');
       return "";
     }
-  }
-
-  String _formatCurrentDate() {
-    final now = DateTime.now();
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    return '${months[now.month - 1]} ${now.day}, ${now.year}';
   }
 
   Future<ui.Image> _createStitchedImage({

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:life_frame/theme.dart';
 import '../models/daily_entry.dart';
+import '../utils/date_formatter.dart';
 import '../utils/location_formatter.dart';
 import '../controllers/daily_entry_controller.dart';
 import '../screens/photo_detail_screen.dart';
@@ -11,24 +12,6 @@ class GalleryImage extends StatelessWidget {
   final DailyEntry entry;
 
   const GalleryImage({super.key, required this.entry});
-
-  String _formatDateForDisplay(DateTime dateTime) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
-  }
 
   Widget _buildPhotoWidget(BuildContext context) {
     String? photoPath;
@@ -103,7 +86,7 @@ class GalleryImage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _formatDateForDisplay(entry.timestamp),
+                    formatDateForDisplay(entry.timestamp),
                     style: CupertinoTheme.of(context).textTheme.textStyle
                         .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
