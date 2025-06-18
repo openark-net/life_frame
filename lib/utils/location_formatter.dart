@@ -24,56 +24,52 @@ Future<String?> getFormattedLocation(Position? position) async {
     return null;
   }
 
-  try {
-    talker.debug(
-      'Getting formatted location for coordinates: ${position.latitude}, ${position.longitude}',
-    );
+  talker.debug(
+    'Getting formatted location for coordinates: ${position.latitude}, ${position.longitude}',
+  );
 
-    // Perform reverse geocoding to get address information
-    List<Placemark> placemarks = await placemarkFromCoordinates(
+  // Perform reverse geocoding to get address information
+  List<Placemark> placemarks;
+  try {
+    placemarks = await placemarkFromCoordinates(
       position.latitude,
       position.longitude,
     );
+  } catch (e) {
+    return null;
+  }
 
-    if (placemarks.isEmpty) {
-      talker.warning(
-        'No placemarks found for coordinates: ${position.latitude}, ${position.longitude}',
-      );
-      return null;
-    }
+  if (placemarks.isEmpty) {
+    talker.warning(
+      'No placemarks found for coordinates: ${position.latitude}, ${position.longitude}',
+    );
+    return null;
+  }
 
-    final placemark = placemarks.first;
-    talker.debug('Found placemark: ${placemark.toString()}');
+  final placemark = placemarks.first;
+  talker.debug('Found placemark: ${placemark.toString()}');
 
-    // Extract city (locality) and province/state (administrativeArea)
-    final city = placemark.locality ?? '';
-    final province = placemark.administrativeArea ?? '';
+  // Extract city (locality) and province/state (administrativeArea)
+  final city = placemark.locality ?? '';
+  final province = placemark.administrativeArea ?? '';
 
-    // Convert province to short name
-    final shortProvince = _getShortProvinceName(province);
+  // Convert province to short name
+  final shortProvince = _getShortProvinceName(province);
 
-    // Format the location string based on available data
-    if (city.isNotEmpty && shortProvince.isNotEmpty) {
-      final result = '$city, $shortProvince';
-      talker.debug('Formatted location: $result');
-      return result;
-    } else if (city.isNotEmpty) {
-      talker.debug('Only city available: $city');
-      return city;
-    } else if (shortProvince.isNotEmpty) {
-      talker.debug('Only province available: $shortProvince');
-      return shortProvince;
-    } else {
-      talker.warning(
-        'No city or province data available for coordinates:  ${position.latitude}, ${position.longitude}',
-      );
-      return null;
-    }
-  } catch (e, st) {
-    talker.handle(
-      e,
-      st,
-      'Error getting formatted location for coordinates: ${position.latitude}, ${position.longitude}',
+  // Format the location string based on available data
+  if (city.isNotEmpty && shortProvince.isNotEmpty) {
+    final result = '$city, $shortProvince';
+    talker.debug('Formatted location: $result');
+    return result;
+  } else if (city.isNotEmpty) {
+    talker.debug('Only city available: $city');
+    return city;
+  } else if (shortProvince.isNotEmpty) {
+    talker.debug('Only province available: $shortProvince');
+    return shortProvince;
+  } else {
+    talker.warning(
+      'No city or province data available for coordinates:  ${position.latitude}, ${position.longitude}',
     );
     return null;
   }
