@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 import 'package:get/get.dart';
+import 'package:life_frame/utils/image.dart';
 import 'package:talker/talker.dart';
 import '../models/frame_photos.dart';
 import '../utils/date_formatter.dart';
@@ -23,8 +24,7 @@ class PhotoStitchingService {
       final dateText = formatDateForDisplay(DateTime.now());
 
       final stitchedImage = await _createStitchedImage(
-        backImage: framePhotos.back,
-        frontImage: framePhotos.front,
+        framePhotos: framePhotos,
         dateText: dateText,
         locationText: locationName,
       );
@@ -36,11 +36,12 @@ class PhotoStitchingService {
   }
 
   Future<ui.Image> _createStitchedImage({
-    required ui.Image backImage,
-    required ui.Image frontImage,
+    required FramePhotos framePhotos,
     required String dateText,
     String? locationText,
   }) async {
+    final backImage = await convertXFileToImage(framePhotos.back);
+    final frontImage = await convertXFileToImage(framePhotos.front);
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 

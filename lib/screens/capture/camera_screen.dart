@@ -17,8 +17,8 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   CameraController? _controller;
   List<CameraDescription>? _cameras;
-  ui.Image? _backPhoto;
-  ui.Image? _frontPhoto;
+  XFile? _backPhoto;
+  XFile? _frontPhoto;
   bool _isProcessing = false;
   bool _isFrontCamera = false;
   String _statusMessage = 'Position your shot';
@@ -106,9 +106,7 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       await HapticFeedback.lightImpact();
 
-      final XFile photo = await _controller!.takePicture();
-      final ui.Image image = await _convertXFileToImage(photo);
-
+      final XFile image = await _controller!.takePicture();
       if (_isFrontCamera) {
         _frontPhoto = image;
         _completeCapture();
@@ -233,11 +231,6 @@ class _CameraScreenState extends State<CameraScreen> {
       DeviceOrientation.landscapeRight,
     ]);
     _controller?.dispose();
-
-    // Clean up ui.Image objects if navigation is cancelled
-    _backPhoto?.dispose();
-    _frontPhoto?.dispose();
-
     super.dispose();
   }
 

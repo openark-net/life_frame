@@ -149,11 +149,7 @@ class DailyPhotoCaptureService {
       ),
     );
 
-    _talker.info('Returned from camera screen', {
-      'hasResult': result != null,
-      'hasFrontPhoto': result?.front != null,
-      'hasBackPhoto': result?.back != null,
-    });
+    _talker.info('Returned from camera screen', {'hasResult': result != null});
 
     return result;
   }
@@ -176,7 +172,8 @@ class DailyPhotoCaptureService {
       _talker.info(
         'Location formatting failed, showing location selection modal',
       );
-      locationName = await _showLocationSelectionModal(context);
+      // locationName = await _showLocationSelectionModal(context);
+      locationName = "UPDATED FROM MODAL";
       if (locationName == null) {
         _talker.info('User cancelled location selection, using default');
         locationName = 'Unknown Location';
@@ -192,6 +189,7 @@ class DailyPhotoCaptureService {
 
   Future<String?> _updateLocation(BuildContext context) async {
     _talker.info('User requested location update');
+    return "UPDATED FROM MODAL";
     return await _showLocationSelectionModal(context);
   }
 
