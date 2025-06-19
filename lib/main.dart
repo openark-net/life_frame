@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:life_frame/screens/main_screen.dart';
+import 'package:life_frame/services/donation_service.dart';
 import 'package:life_frame/services/location.dart';
 import 'package:life_frame/services/permissions_service.dart';
 import 'package:life_frame/theme.dart';
@@ -21,6 +22,7 @@ void main() async {
     Get.put(NavigationController());
     Get.put(SettingsController());
     Get.put(PermissionsService());
+    Get.put(InAppPurchaseService());
     await Get.putAsync(() async {
       final notificationService = NotificationService();
       await notificationService.onInit();

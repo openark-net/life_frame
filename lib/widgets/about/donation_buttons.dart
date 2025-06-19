@@ -12,7 +12,7 @@ class DonationButtons extends StatefulWidget {
 
 class _DonationButtonsState extends State<DonationButtons> {
   String selectedAmount = '1';
-  final List<String> amounts = ['1', '3', '5', '15'];
+  final List<String> amounts = ['1', '5', '10', '50'];
 
   @override
   void initState() {
