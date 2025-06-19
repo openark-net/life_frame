@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../models/daily_entry.dart';
-import '../controllers/photo_journal_controller.dart';
+import '../controllers/daily_entry_controller.dart';
 
 class PhotoDetailController extends GetxController
     with GetTickerProviderStateMixin {
-  final PhotoJournalController photoJournalController;
+  final DailyEntryController photoJournalController;
   final DailyEntry initialEntry;
 
   PhotoDetailController({
@@ -83,7 +83,7 @@ class PhotoDetailController extends GetxController
     try {
       final allEntries = await _getAllEntriesWithPhotos();
       final initialIndex = allEntries.indexWhere(
-        (entry) => entry.date == initialEntry.date,
+        (entry) => entry.timestamp == initialEntry.timestamp,
       );
 
       entries.value = allEntries;
@@ -101,17 +101,7 @@ class PhotoDetailController extends GetxController
   }
 
   Future<List<DailyEntry>> _getAllEntriesWithPhotos() async {
-    final allEntries = photoJournalController.allEntries
-        .where(
-          (entry) =>
-              entry.photoPath != null &&
-              entry.photoPath!.isNotEmpty &&
-              File(entry.photoPath!).existsSync(),
-        )
-        .toList();
-
-    allEntries.sort((a, b) => b.date.compareTo(a.date));
-    return allEntries;
+    return (await photoJournalController.list()).results;
   }
 
   Future<void> _preloadInitialImages() async {

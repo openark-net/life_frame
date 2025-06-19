@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import '../../controllers/photo_journal_controller.dart';
+import '../../controllers/daily_entry_controller.dart';
 
 class ActionButtons extends StatefulWidget {
   final Function(String?) onStitchedPhotoChanged;
@@ -31,7 +31,7 @@ class _ActionButtonsState extends State<ActionButtons> {
   }
 
   Future<void> _handleDeleteTodayEntry() async {
-    final controller = Get.find<PhotoJournalController>();
+    final controller = Get.find<DailyEntryController>();
 
     final success = await controller.deleteTodayEntry();
     if (success) {

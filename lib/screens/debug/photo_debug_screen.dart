@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import '../../controllers/photo_journal_controller.dart';
+import '../../controllers/daily_entry_controller.dart';
 
 import '../../widgets/debug_screen/action_buttons.dart';
 
@@ -16,16 +16,12 @@ class _PhotoDebugScreenState extends State<PhotoDebugScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<PhotoJournalController>();
+    final controller = Get.find<DailyEntryController>();
 
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Obx(() {
-          if (controller.isLoading) {
-            return const Center(child: CupertinoActivityIndicator());
-          }
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

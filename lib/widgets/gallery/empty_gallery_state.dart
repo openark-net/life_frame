@@ -1,7 +1,7 @@
 // lib/widgets/gallery/empty_gallery_state.dart
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import '../../controllers/photo_journal_controller.dart';
+import '../../controllers/daily_entry_controller.dart';
 
 class EmptyGalleryState extends StatelessWidget {
   const EmptyGalleryState({super.key});

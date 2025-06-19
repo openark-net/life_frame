@@ -1,91 +1,35 @@
 class DailyEntry {
-  final String date; // YYYY-MM-DD format
-  final String photoPath; // Local filesystem path
+  final String photoPath;
+  final String locationName;
   final double latitude;
   final double longitude;
   final DateTime timestamp;
 
   DailyEntry({
-    required this.date,
     required this.photoPath,
+    required this.locationName,
     required this.latitude,
     required this.longitude,
     required this.timestamp,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
-      'date': date,
+      'timestamp': timestamp.millisecondsSinceEpoch,
       'photoPath': photoPath,
-      'latitude': latitude,
-      'longitude': longitude,
-      'timestamp': timestamp.toIso8601String(),
+      'location_name': locationName,
+      'lat': latitude,
+      'lng': longitude,
     };
   }
 
-  factory DailyEntry.fromJson(Map<String, dynamic> json) {
+  factory DailyEntry.fromMap(Map<String, dynamic> map) {
     return DailyEntry(
-      date: json['date'],
-      photoPath: json['photoPath'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
-      timestamp: DateTime.parse(json['timestamp']),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
+      photoPath: map['photoPath'] as String,
+      locationName: map['location_name'] as String,
+      latitude: (map['lat'] as num).toDouble(),
+      longitude: (map['lng'] as num).toDouble(),
     );
-  }
-
-  static String formatDate(DateTime date) {
-    return date.toIso8601String().split('T')[0];
-  }
-
-  static String getTodayKey() {
-    return formatDate(DateTime.now());
-  }
-
-  bool isValid() {
-    return date.isNotEmpty &&
-        photoPath.isNotEmpty &&
-        latitude.abs() <= 90 &&
-        longitude.abs() <= 180;
-  }
-
-  @override
-  String toString() {
-    return 'DailyEntry(date: $date, photoPath: $photoPath, lat: $latitude, lng: $longitude, timestamp: $timestamp)';
-  }
-
-  DailyEntry copyWith({
-    String? date,
-    String? photoPath,
-    double? latitude,
-    double? longitude,
-    DateTime? timestamp,
-  }) {
-    return DailyEntry(
-      date: date ?? this.date,
-      photoPath: photoPath ?? this.photoPath,
-      latitude: latitude ?? this.latitude,
-      longitude: longitude ?? this.longitude,
-      timestamp: timestamp ?? this.timestamp,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is DailyEntry &&
-        other.date == date &&
-        other.photoPath == photoPath &&
-        other.latitude == latitude &&
-        other.longitude == longitude &&
-        other.timestamp == timestamp;
-  }
-
-  @override
-  int get hashCode {
-    return date.hashCode ^
-        photoPath.hashCode ^
-        latitude.hashCode ^
-        longitude.hashCode ^
-        timestamp.hashCode;
   }
 }

@@ -6,9 +6,8 @@ import 'package:life_frame/services/permissions_service.dart';
 import 'package:life_frame/theme.dart';
 import 'package:life_frame/widgets/permissions_checker.dart';
 import 'package:talker_flutter/talker_flutter.dart';
-import 'services/storage_service.dart';
 import 'services/notification_service.dart';
-import 'controllers/photo_journal_controller.dart';
+import 'controllers/daily_entry_controller.dart';
 import 'controllers/navigation_controller.dart';
 import 'controllers/settings_controller.dart';
 
@@ -18,12 +17,7 @@ void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    await Get.putAsync(() async {
-      final service = StorageService();
-      await service.onInit();
-      return service;
-    });
-    Get.put(PhotoJournalController());
+    Get.put(DailyEntryController());
     Get.put(NavigationController());
     Get.put(SettingsController());
     Get.put(PermissionsService());

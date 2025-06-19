@@ -10,7 +10,6 @@
 #l
 include:
   - ./CLAUDE.md
-  - pubspec.yaml
 
 
 ignore:

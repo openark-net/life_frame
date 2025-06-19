@@ -5,20 +5,20 @@ import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:get/get.dart';
 import 'package:talker/talker.dart';
-import '../models/frame_photos.dart';
+import '../../models/frame_photos.dart';
 
-class SimpleCameraScreen extends StatefulWidget {
-  const SimpleCameraScreen({super.key});
+class CameraScreen extends StatefulWidget {
+  const CameraScreen({super.key});
 
   @override
-  State<SimpleCameraScreen> createState() => _SimpleCameraScreenState();
+  State<CameraScreen> createState() => _CameraScreenState();
 }
 
-class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
+class _CameraScreenState extends State<CameraScreen> {
   CameraController? _controller;
   List<CameraDescription>? _cameras;
-  ui.Image? _backPhoto;
-  ui.Image? _frontPhoto;
+  XFile? _backPhoto;
+  XFile? _frontPhoto;
   bool _isProcessing = false;
   bool _isFrontCamera = false;
   String _statusMessage = 'Position your shot';
@@ -106,9 +106,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     try {
       await HapticFeedback.lightImpact();
 
-      final XFile photo = await _controller!.takePicture();
-      final ui.Image image = await _convertXFileToImage(photo);
-
+      final XFile image = await _controller!.takePicture();
       if (_isFrontCamera) {
         _frontPhoto = image;
         _completeCapture();
@@ -207,7 +205,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
     );
   }
 
-  Widget _buildPhotoThumbnail(ui.Image image) {
+  Widget _buildPhotoThumbnail(XFile xFile) {
     return Container(
       width: 60,
       height: 80,
@@ -217,7 +215,7 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
-        child: RawImage(image: image, fit: BoxFit.cover),
+        child: Image.file(File(xFile.path), fit: BoxFit.cover),
       ),
     );
   }
@@ -233,11 +231,6 @@ class _SimpleCameraScreenState extends State<SimpleCameraScreen> {
       DeviceOrientation.landscapeRight,
     ]);
     _controller?.dispose();
-
-    // Clean up ui.Image objects if navigation is cancelled
-    _backPhoto?.dispose();
-    _frontPhoto?.dispose();
-
     super.dispose();
   }
 

@@ -3,37 +3,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:life_frame/theme.dart';
 import '../models/daily_entry.dart';
+import '../utils/date_formatter.dart';
 import '../utils/location_formatter.dart';
-import '../controllers/photo_journal_controller.dart';
+import '../controllers/daily_entry_controller.dart';
 import '../screens/photo_detail_screen.dart';
 
 class GalleryImage extends StatelessWidget {
   final DailyEntry entry;
 
   const GalleryImage({super.key, required this.entry});
-
-  String _formatDateForDisplay(String date) {
-    try {
-      final dateTime = DateTime.parse(date);
-      const months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ];
-      return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
-    } catch (e) {
-      return date;
-    }
-  }
 
   Widget _buildPhotoWidget(BuildContext context) {
     String? photoPath;
@@ -78,7 +56,7 @@ class GalleryImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        final controller = Get.find<PhotoJournalController>();
+        final controller = Get.find<DailyEntryController>();
         Get.to(
           () => PhotoDetailScreen(controller: controller, initialEntry: entry),
           transition: Transition.fadeIn,
@@ -108,29 +86,17 @@ class GalleryImage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _formatDateForDisplay(entry.date),
+                    formatDateForDisplay(entry.timestamp),
                     style: CupertinoTheme.of(context).textTheme.textStyle
                         .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
-                  FutureBuilder<String>(
-                    future: getFormattedLocation(
-                      entry.latitude,
-                      entry.longitude,
-                    ),
-                    builder: (context, snapshot) {
-                      return Text(
-                        snapshot.data ?? 'Loading...',
-                        style: CupertinoTheme.of(context).textTheme.textStyle
-                            .copyWith(
-                              fontSize: 14,
-                              color:
-                                  CupertinoTheme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? CupertinoColors.systemGrey2
-                                  : CupertinoColors.systemGrey,
-                            ),
-                      );
-                    },
+                  Text(
+                    entry.locationName,
+                    style: CupertinoTheme.of(context).textTheme.textStyle
+                        .copyWith(
+                          fontSize: 14,
+                          color: CupertinoColors.systemGrey,
+                        ),
                   ),
                 ],
               ),

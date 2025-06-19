@@ -1,8 +1,10 @@
 import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 import 'package:get/get.dart';
+import 'package:life_frame/utils/image.dart';
 import 'package:talker/talker.dart';
 import '../models/frame_photos.dart';
+import '../utils/date_formatter.dart';
 import '../utils/location_formatter.dart';
 
 class PhotoStitchingService {
@@ -16,18 +18,15 @@ class PhotoStitchingService {
 
   Future<ui.Image?> stitchPhotos({
     required FramePhotos framePhotos,
-    double? latitude,
-    double? longitude,
+    required String locationName,
   }) async {
     try {
-      final locationText = await _getLocationText(latitude, longitude);
-      final dateText = _formatCurrentDate();
+      final dateText = formatDateForDisplay(DateTime.now());
 
       final stitchedImage = await _createStitchedImage(
-        backImage: framePhotos.back,
-        frontImage: framePhotos.front,
+        framePhotos: framePhotos,
         dateText: dateText,
-        locationText: locationText,
+        locationText: locationName,
       );
       return stitchedImage;
     } catch (e, stackTrace) {
@@ -36,48 +35,13 @@ class PhotoStitchingService {
     }
   }
 
-  Future<String> _getLocationText(double? latitude, double? longitude) async {
-    if (latitude == null || longitude == null) {
-      _talker.info('No location coordinates provided');
-      return "";
-    }
-
-    try {
-      final locationText = await getFormattedLocation(latitude, longitude);
-      _talker.info('Location text generated', {'locationText': locationText});
-      return locationText;
-    } catch (e, stackTrace) {
-      _talker.handle(e, stackTrace, 'Failed to get formatted location');
-      return "";
-    }
-  }
-
-  String _formatCurrentDate() {
-    final now = DateTime.now();
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    return '${months[now.month - 1]} ${now.day}, ${now.year}';
-  }
-
   Future<ui.Image> _createStitchedImage({
-    required ui.Image backImage,
-    required ui.Image frontImage,
+    required FramePhotos framePhotos,
     required String dateText,
     String? locationText,
   }) async {
+    final backImage = await convertXFileToImage(framePhotos.back);
+    final frontImage = await convertXFileToImage(framePhotos.front);
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
