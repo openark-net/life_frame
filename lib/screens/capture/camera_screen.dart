@@ -205,7 +205,7 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Widget _buildPhotoThumbnail(ui.Image image) {
+  Widget _buildPhotoThumbnail(XFile xFile) {
     return Container(
       width: 60,
       height: 80,
@@ -215,7 +215,7 @@ class _CameraScreenState extends State<CameraScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
-        child: RawImage(image: image, fit: BoxFit.cover),
+        child: Image.file(File(xFile.path), fit: BoxFit.cover),
       ),
     );
   }
