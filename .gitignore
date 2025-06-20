@@ -47,3 +47,4 @@ android/build/reports/problems/
 
 # Environment variables
 .env
+android/key.properties
