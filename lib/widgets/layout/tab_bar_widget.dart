@@ -104,9 +104,7 @@ class _TabBarWidgetState extends State<TabBarWidget> {
               ),
             ),
             tabBuilder: (BuildContext context, int index) {
-              return CupertinoTabView(
-                builder: (context) => visibleTabs[index].screen,
-              );
+              return visibleTabs[index].screen;
             },
           ),
         ],
