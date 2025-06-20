@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:life_frame/theme.dart';
 import '../controllers/daily_entry_controller.dart';
@@ -54,72 +55,56 @@ class _HomeScreenState extends State<HomeScreen> {
     final navController = Get.find<NavigationController>();
 
     return CupertinoPageScaffold(
-      backgroundColor: AppColors.background,
-      child: Stack(
-        children: [
-          const AbstractBackground(
-            density: 0.6,
-            seed: 99983,
-            radialDistribution: false,
-          ),
-          SafeArea(
+      backgroundColor: Colors.transparent,
+      child: SafeArea(
+        child: Obx(() {
+          final photoStatus = _getPhotoStatus(controller);
+          final isActionDisabled = _isTakingPicture;
+          final hasPhoto = controller.hasPhotoToday$.value;
+          final streak = controller.streak$.value;
+
+          return Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Spacer(),
-                ContentCard(
-                  child: Obx(() {
-                    final photoStatus = _getPhotoStatus(controller);
-                    final isActionDisabled = _isTakingPicture;
-                    final hasPhoto = controller.hasPhotoToday$.value;
-                    final streak = controller.streak$.value;
-
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        LifeFrameLogo(
-                          onDoubleTap: () => navController.toggleDebugMode(),
-                        ),
-
-                        const SizedBox(height: 40),
-
-                        PhotoStatusIndicator(status: photoStatus),
-
-                        const SizedBox(height: 30),
-
-                        DayStreakWidget(streakCount: streak),
-
-                        const SizedBox(height: 40),
-
-                        CupertinoButton.filled(
-                          onPressed: isActionDisabled
-                              ? null
-                              : () => _handleTakePicture(context),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 40,
-                            vertical: 16,
-                          ),
-                          child: Text(
-                            !hasPhoto
-                                ? 'Take Your Daily Picture'
-                                : 'Take ANOTHER Photo',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: AppColors.yellowContrast,
-                              fontFamily: fontFamily,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
+                LifeFrameLogo(
+                  onDoubleTap: () => navController.toggleDebugMode(),
                 ),
-                const Spacer(),
+
+                const SizedBox(height: 40),
+
+                PhotoStatusIndicator(status: photoStatus),
+
+                const SizedBox(height: 30),
+
+                DayStreakWidget(streakCount: streak),
+
+                const SizedBox(height: 40),
+
+                CupertinoButton.filled(
+                  onPressed: isActionDisabled
+                      ? null
+                      : () => _handleTakePicture(context),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 16,
+                  ),
+                  child: Text(
+                    !hasPhoto
+                        ? 'Take Your Daily Picture'
+                        : 'Take ANOTHER Photo',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: AppColors.yellowContrast,
+                      fontFamily: fontFamily,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
+          );
+        }),
       ),
     );
   }

@@ -48,6 +48,7 @@ flutter:
   
   assets:
     - assets/logo/
+    - assets/img/
   
   fonts:
     - family: Comfortaa-Bold

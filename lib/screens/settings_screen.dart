@@ -59,23 +59,18 @@ class SettingsScreen extends StatelessWidget {
     ];
 
     return CupertinoPageScaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       navigationBar: const CupertinoNavigationBar(middle: Text('Settings')),
-      child: Stack(
-        children: [
-          const AbstractBackground(density: 0.6, seed: 11103),
-          SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-                LifeFrameLogo(),
-                const SizedBox(height: 60),
-                SettingsList(options: settingsOptions),
-                const Spacer(),
-              ],
-            ),
-          ),
-        ],
+      child: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            LifeFrameLogo(),
+            const SizedBox(height: 60),
+            SettingsList(options: settingsOptions),
+            const Spacer(),
+          ],
+        ),
       ),
     );
   }
