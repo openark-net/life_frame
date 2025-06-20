@@ -7,6 +7,7 @@ import '../../widgets/about/openark_logo.dart';
 import '../../widgets/about/support_title.dart';
 import '../../widgets/about/website_badge.dart';
 import '../../widgets/about/donation_buttons.dart';
+import '../../widgets/about/donation_dialog.dart';
 import '../../widgets/about/rainbow_background.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -18,6 +19,16 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutScreenState extends State<AboutScreen> {
   String selectedAmount = '1';
+
+  void _showDonationDialog() {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => DonationDialog(
+        donationAmount: selectedAmount,
+        onClose: () => Navigator.of(context).pop(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +62,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     selectedAmount = amount;
                   });
                 },
+                onDonatePressed: _showDonationDialog,
               ),
               const Spacer(),
             ],

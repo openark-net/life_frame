@@ -3,8 +3,13 @@ import '../../openark_theme.dart';
 
 class DonationButtons extends StatefulWidget {
   final Function(String) onAmountSelected;
+  final VoidCallback? onDonatePressed;
 
-  const DonationButtons({super.key, required this.onAmountSelected});
+  const DonationButtons({
+    super.key,
+    required this.onAmountSelected,
+    this.onDonatePressed,
+  });
 
   @override
   State<DonationButtons> createState() => _DonationButtonsState();
@@ -45,9 +50,7 @@ class _DonationButtonsState extends State<DonationButtons> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               color: OpenArkColors.primary,
               borderRadius: BorderRadius.circular(12),
-              onPressed: () {
-                // TODO: Implement actual donation functionality
-              },
+              onPressed: widget.onDonatePressed,
               child: Text(
                 'Donate \$$selectedAmount',
                 style: TextStyle(
