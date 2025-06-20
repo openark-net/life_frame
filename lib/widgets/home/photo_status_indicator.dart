@@ -15,7 +15,10 @@ class PhotoStatusIndicator extends StatelessWidget {
       children: [
         _buildStatusIcon(),
         const SizedBox(height: 20),
-        _buildStatusText(context),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+          child: _buildStatusText(context),
+        ),
       ],
     );
   }
