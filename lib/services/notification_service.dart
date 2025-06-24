@@ -158,13 +158,13 @@ class NotificationService extends GetxService {
       notification.body,
       scheduledDate,
       details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: notification.matchDateTimeComponents,
       payload: notification.payload,
     );
 
     talker.debug(
-      'Scheduled notification ${notification.id} for ${scheduledDate}',
+      'Scheduled inexact notification ${notification.id} for approximately ${scheduledDate}',
     );
   }
 
@@ -179,12 +179,12 @@ class NotificationService extends GetxService {
       notification.body,
       notification.repeatInterval,
       details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexact,
       payload: notification.payload,
     );
 
     talker.debug(
-      'Scheduled periodic notification ${notification.id} with interval ${notification.repeatInterval}',
+      'Scheduled inexact periodic notification ${notification.id} with interval ${notification.repeatInterval}',
     );
   }
 

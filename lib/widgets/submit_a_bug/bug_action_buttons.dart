@@ -18,10 +18,28 @@ class BugActionButtons extends StatelessWidget {
   Future<void> _shareLogs() async {
     try {
       final talker = Get.find<Talker>();
-      final logs = talker.history.map((log) => log.message).join('\n');
+      final formattedLogs = talker.history
+          .map((log) {
+            final timestamp = log.time.toIso8601String();
+            final level = log.key?.toUpperCase() ?? 'LOG';
+            return '[$timestamp] [$level] ${log.message}';
+          })
+          .join('\n');
 
-      await Share.share(logs, subject: 'Life Frame App Logs');
-    } catch (e) {
+      final header =
+          '=== Life Frame App Logs ===\n'
+          'Generated: ${DateTime.now().toIso8601String()}\n'
+          'Total Logs: ${talker.history.length}\n'
+          '================================\n\n';
+
+      final finalLogs = header + formattedLogs;
+
+      await Share.share(finalLogs, subject: 'Life Frame App Logs');
+
+      talker.info('User shared logs with ${talker.history.length} entries');
+    } catch (e, st) {
+      final talker = Get.find<Talker>();
+      talker.handle(e, st, 'Failed to share logs');
       Get.snackbar(
         'Error',
         'Failed to share logs: $e',
