@@ -99,8 +99,6 @@ class PermissionsService extends GetxService {
         _talker.info('Android notification permission result', {
           'granted': granted,
         });
-
-        await androidPlugin.requestExactAlarmsPermission();
         return granted ?? false;
       }
     } else if (Platform.isIOS) {

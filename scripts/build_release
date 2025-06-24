@@ -92,7 +92,6 @@ fi
 
 echo "📱 Building Life Frame v$NEW_VERSION (build $NEW_BUILD)..."
 
-exit
 # Build the app bundle
 flutter build appbundle --release
 
