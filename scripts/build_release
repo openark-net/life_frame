@@ -38,11 +38,14 @@ fi
 VERSION_FULL=$(echo "$VERSION_LINE" | sed 's/version: //' | tr -d ' ')
 CURRENT_VERSION=$(echo "$VERSION_FULL" | cut -d'+' -f1)
 CURRENT_BUILD=$(echo "$VERSION_FULL" | cut -d'+' -f2)
+NEW_BUILD=$((CURRENT_BUILD + 1))
+echo "📈 Incrementing build number: $CURRENT_BUILD → $NEW_BUILD"
 
 # Parse semantic version components
 MAJOR=$(echo "$CURRENT_VERSION" | cut -d'.' -f1)
 MINOR=$(echo "$CURRENT_VERSION" | cut -d'.' -f2)
 PATCH=$(echo "$CURRENT_VERSION" | cut -d'.' -f3)
+NEW_VERSION="$CURRENT_VERSION"
 
 # Calculate new version based on bump type
 if [ -n "$VERSION_BUMP_TYPE" ]; then
@@ -51,30 +54,22 @@ if [ -n "$VERSION_BUMP_TYPE" ]; then
             NEW_MAJOR=$((MAJOR + 1))
             NEW_MINOR=0
             NEW_PATCH=0
-            NEW_BUILD=1
             echo "🚀 Major version bump: $CURRENT_VERSION → $NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
             ;;
         minor)
             NEW_MAJOR=$MAJOR
             NEW_MINOR=$((MINOR + 1))
             NEW_PATCH=0
-            NEW_BUILD=1
             echo "📈 Minor version bump: $CURRENT_VERSION → $NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
             ;;
         patch)
             NEW_MAJOR=$MAJOR
             NEW_MINOR=$MINOR
             NEW_PATCH=$((PATCH + 1))
-            NEW_BUILD=1
             echo "🔧 Patch version bump: $CURRENT_VERSION → $NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
             ;;
     esac
     NEW_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
-else
-    # Just increment build number
-    NEW_VERSION="$CURRENT_VERSION"
-    NEW_BUILD=$((CURRENT_BUILD + 1))
-    echo "📈 Incrementing build number: $CURRENT_BUILD → $NEW_BUILD"
 fi
 
 # Update pubspec.yaml with new version
