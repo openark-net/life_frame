@@ -1,0 +1,145 @@
+#!/bin/bash
+
+set -e  # Exit on any error
+
+# Parse command line arguments
+VERSION_BUMP_TYPE=""
+if [ $# -eq 1 ]; then
+    case "$1" in
+        major|minor|patch)
+            VERSION_BUMP_TYPE="$1"
+            ;;
+        *)
+            echo "❌ Error: Invalid argument '$1'"
+            echo "Usage: $0 [major|minor|patch]"
+            echo "  major - Bump major version (1.0.1 → 2.0.0)"
+            echo "  minor - Bump minor version (1.0.1 → 1.1.0)"
+            echo "  patch - Bump patch version (1.0.1 → 1.0.2)"
+            echo "  (no args) - Just increment build number"
+            exit 1
+            ;;
+    esac
+elif [ $# -gt 1 ]; then
+    echo "❌ Error: Too many arguments"
+    echo "Usage: $0 [major|minor|patch]"
+    exit 1
+fi
+
+echo "🚀 Starting release build process..."
+
+# Extract version and build number from pubspec.yaml
+VERSION_LINE=$(grep "^version:" pubspec.yaml)
+if [ -z "$VERSION_LINE" ]; then
+    echo "❌ Error: Could not find version in pubspec.yaml"
+    exit 1
+fi
+
+# Parse version (e.g., "1.0.1+5" -> version="1.0.1", build="5")
+VERSION_FULL=$(echo "$VERSION_LINE" | sed 's/version: //' | tr -d ' ')
+CURRENT_VERSION=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+CURRENT_BUILD=$(echo "$VERSION_FULL" | cut -d'+' -f2)
+
+# Parse semantic version components
+MAJOR=$(echo "$CURRENT_VERSION" | cut -d'.' -f1)
+MINOR=$(echo "$CURRENT_VERSION" | cut -d'.' -f2)
+PATCH=$(echo "$CURRENT_VERSION" | cut -d'.' -f3)
+
+# Calculate new version based on bump type
+if [ -n "$VERSION_BUMP_TYPE" ]; then
+    case "$VERSION_BUMP_TYPE" in
+        major)
+            NEW_MAJOR=$((MAJOR + 1))
+            NEW_MINOR=0
+            NEW_PATCH=0
+            NEW_BUILD=1
+            echo "🚀 Major version bump: $CURRENT_VERSION → $NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+            ;;
+        minor)
+            NEW_MAJOR=$MAJOR
+            NEW_MINOR=$((MINOR + 1))
+            NEW_PATCH=0
+            NEW_BUILD=1
+            echo "📈 Minor version bump: $CURRENT_VERSION → $NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+            ;;
+        patch)
+            NEW_MAJOR=$MAJOR
+            NEW_MINOR=$MINOR
+            NEW_PATCH=$((PATCH + 1))
+            NEW_BUILD=1
+            echo "🔧 Patch version bump: $CURRENT_VERSION → $NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+            ;;
+    esac
+    NEW_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+else
+    # Just increment build number
+    NEW_VERSION="$CURRENT_VERSION"
+    NEW_BUILD=$((CURRENT_BUILD + 1))
+    echo "📈 Incrementing build number: $CURRENT_BUILD → $NEW_BUILD"
+fi
+
+# Update pubspec.yaml with new version
+NEW_VERSION_LINE="version: $NEW_VERSION+$NEW_BUILD"
+sed -i "s/^version:.*/$NEW_VERSION_LINE/" pubspec.yaml
+
+# Verify the update worked
+UPDATED_VERSION_LINE=$(grep "^version:" pubspec.yaml)
+if [[ "$UPDATED_VERSION_LINE" != "$NEW_VERSION_LINE" ]]; then
+    echo "❌ Error: Failed to update version in pubspec.yaml"
+    echo "   Expected: $NEW_VERSION_LINE"
+    echo "   Found: $UPDATED_VERSION_LINE"
+    exit 1
+fi
+
+echo "📱 Building Life Frame v$NEW_VERSION (build $NEW_BUILD)..."
+
+exit
+# Build the app bundle
+flutter build appbundle --release
+
+# Define paths
+ORIGINAL_BUNDLE="build/app/outputs/bundle/release/app-release.aab"
+NEW_BUNDLE_NAME="life_frame_v${NEW_VERSION}_build${NEW_BUILD}.aab"
+BUNDLE_DIR="build/app/outputs/bundle/release"
+NEW_BUNDLE_PATH="$BUNDLE_DIR/$NEW_BUNDLE_NAME"
+
+# Check if the original bundle was created
+if [ ! -f "$ORIGINAL_BUNDLE" ]; then
+    echo "❌ Error: App bundle not found at $ORIGINAL_BUNDLE"
+    exit 1
+fi
+
+# Rename the bundle with version info
+echo "📦 Renaming bundle to: $NEW_BUNDLE_NAME"
+mv "$ORIGINAL_BUNDLE" "$NEW_BUNDLE_PATH"
+
+# Get the full path for display
+FULL_BUNDLE_PATH=$(realpath "$NEW_BUNDLE_PATH")
+echo "✅ Release bundle created: $FULL_BUNDLE_PATH"
+
+# Open the directory containing the bundle
+echo "📂 Opening bundle directory..."
+open "$BUNDLE_DIR"
+
+# Open Google Play Console
+echo "🌐 Opening Google Play Console..."
+PLAY_CONSOLE_URL="https://play.google.com/console/u/0/developers/5432116343729248874/app/4975940671158850067/tracks/4699540413749970793/releases/"
+open "$PLAY_CONSOLE_URL"
+
+echo ""
+echo "🎉 Release build complete!"
+echo "   📱 App: Life Frame"
+if [ -n "$VERSION_BUMP_TYPE" ]; then
+    echo "   📊 Version: $CURRENT_VERSION → $NEW_VERSION ($VERSION_BUMP_TYPE bump)"
+    echo "   🔢 Build: $CURRENT_BUILD → $NEW_BUILD (reset)"
+else
+    echo "   📊 Version: $NEW_VERSION"
+    echo "   🔢 Build: $CURRENT_BUILD → $NEW_BUILD (incremented)"
+fi
+echo "   📦 Bundle: $NEW_BUNDLE_NAME"
+echo "   📍 Location: $FULL_BUNDLE_PATH"
+echo ""
+echo "Next steps:"
+echo "1. Upload the bundle to Google Play Console (opening now)"
+echo "2. Fill in release notes for v$NEW_VERSION"
+echo "3. Submit for review"
+echo "4. Commit the updated pubspec.yaml with new version"
