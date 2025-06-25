@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'debug/image_restoration_screen.dart';
-import 'debug/photo_debug_screen.dart';
+import 'debug/database.dart';
 import 'debug/exif_debug_screen.dart';
 import 'debug/notifications_debug_screen.dart';
 import 'debug/talker_debug_screen.dart';
 import '../widgets/debug/shapes_showcase.dart';
 import '../widgets/life_frame_logo.dart';
-import '../models/debug_option.dart';
-import '../widgets/debug/debug_list.dart';
+import '../models/menu_option.dart';
+import '../widgets/menu_list.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
@@ -28,10 +28,10 @@ class DebugScreen extends StatelessWidget {
   }
 
   Widget _buildDebugContent(BuildContext context, Talker talker) {
-    final List<DebugOption> debugOptions = [
-      DebugOption(
-        title: 'Photo Debugging',
-        icon: CupertinoIcons.camera_fill,
+    final List<MenuOption> debugOptions = [
+      MenuOption(
+        title: 'Database',
+        icon: CupertinoIcons.archivebox,
         iconColor: CupertinoColors.white,
         iconBackgroundColor: CupertinoColors.systemBlue,
         isLink: true,
@@ -44,7 +44,7 @@ class DebugScreen extends StatelessWidget {
           }
         },
       ),
-      DebugOption(
+      MenuOption(
         title: 'EXIF Data Viewer',
         icon: CupertinoIcons.info_circle_fill,
         iconColor: CupertinoColors.white,
@@ -59,7 +59,7 @@ class DebugScreen extends StatelessWidget {
           }
         },
       ),
-      DebugOption(
+      MenuOption(
         title: 'Notifications Testing',
         icon: CupertinoIcons.bell_fill,
         iconColor: CupertinoColors.white,
@@ -78,7 +78,7 @@ class DebugScreen extends StatelessWidget {
           }
         },
       ),
-      DebugOption(
+      MenuOption(
         title: 'System Logs',
         icon: CupertinoIcons.text_alignleft,
         iconColor: CupertinoColors.white,
@@ -93,7 +93,7 @@ class DebugScreen extends StatelessWidget {
           }
         },
       ),
-      DebugOption(
+      MenuOption(
         title: 'UI Components',
         icon: CupertinoIcons.square_on_circle,
         iconColor: CupertinoColors.white,
@@ -108,7 +108,7 @@ class DebugScreen extends StatelessWidget {
           }
         },
       ),
-      DebugOption(
+      MenuOption(
         title: 'Restore Images',
         icon: CupertinoIcons.photo_on_rectangle,
         iconColor: CupertinoColors.white,
@@ -149,7 +149,7 @@ class DebugScreen extends StatelessWidget {
             const SizedBox(height: 40),
             LifeFrameLogo(),
             const SizedBox(height: 60),
-            DebugList(options: debugOptions),
+            MenuList(options: debugOptions),
             const Spacer(),
           ],
         ),

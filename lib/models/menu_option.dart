@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-class DebugOption {
+class MenuOption {
   final String title;
   final IconData icon;
   final Color iconColor;
@@ -9,7 +9,7 @@ class DebugOption {
   final VoidCallback? onTap;
   final bool isLink;
 
-  const DebugOption({
+  const MenuOption({
     required this.title,
     required this.icon,
     required this.iconColor,
@@ -19,7 +19,7 @@ class DebugOption {
     this.isLink = false,
   });
 
-  DebugOption copyWith({
+  MenuOption copyWith({
     String? title,
     IconData? icon,
     Color? iconColor,
@@ -28,7 +28,7 @@ class DebugOption {
     VoidCallback? onTap,
     bool? isLink,
   }) {
-    return DebugOption(
+    return MenuOption(
       title: title ?? this.title,
       icon: icon ?? this.icon,
       iconColor: iconColor ?? this.iconColor,

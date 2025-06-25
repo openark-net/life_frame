@@ -4,10 +4,10 @@ import 'package:get/get.dart';
 import 'package:life_frame/widgets/life_frame_logo.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import '../controllers/settings_controller.dart';
-import '../models/settings_option.dart';
+import '../models/menu_option.dart';
 import '../openark_theme.dart';
 import '../services/notification_service.dart';
-import '../widgets/settings/settings_list.dart';
+import '../widgets/menu_list.dart';
 import 'settings/about_screen.dart';
 import 'settings/submit_a_bug.dart';
 import 'debug/image_restoration_screen.dart';
@@ -41,8 +41,8 @@ class SettingsScreen extends StatelessWidget {
     NotificationService notifications,
     Talker talker,
   ) {
-    final List<SettingsOption> settingsOptions = [
-      SettingsOption(
+    final List<MenuOption> settingsOptions = [
+      MenuOption(
         title: 'Daily Notifications',
         icon: CupertinoIcons.bell_fill,
         iconColor: CupertinoColors.white,
@@ -66,7 +66,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
       ),
-      SettingsOption(
+      MenuOption(
         title: 'About OpenArk',
         icon: CupertinoIcons.app,
         iconColor: CupertinoColors.white,
@@ -81,7 +81,7 @@ class SettingsScreen extends StatelessWidget {
           }
         },
       ),
-      SettingsOption(
+      MenuOption(
         title: 'Submit a Bug',
         icon: CupertinoIcons.ant,
         iconColor: CupertinoColors.white,
@@ -119,7 +119,7 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 40),
             LifeFrameLogo(),
             const SizedBox(height: 60),
-            SettingsList(options: settingsOptions),
+            MenuList(options: settingsOptions),
             const Spacer(),
           ],
         ),

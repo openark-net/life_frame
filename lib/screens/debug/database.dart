@@ -14,9 +14,7 @@ class _PhotoDebugScreenState extends State<PhotoDebugScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Photo Debugging'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Database')),
       child: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

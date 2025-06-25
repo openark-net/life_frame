@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../models/settings_option.dart';
-import '../../openark_theme.dart';
+import '../models/menu_option.dart';
+import '../openark_theme.dart';
 
-class SettingsList extends StatelessWidget {
-  final List<SettingsOption> options;
+class MenuList extends StatelessWidget {
+  final List<MenuOption> options;
 
-  const SettingsList({super.key, required this.options});
+  const MenuList({super.key, required this.options});
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +14,12 @@ class SettingsList extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: CupertinoListSection.insetGrouped(
         backgroundColor: Colors.transparent,
-        children: options.map((option) => _buildSettingsItem(option)).toList(),
+        children: options.map((option) => _buildMenuItem(option)).toList(),
       ),
     );
   }
 
-  Widget _buildSettingsItem(SettingsOption option) {
+  Widget _buildMenuItem(MenuOption option) {
     return CupertinoListTile(
       leading: Container(
         width: 28,
