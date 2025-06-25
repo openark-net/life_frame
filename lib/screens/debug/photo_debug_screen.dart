@@ -13,20 +13,27 @@ class _PhotoDebugScreenState extends State<PhotoDebugScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ActionButtons(
-              onStitchedPhotoChanged: (path) {
-                setState(() {
-                  stitchedPhotoPath = path;
-                });
-              },
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Photo Debugging'),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ActionButtons(
+                  onStitchedPhotoChanged: (path) {
+                    setState(() {
+                      stitchedPhotoPath = path;
+                    });
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

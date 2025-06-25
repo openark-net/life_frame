@@ -22,6 +22,7 @@ class ImageFilesystem {
     ui.Image image, {
     double? latitude,
     double? longitude,
+    String? locationName,
   }) async {
     final bytes = await _convertToHighQualityJpeg(image);
 
@@ -38,7 +39,13 @@ class ImageFilesystem {
     await file.writeAsBytes(bytes);
 
     // Apply metadata to the saved file
-    await _applyMetadataToFile(filePath, now, latitude, longitude);
+    await _applyMetadataToFile(
+      filePath,
+      now,
+      latitude,
+      longitude,
+      locationName,
+    );
 
     await Gal.putImage(filePath, album: 'LifeFrame');
 
@@ -71,6 +78,7 @@ class ImageFilesystem {
     DateTime timestamp,
     double? latitude,
     double? longitude,
+    String? locationName,
   ) async {
     final exif = await Exif.fromPath(filePath);
 
@@ -85,6 +93,7 @@ class ImageFilesystem {
         'DateTimeOriginal': formattedTimestamp,
         'DateTime': formattedTimestamp,
         'DateTimeDigitized': formattedTimestamp,
+        'ImageDescription': locationName ?? 'Unknown',
       };
 
       // Add GPS metadata only if coordinates are provided
@@ -157,16 +166,14 @@ class ImageFilesystem {
         // Extract GPS coordinates
         final lat = attributes?['GPSLatitude'] as double?;
         final lng = attributes?['GPSLongitude'] as double?;
-
-        String locationName = 'Unknown Location';
-        if (lat != null && lng != null) {
-          locationName =
-              await getFormattedLocationLatLng(lat, lng) ?? "Unknown Location";
+        var locationName = attributes?['ImageDescription'] as String?;
+        if (locationName == null && lat != null && lng != null) {
+          locationName = await getFormattedLocationLatLng(lat, lng);
         }
 
         return DailyEntry(
           photoPath: file.path,
-          locationName: locationName,
+          locationName: locationName ?? "Unknown Location",
           latitude: lat ?? 0.0,
           longitude: lng ?? 0.0,
           timestamp: timestamp,

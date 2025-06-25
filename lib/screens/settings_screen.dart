@@ -10,7 +10,7 @@ import '../services/notification_service.dart';
 import '../widgets/settings/settings_list.dart';
 import 'settings/about_screen.dart';
 import 'settings/submit_a_bug.dart';
-import 'settings/image_restoration_screen.dart';
+import 'debug/image_restoration_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -93,25 +93,6 @@ class SettingsScreen extends StatelessWidget {
             Get.to(() => const SubmitABugScreen());
           } catch (e, st) {
             talker.handle(e, st, 'Error navigating to Submit a Bug screen');
-          }
-        },
-      ),
-      SettingsOption(
-        title: 'Restore Images',
-        icon: CupertinoIcons.photo_on_rectangle,
-        iconColor: CupertinoColors.white,
-        iconBackgroundColor: CupertinoColors.systemBlue,
-        isLink: true,
-        onTap: () {
-          try {
-            talker.info('Navigating to Image Restoration screen');
-            Get.to(() => const ImageRestorationScreen());
-          } catch (e, st) {
-            talker.handle(
-              e,
-              st,
-              'Error navigating to Image Restoration screen',
-            );
           }
         },
       ),

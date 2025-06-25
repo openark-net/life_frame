@@ -51,6 +51,7 @@ class DailyPhotoCaptureService {
         result.photo!,
         latitude: result.position?.latitude,
         longitude: result.position?.longitude,
+        locationName: result.locationName,
       );
 
       _talker.info('Image saved to filesystem', {'photoPath': photoPath});
