@@ -241,6 +241,32 @@ class DailyEntryController extends GetxController {
     }
   }
 
+  Future<bool> deleteEntryByTimestamp(DateTime timestamp) async {
+    try {
+      final timestampMs = timestamp.millisecondsSinceEpoch;
+      final count = await _db.delete(
+        _tableName,
+        where: 'timestamp = ?',
+        whereArgs: [timestampMs],
+      );
+
+      if (count > 0) {
+        _talker.info('Deleted entry for ${timestamp.toIso8601String()}');
+        await _refreshStats();
+        _incrementEntriesVersion();
+        return true;
+      } else {
+        _talker.warning(
+          'No entry found for timestamp: ${timestamp.toIso8601String()}',
+        );
+        return false;
+      }
+    } catch (e, st) {
+      _talker.handle(e, st, 'Error deleting entry by timestamp');
+      return false;
+    }
+  }
+
   Future<bool> deleteTodayEntry() async {
     try {
       final todaysEntries = await _getTodaysEntries();
