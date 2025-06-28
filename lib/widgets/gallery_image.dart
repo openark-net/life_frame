@@ -91,7 +91,9 @@ class GalleryImage extends StatelessWidget {
                         .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   Text(
-                    entry.locationName,
+                    entry.locationName != "Unknown Location"
+                        ? entry.locationName
+                        : '',
                     style: CupertinoTheme.of(context).textTheme.textStyle
                         .copyWith(
                           fontSize: 14,
