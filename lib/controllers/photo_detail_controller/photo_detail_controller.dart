@@ -6,7 +6,10 @@ import 'animation_mixin.dart';
 import 'pagination_mixin.dart';
 
 class PhotoDetailController extends GetxController
-    with GetTickerProviderStateMixin, PhotoDetailAnimationMixin, PhotoDetailPaginationMixin {
+    with
+        GetTickerProviderStateMixin,
+        PhotoDetailAnimationMixin,
+        PhotoDetailPaginationMixin {
   @override
   final DailyEntryController photoJournalController;
   @override
