@@ -35,9 +35,21 @@ class PhotoDetailController extends GetxController
   }
 
   void onPageChanged(int index) {
+    final previousIndex = currentIndex.value;
     currentIndex.value = index;
+
     resetAnimationsForPageChange();
-    preloadImageForIndex(index);
+
+    if (index > previousIndex) {
+      if (index + 2 < entries.length) {
+        preloadImageForIndex(index + 2);
+      }
+    } else if (index < previousIndex) {
+      if (index - 2 >= 0) {
+        preloadImageForIndex(index - 2);
+      }
+    }
+
     startNextPhotoPreview(index, entries.length);
   }
 
