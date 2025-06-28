@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-class SettingsOption {
+class MenuOption {
   final String title;
   final IconData icon;
   final Color iconColor;
@@ -9,7 +9,7 @@ class SettingsOption {
   final VoidCallback? onTap;
   final bool isLink;
 
-  const SettingsOption({
+  const MenuOption({
     required this.title,
     required this.icon,
     required this.iconColor,
@@ -19,7 +19,7 @@ class SettingsOption {
     this.isLink = false,
   });
 
-  SettingsOption copyWith({
+  MenuOption copyWith({
     String? title,
     IconData? icon,
     Color? iconColor,
@@ -28,7 +28,7 @@ class SettingsOption {
     VoidCallback? onTap,
     bool? isLink,
   }) {
-    return SettingsOption(
+    return MenuOption(
       title: title ?? this.title,
       icon: icon ?? this.icon,
       iconColor: iconColor ?? this.iconColor,

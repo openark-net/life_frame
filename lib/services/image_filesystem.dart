@@ -8,6 +8,10 @@ import 'package:native_exif/native_exif.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 
+import 'package:life_frame/models/daily_entry.dart';
+
+import '../utils/location_formatter.dart';
+
 class ImageFilesystem {
   static const String _lifeFrameSoftware = 'life_frame';
   static const int _jpegQuality = 95; // High quality JPEG (0-100)
@@ -18,6 +22,7 @@ class ImageFilesystem {
     ui.Image image, {
     double? latitude,
     double? longitude,
+    String? locationName,
   }) async {
     final bytes = await _convertToHighQualityJpeg(image);
 
@@ -34,9 +39,14 @@ class ImageFilesystem {
     await file.writeAsBytes(bytes);
 
     // Apply metadata to the saved file
-    await _applyMetadataToFile(filePath, now, latitude, longitude);
+    await _applyMetadataToFile(
+      filePath,
+      now,
+      latitude,
+      longitude,
+      locationName,
+    );
 
-    // Save to gallery and return the gallery path
     await Gal.putImage(filePath, album: 'LifeFrame');
 
     return filePath;
@@ -68,6 +78,7 @@ class ImageFilesystem {
     DateTime timestamp,
     double? latitude,
     double? longitude,
+    String? locationName,
   ) async {
     final exif = await Exif.fromPath(filePath);
 
@@ -82,6 +93,7 @@ class ImageFilesystem {
         'DateTimeOriginal': formattedTimestamp,
         'DateTime': formattedTimestamp,
         'DateTimeDigitized': formattedTimestamp,
+        'ImageDescription': locationName ?? 'Unknown',
       };
 
       // Add GPS metadata only if coordinates are provided
@@ -128,5 +140,57 @@ class ImageFilesystem {
       'GPSDateStamp': gpsDate,
       'GPSMapDatum': 'WGS-84',
     };
+  }
+
+  /// Loads a DailyEntry from an existing image file
+  /// Extracts metadata from EXIF data and returns a DailyEntry object
+  static Future<DailyEntry?> loadDailyEntry(File file) async {
+    try {
+      final exif = await Exif.fromPath(file.path);
+
+      try {
+        final attributes = await exif.getAttributes();
+
+        // Extract timestamp from EXIF data
+        final dateTimeOriginal = attributes?['DateTimeOriginal'] as String?;
+        final dateTime = attributes?['DateTime'] as String?;
+        final dateTimeStr = dateTimeOriginal ?? dateTime;
+
+        if (dateTimeStr == null) {
+          throw Exception('No timestamp found in EXIF data');
+        }
+
+        // Parse EXIF timestamp (format: "YYYY:MM:DD HH:mm:ss")
+        final timestamp = DateFormat("yyyy:MM:dd HH:mm:ss").parse(dateTimeStr);
+
+        // Extract GPS coordinates
+        final lat = attributes?['GPSLatitude'] as double?;
+        final lng = attributes?['GPSLongitude'] as double?;
+        var locationName = attributes?['ImageDescription'] as String?;
+        if (locationName == null && lat != null && lng != null) {
+          locationName = await getFormattedLocationLatLng(lat, lng);
+        }
+
+        return DailyEntry(
+          photoPath: file.path,
+          locationName: locationName ?? "Unknown Location",
+          latitude: lat ?? 0.0,
+          longitude: lng ?? 0.0,
+          timestamp: timestamp,
+        );
+      } finally {
+        await exif.close();
+      }
+    } catch (e) {
+      // If we can't read EXIF data, use file modification time as fallback
+      final stat = await file.stat();
+      return DailyEntry(
+        photoPath: file.path,
+        locationName: 'Unknown Location',
+        latitude: 0.0,
+        longitude: 0.0,
+        timestamp: stat.modified,
+      );
+    }
   }
 }

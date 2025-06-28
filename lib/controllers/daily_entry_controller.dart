@@ -1,6 +1,5 @@
 // lib/controllers/daily_entry_controller.dart
 import 'dart:async';
-import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:path/path.dart';
@@ -213,6 +212,58 @@ class DailyEntryController extends GetxController {
         hasPreviousPage: false,
         total: 0,
       );
+    }
+  }
+
+  Future<DailyEntry?> getImageByTimestamp(DateTime time) async {
+    try {
+      final timestamp = time.millisecondsSinceEpoch;
+      final rows = await _db.query(
+        _tableName,
+        where: 'timestamp = ?',
+        whereArgs: [timestamp],
+        limit: 1,
+      );
+
+      if (rows.isEmpty) {
+        _talker.debug(
+          'No entry found for timestamp: ${time.toIso8601String()}',
+        );
+        return null;
+      }
+
+      final entry = DailyEntry.fromMap(rows.first);
+      _talker.debug('Found entry for timestamp: ${time.toIso8601String()}');
+      return entry;
+    } catch (e, st) {
+      _talker.handle(e, st, 'Error getting image by timestamp');
+      return null;
+    }
+  }
+
+  Future<bool> deleteEntryByTimestamp(DateTime timestamp) async {
+    try {
+      final timestampMs = timestamp.millisecondsSinceEpoch;
+      final count = await _db.delete(
+        _tableName,
+        where: 'timestamp = ?',
+        whereArgs: [timestampMs],
+      );
+
+      if (count > 0) {
+        _talker.info('Deleted entry for ${timestamp.toIso8601String()}');
+        await _refreshStats();
+        _incrementEntriesVersion();
+        return true;
+      } else {
+        _talker.warning(
+          'No entry found for timestamp: ${timestamp.toIso8601String()}',
+        );
+        return false;
+      }
+    } catch (e, st) {
+      _talker.handle(e, st, 'Error deleting entry by timestamp');
+      return false;
     }
   }
 

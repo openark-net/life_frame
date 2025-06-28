@@ -6,7 +6,7 @@ import 'package:talker/talker.dart';
 /// Converts latitude and longitude coordinates to a formatted location string.
 /// Returns a string in the format "City, Province/State" using short province codes.
 ///
-/// Example: getFormattedLocation(49.2827, -123.1207) returns "Vancouver, BC"
+/// Example: getFormattedLocationLatLng(49.2827, -123.1207) returns "Vancouver, BC"
 ///
 /// Parameters:
 /// - [latitude]: The latitude coordinate (required)
@@ -17,31 +17,27 @@ import 'package:talker/talker.dart';
 /// - Just "City" if only city is available
 /// - Just "Province" if only province is available
 /// - null if geocoding fails or no location data is available
-Future<String?> getFormattedLocation(Position? position) async {
+Future<String?> getFormattedLocationLatLng(
+  double latitude,
+  double longitude,
+) async {
   final Talker talker = Get.find<Talker>();
 
-  if (position == null) {
-    return null;
-  }
-
   talker.debug(
-    'Getting formatted location for coordinates: ${position.latitude}, ${position.longitude}',
+    'Getting formatted location for coordinates: $latitude, $longitude',
   );
 
   // Perform reverse geocoding to get address information
   List<Placemark> placemarks;
   try {
-    placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
+    placemarks = await placemarkFromCoordinates(latitude, longitude);
   } catch (e) {
     return null;
   }
 
   if (placemarks.isEmpty) {
     talker.warning(
-      'No placemarks found for coordinates: ${position.latitude}, ${position.longitude}',
+      'No placemarks found for coordinates: $latitude, $longitude',
     );
     return null;
   }
@@ -69,10 +65,28 @@ Future<String?> getFormattedLocation(Position? position) async {
     return shortProvince;
   } else {
     talker.warning(
-      'No city or province data available for coordinates:  ${position.latitude}, ${position.longitude}',
+      'No city or province data available for coordinates: $latitude, $longitude',
     );
     return null;
   }
+}
+
+/// Convenience function that converts a Position to a formatted location string.
+///
+/// Parameters:
+/// - [position]: The Position object containing latitude and longitude
+///
+/// Returns:
+/// - A formatted string like "City, Province" on success
+/// - Just "City" if only city is available
+/// - Just "Province" if only province is available
+/// - null if position is null or geocoding fails
+Future<String?> getFormattedLocation(Position? position) async {
+  if (position == null) {
+    return null;
+  }
+
+  return getFormattedLocationLatLng(position.latitude, position.longitude);
 }
 
 /// Converts full province/state names to their short form abbreviations.

@@ -142,6 +142,9 @@ class _NotificationsDebugScreenState extends State<NotificationsDebugScreen> {
     }
 
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Notifications Testing'),
+      ),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
