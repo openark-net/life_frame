@@ -11,8 +11,6 @@ class GalleryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<DailyEntryController>();
-
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
       navigationBar: const CupertinoNavigationBar(middle: Text('Gallery')),

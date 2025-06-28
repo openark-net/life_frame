@@ -188,7 +188,7 @@ class DailyEntryController extends GetxController {
         LIMIT ?
       ''', args);
 
-      final entries = rows.map(DailyEntry.fromMap).toList(growable: false);
+      final entries = rows.map(DailyEntry.fromMap).toList();
 
       // Determine pagination flags
       final hasPreviousPage = cursor != null;
