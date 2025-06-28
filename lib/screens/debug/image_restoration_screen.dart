@@ -89,42 +89,6 @@ class _ImageRestorationScreenState extends State<ImageRestorationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
-
-              ContentCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Image Restoration',
-                      style: CupertinoTheme.of(context).textTheme.textStyle
-                          .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'This tool will scan your ~/Pictures/LifeFrame directory and restore any images that are not currently in your photo timeline.',
-                      style: CupertinoTheme.of(context).textTheme.textStyle
-                          .copyWith(
-                            fontSize: 16,
-                            color: CupertinoColors.secondaryLabel,
-                          ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Directory: $_directoryPath',
-                      style: CupertinoTheme.of(context).textTheme.textStyle
-                          .copyWith(
-                            fontSize: 14,
-                            color: CupertinoColors.tertiaryLabel,
-                            fontFamily: 'Courier',
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
               if (_isRestoring) ...[
                 ContentCard(
                   child: Column(
