@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../controllers/daily_entry_controller.dart';
-import '../controllers/photo_detail_controller.dart';
+import '../controllers/photo_detail_controller/photo_detail_controller.dart';
 import '../models/daily_entry.dart';
 import '../widgets/photo_detail/photo_header.dart';
 import '../widgets/photo_detail/photo_page_view.dart';

@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
-import '../../controllers/photo_detail_controller.dart';
+import '../../controllers/photo_detail_controller/photo_detail_controller.dart';
 
 class AnimatedPhoto extends StatelessWidget {
   final PhotoDetailController controller;

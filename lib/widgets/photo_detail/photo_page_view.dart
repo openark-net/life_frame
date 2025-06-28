@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import '../../controllers/photo_detail_controller.dart';
+import '../../controllers/photo_detail_controller/photo_detail_controller.dart';
 import 'photo_stack.dart';
 
 class PhotoPageView extends StatelessWidget {

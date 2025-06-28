@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import '../../controllers/photo_detail_controller.dart';
+import '../../controllers/photo_detail_controller/photo_detail_controller.dart';
 import '../../models/daily_entry.dart';
 import 'photo_preview.dart';
 import 'animated_photo.dart';
