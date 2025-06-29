@@ -17,6 +17,7 @@ class NotificationService extends GetxService {
   PermissionsService? _permissionsService;
   SettingsController? _settingsController;
   Talker? _talker;
+  bool _initializationFailure = false;
 
   static const String channelId = 'life_frame_daily';
   static const String channelName = 'Daily Photo Reminder';
@@ -32,25 +33,51 @@ class NotificationService extends GetxService {
     _permissionsService ??= Get.find<PermissionsService>();
     _settingsController ??= Get.find<SettingsController>();
 
-    if (!await _shouldDoNotifications()) {
-      talker.info(
-        'Notifications disabled or not permitted, skipping initialization',
-      );
-      return this;
+    try {
+      talker.info('Initializing notification service');
+      await _initializeNotifications();
+      await _initializeTimezone();
+      await _permissionsService!.requestNotificationPermissions();
+
+      if (await _shouldDoNotifications()) {
+        await registerNotifications(notifications);
+      } else {
+        talker.info(
+          'Notifications disabled or not permitted, skipping registration',
+        );
+      }
+    } catch (e, st) {
+      _initializationFailure = true;
+      talker.handle(e, st, 'Failed to initialize notification service');
     }
 
-    talker.info('Initializing notification service');
-    await _initializeNotifications();
-    await _initializeTimezone();
-    await _permissionsService!.requestNotificationPermissions();
-    await registerNotifications(notifications);
     return this;
   }
 
   Future<void> _initializeNotifications() async {
-    const androidSettings = AndroidInitializationSettings(
-      '@drawable/ic_notification',
-    );
+    try {
+      await _tryInitializeWithIcon('@drawable/ic_notification');
+      talker.debug('Notifications initialized with custom icon');
+    } catch (e, st) {
+      talker.warning('Failed to initialize with custom icon, trying app icon');
+      talker.handle(e, st, 'Custom icon initialization failed');
+
+      try {
+        await _tryInitializeWithIcon('@mipmap/ic_launcher');
+        talker.debug('Notifications initialized with app icon fallback');
+      } catch (fallbackError, fallbackSt) {
+        talker.handle(
+          fallbackError,
+          fallbackSt,
+          'Both custom and app icon initialization failed',
+        );
+        rethrow;
+      }
+    }
+  }
+
+  Future<void> _tryInitializeWithIcon(String iconPath) async {
+    final androidSettings = AndroidInitializationSettings(iconPath);
 
     const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -58,7 +85,7 @@ class NotificationService extends GetxService {
       requestSoundPermission: true,
     );
 
-    const initSettings = InitializationSettings(
+    final initSettings = InitializationSettings(
       android: androidSettings,
       iOS: darwinSettings,
       macOS: darwinSettings,
@@ -68,8 +95,6 @@ class NotificationService extends GetxService {
       initSettings,
       onDidReceiveNotificationResponse: _handleNotificationTap,
     );
-
-    talker.debug('Flutter local notifications initialized');
   }
 
   Future<void> _initializeTimezone() async {
@@ -80,10 +105,16 @@ class NotificationService extends GetxService {
   }
 
   Future<bool> _shouldDoNotifications() async {
+    if (_initializationFailure) {
+      talker.warning('Notifications unavailable due to initialization failure');
+      return false;
+    }
+
     if (!_settingsController!.notificationsEnabled) {
       talker.debug('Notifications disabled in settings');
       return false;
     }
+
     final areEnabled = await _permissionsService!.areNotificationsEnabled();
     if (!areEnabled) {
       talker.warning('Notification permissions not granted');
@@ -92,6 +123,13 @@ class NotificationService extends GetxService {
   }
 
   Future<void> registerNotifications(List<LFNotification> notifications) async {
+    if (_initializationFailure) {
+      talker.warning(
+        'Cannot register notifications due to initialization failure',
+      );
+      return;
+    }
+
     talker.info('Registering ${notifications.length} notifications');
     await cancelAllNotifications();
 
@@ -117,6 +155,13 @@ class NotificationService extends GetxService {
   }
 
   Future<void> showInstantNotification(InstantNotification notification) async {
+    if (_initializationFailure) {
+      talker.warning(
+        'Cannot show instant notification due to initialization failure',
+      );
+      return;
+    }
+
     talker.info('Showing instant notification: ${notification.title}');
 
     try {
@@ -136,6 +181,13 @@ class NotificationService extends GetxService {
   }
 
   Future<void> _scheduleNotification(ScheduledNotification notification) async {
+    if (_initializationFailure) {
+      talker.warning(
+        'Cannot schedule notification due to initialization failure',
+      );
+      return;
+    }
+
     final details = _createNotificationDetails();
 
     final now = tz.TZDateTime.now(tz.local);
@@ -171,6 +223,13 @@ class NotificationService extends GetxService {
   Future<void> _schedulePeriodicNotification(
     PeriodicNotification notification,
   ) async {
+    if (_initializationFailure) {
+      talker.warning(
+        'Cannot schedule periodic notification due to initialization failure',
+      );
+      return;
+    }
+
     final details = _createNotificationDetails();
 
     await _notifications.periodicallyShow(
@@ -212,11 +271,25 @@ class NotificationService extends GetxService {
   }
 
   Future<void> cancelAllNotifications() async {
+    if (_initializationFailure) {
+      talker.warning(
+        'Cannot cancel notifications due to initialization failure',
+      );
+      return;
+    }
+
     talker.info('Cancelling all notifications');
     await _notifications.cancelAll();
   }
 
   Future<void> enableNotifications() async {
+    if (_initializationFailure) {
+      talker.warning(
+        'Cannot enable notifications due to initialization failure',
+      );
+      return;
+    }
+
     talker.info('Enabling notifications');
     await registerNotifications(notifications);
   }
@@ -227,4 +300,6 @@ class NotificationService extends GetxService {
     );
     // Navigate to camera screen when notification is tapped
   }
+
+  bool get isInitialized => !_initializationFailure;
 }
