@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:talker/talker.dart';
@@ -33,6 +34,9 @@ class _AboutScreenState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     final talker = Get.find<Talker>();
+    final isIOS = Platform.isIOS;
+    final platformSupportsDonations = !isIOS;
+
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(middle: Text('About')),
       backgroundColor: OpenArkColors.background,
@@ -50,20 +54,23 @@ class _AboutScreenState extends State<AboutScreen> {
                     const SizedBox(height: 24),
                     const WebsiteBadge(),
                     const SizedBox(height: 12),
-                    const SupportDescription(),
+                    SupportDescription(
+                      platformSupportsDonations: platformSupportsDonations,
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 40),
-              DonationButtons(
-                onAmountSelected: (amount) {
-                  setState(() {
-                    talker.info("Selected donation amount: $amount");
-                    selectedAmount = amount;
-                  });
-                },
-                onDonatePressed: _showDonationDialog,
-              ),
+              if (platformSupportsDonations)
+                DonationButtons(
+                  onAmountSelected: (amount) {
+                    setState(() {
+                      talker.info("Selected donation amount: $amount");
+                      selectedAmount = amount;
+                    });
+                  },
+                  onDonatePressed: _showDonationDialog,
+                ),
               const Spacer(),
             ],
           ),
