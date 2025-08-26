@@ -67,7 +67,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       await _controller!.initialize();
-      await _controller!.setFlashMode(FlashMode.off);
       await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
 
       if (mounted) {
@@ -78,8 +77,10 @@ class _CameraScreenState extends State<CameraScreen> {
               : 'Position your shot';
         });
       }
-    } catch (e) {
-      _showError('Camera initialization failed');
+    } catch (e, st) {
+      const err = 'Camera initialization failed';
+      talker.handle(e, st, err);
+      _showError(err);
     }
   }
 
