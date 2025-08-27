@@ -69,6 +69,16 @@ class _CameraScreenState extends State<CameraScreen> {
       await _controller!.initialize();
       await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
 
+      try {
+        await _controller!.setFlashMode(FlashMode.off);
+      } catch (e, st) {
+        talker.handle(
+          e,
+          st,
+          'Failed to set flashmode, this might not be a problem on some devices.',
+        );
+      }
+
       if (mounted) {
         setState(() {
           _isFrontCamera = !isBack;
