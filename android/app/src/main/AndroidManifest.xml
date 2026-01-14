@@ -5,11 +5,16 @@
     <uses-feature android:name="android.hardware.camera.front" android:required="false" />
 
     <!-- Storage permissions for saving photos -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
+    <!-- Android 13+ (API 33+): READ_MEDIA_IMAGES permission (scoped to photos) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    
+    <!-- Android 11-12 (API 30-32): READ_EXTERNAL_STORAGE for access to gallery -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    
+    <!-- Android 10 and below (API < 30): Legacy storage access -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <!-- Location permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

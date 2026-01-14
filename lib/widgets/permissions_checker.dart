@@ -20,7 +20,8 @@ class AndroidPermissionsScreen extends StatefulWidget {
       _AndroidPermissionsScreenState();
 }
 
-class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen> {
+class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen>
+    with WidgetsBindingObserver {
   final Map<PermissionType, PermissionStatus> _permissionStatuses = {};
   bool _isChecking = true;
   bool _allPermissionsGranted = false;
@@ -28,7 +29,23 @@ class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializePermissions();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Re-check permissions when app comes to foreground
+    // This handles cases where user granted permissions in system settings
+    if (state == AppLifecycleState.resumed) {
+      _checkAllPermissions();
+    }
   }
 
   Future<void> _initializePermissions() async {
@@ -58,6 +75,7 @@ class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen> {
       _isChecking = false;
     });
 
+    // If all permissions are granted, call the callback
     if (_allPermissionsGranted) {
       widget.onAllPermissionsGranted?.call();
     }
@@ -88,23 +106,32 @@ class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen> {
 
   Future<PermissionStatus> _checkStoragePermission() async {
     final deviceInfo = await DeviceInfoPlugin().androidInfo;
-    if (deviceInfo.version.sdkInt >= 33) {
+    final sdkInt = deviceInfo.version.sdkInt;
+    
+    if (sdkInt >= 33) {
+      // Android 13+: READ_MEDIA_IMAGES permission (scoped, can be limited)
       return await Permission.photos.status;
-    } else if (deviceInfo.version.sdkInt >= 30) {
-      return await Permission.manageExternalStorage.status;
     } else {
+      // Android 11 and below: READ_EXTERNAL_STORAGE or WRITE_EXTERNAL_STORAGE
       return await Permission.storage.status;
     }
   }
 
   Future<PermissionStatus> _checkNotificationPermission() async {
-    final androidImplementation = FlutterLocalNotificationsPlugin()
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    final granted =
-        await androidImplementation?.areNotificationsEnabled() ?? false;
-    return granted ? PermissionStatus.granted : PermissionStatus.denied;
+    if (Platform.isAndroid) {
+      final androidImplementation = FlutterLocalNotificationsPlugin()
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      final granted =
+          await androidImplementation?.areNotificationsEnabled() ?? false;
+      return granted ? PermissionStatus.granted : PermissionStatus.denied;
+    } else if (Platform.isIOS) {
+      // On iOS, notifications are considered granted if permission was requested
+      // and user didn't deny it permanently
+      return PermissionStatus.granted;
+    }
+    return PermissionStatus.denied;
   }
 
   bool _areAllPermissionsGranted() {
@@ -124,25 +151,22 @@ class _AndroidPermissionsScreenState extends State<AndroidPermissionsScreen> {
         await Permission.camera.request();
         break;
       case PermissionType.storage:
-        await _requestStoragePermission();
+        final deviceInfo = await DeviceInfoPlugin().androidInfo;
+        if (deviceInfo.version.sdkInt >= 33) {
+          await Permission.photos.request();
+        } else {
+          await Permission.storage.request();
+        }
         break;
       case PermissionType.notifications:
         await _requestNotificationPermission();
         break;
     }
 
+    // Add a small delay to ensure permission changes are reflected
+    await Future.delayed(const Duration(milliseconds: 500));
+    
     await _checkAllPermissions();
-  }
-
-  Future<PermissionStatus> _requestStoragePermission() async {
-    final deviceInfo = await DeviceInfoPlugin().androidInfo;
-    if (deviceInfo.version.sdkInt >= 33) {
-      return await Permission.photos.request();
-    } else if (deviceInfo.version.sdkInt >= 30) {
-      return await Permission.manageExternalStorage.request();
-    } else {
-      return await Permission.storage.request();
-    }
   }
 
   Future<PermissionStatus> _requestNotificationPermission() async {
