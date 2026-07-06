@@ -15,6 +15,10 @@ import flutter_local_notifications
 
     GeneratedPluginRegistrant.register(with: self)
 
+    if let controller = window?.rootViewController as? FlutterViewController {
+      LensZoomFactors.register(with: controller.binaryMessenger)
+    }
+
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }

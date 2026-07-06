@@ -1,11 +1,16 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:get/get.dart';
 import 'package:talker/talker.dart';
+import '../../models/camera_lens_option.dart';
 import '../../models/frame_photos.dart';
+import '../../services/camera_lens_service.dart';
+import '../../services/ios_lens_metadata.dart';
+import '../../widgets/capture/lens_selector.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -15,19 +20,26 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
+  static const CameraLensService _lensService = CameraLensService();
+
   CameraController? _controller;
   List<CameraDescription>? _cameras;
   XFile? _backPhoto;
   XFile? _frontPhoto;
   bool _isProcessing = false;
   bool _isFrontCamera = false;
+  bool _isSwitchingLens = false;
+  List<CameraLensOption> _lensOptions = const [];
+  CameraLensOption? _selectedLens;
   String _statusMessage = 'Position your shot';
   late Talker talker;
+  late IosLensMetadata _iosLensMetadata;
 
   @override
   void initState() {
     super.initState();
     talker = Get.find<Talker>();
+    _iosLensMetadata = IosLensMetadata();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _initializeCamera();
   }
@@ -41,6 +53,13 @@ class _CameraScreenState extends State<CameraScreen> {
         return;
       }
 
+      for (final camera in _cameras!) {
+        talker.debug(
+          'Camera available: ${camera.name} '
+          '(${camera.lensDirection.name}, ${camera.lensType.name})',
+        );
+      }
+
       await _setupCamera(isBack: true);
     } catch (e, st) {
       talker.handle(e, st, "Failed to initialize camera!");
@@ -48,15 +67,19 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  Future<void> _setupCamera({required bool isBack}) async {
+  Future<void> _setupCamera({
+    required bool isBack,
+    CameraDescription? lensCamera,
+  }) async {
+    if (!mounted) return;
     if (_cameras == null || _cameras!.isEmpty) return;
 
-    final camera = _cameras!.firstWhere(
-      (camera) =>
-          camera.lensDirection ==
-          (isBack ? CameraLensDirection.back : CameraLensDirection.front),
-      orElse: () => _cameras!.first,
-    );
+    final camera =
+        lensCamera ??
+        (isBack
+            ? _lensService.defaultBack(_cameras!)
+            : _lensService.defaultFront(_cameras!));
+    if (camera == null) return;
 
     _controller = CameraController(
       camera,
@@ -79,6 +102,13 @@ class _CameraScreenState extends State<CameraScreen> {
         );
       }
 
+      if (!mounted) return;
+
+      if (isBack) {
+        await _prepareLensSelection(camera);
+        await _applyLensZoom();
+      }
+
       if (mounted) {
         setState(() {
           _isFrontCamera = !isBack;
@@ -91,6 +121,94 @@ class _CameraScreenState extends State<CameraScreen> {
       const err = 'Camera initialization failed';
       talker.handle(e, st, err);
       _showError(err);
+    }
+  }
+
+  Future<void> _prepareLensSelection(CameraDescription activeBack) async {
+    if (_lensOptions.isNotEmpty) return;
+
+    final controller = _controller;
+    if (controller == null) return;
+
+    double minZoomRatio = 1.0;
+    Map<String, double> iosZoomFactors = const {};
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final backCount = _cameras!
+          .where((camera) => camera.lensDirection == CameraLensDirection.back)
+          .length;
+      if (backCount >= 2) {
+        iosZoomFactors = await _iosLensMetadata.backLensZoomFactors();
+        if (iosZoomFactors.isEmpty) {
+          talker.warning(
+            'iOS lens zoom factors unavailable, using fallback labels',
+          );
+        }
+      }
+    } else {
+      try {
+        minZoomRatio = await controller.getMinZoomLevel();
+      } catch (e, st) {
+        talker.handle(
+          e,
+          st,
+          'Min zoom level unavailable, lens selector limited to 1x',
+        );
+      }
+    }
+
+    _lensOptions = _lensService.resolveBackOptions(
+      cameras: _cameras!,
+      activeBack: activeBack,
+      minZoomRatio: minZoomRatio,
+      iosZoomFactors: iosZoomFactors,
+    );
+    _selectedLens = _lensService.initialSelection(_lensOptions, activeBack);
+    talker.info(
+      'Resolved back lens options: '
+      '${_lensOptions.map((option) => option.label).join(', ')}',
+    );
+  }
+
+  Future<void> _applyLensZoom() async {
+    final option = _selectedLens;
+    final controller = _controller;
+    if (option == null || controller == null) return;
+
+    final usesZoomRatios = _lensOptions.any(
+      (lensOption) => lensOption.zoomRatio != 1.0,
+    );
+    if (!usesZoomRatios) return;
+
+    try {
+      await controller.setZoomLevel(option.zoomRatio);
+    } catch (e, st) {
+      talker.handle(e, st, 'Failed to apply lens zoom ${option.label}');
+    }
+  }
+
+  Future<void> _onLensSelected(CameraLensOption option) async {
+    if (_isShutterBlocked || _isFrontCamera) return;
+    if (identical(option, _selectedLens)) return;
+
+    setState(() {
+      _selectedLens = option;
+      _isSwitchingLens = true;
+    });
+    talker.info('Switching back lens to ${option.label}');
+
+    try {
+      if (_controller?.description == option.camera) {
+        await _applyLensZoom();
+      } else {
+        await _controller?.dispose();
+        if (!mounted) return;
+        await _setupCamera(isBack: true, lensCamera: option.camera);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSwitchingLens = false);
+      }
     }
   }
 
@@ -108,7 +226,7 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> _capturePhoto() async {
     if (_controller == null ||
         !_controller!.value.isInitialized ||
-        _isProcessing) {
+        _isShutterBlocked) {
       return;
     }
 
@@ -132,14 +250,18 @@ class _CameraScreenState extends State<CameraScreen> {
         "Failed to capture photo isFrontCamera=$_isFrontCamera",
       );
       _showError('Failed to capture photo');
-      setState(() => _isProcessing = false);
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
     }
   }
 
   Future<void> _switchToFrontCamera() async {
     await _controller?.dispose();
     await _setupCamera(isBack: false);
-    setState(() => _isProcessing = false);
+    if (mounted) {
+      setState(() => _isProcessing = false);
+    }
     talker.debug("Switched to front camera");
   }
 
@@ -233,6 +355,10 @@ class _CameraScreenState extends State<CameraScreen> {
 
   bool get _shouldMirrorPreview => _isFrontCamera && Platform.isAndroid;
 
+  bool get _isShutterBlocked => _isProcessing || _isSwitchingLens;
+
+  bool get _showLensSelector => !_isFrontCamera && _lensOptions.length >= 2;
+
   @override
   void dispose() {
     SystemChrome.setPreferredOrientations([
@@ -302,17 +428,27 @@ class _CameraScreenState extends State<CameraScreen> {
                   ),
                 ),
                 const Spacer(),
+                if (_showLensSelector)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: LensSelector(
+                      options: _lensOptions,
+                      selected: _selectedLens,
+                      enabled: !_isShutterBlocked,
+                      onSelect: _onLensSelected,
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 40),
                   child: GestureDetector(
-                    onTap: _isProcessing ? null : _capturePhoto,
+                    onTap: _isShutterBlocked ? null : _capturePhoto,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _isProcessing
+                        color: _isShutterBlocked
                             ? CupertinoColors.systemGrey
                             : CupertinoColors.white,
                         border: Border.all(
@@ -327,7 +463,7 @@ class _CameraScreenState extends State<CameraScreen> {
                           ),
                         ],
                       ),
-                      child: _isProcessing
+                      child: _isShutterBlocked
                           ? const CupertinoActivityIndicator()
                           : const Icon(
                               CupertinoIcons.camera_fill,
