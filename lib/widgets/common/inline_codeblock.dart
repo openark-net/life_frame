@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../services/app_notification_service.dart';
+
 class InlineCodeblock extends StatelessWidget {
   final String text;
   final bool copyable;
@@ -10,11 +12,11 @@ class InlineCodeblock extends StatelessWidget {
 
   Future<void> _copyToClipboard() async {
     await Clipboard.setData(ClipboardData(text: text));
-    Get.snackbar(
-      'Copied!',
-      'Copied "$text" to clipboard',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
+    Get.find<AppNotificationService>().show(
+      title: 'Copied!',
+      message: 'Copied "$text" to clipboard',
+      position: NotificationPosition.bottom,
+      displayDuration: const Duration(seconds: 2),
     );
   }
 

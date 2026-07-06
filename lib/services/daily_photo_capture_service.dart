@@ -9,6 +9,7 @@ import '../controllers/daily_entry_controller.dart';
 import '../models/daily_entry.dart';
 import '../screens/capture/camera_screen.dart';
 import '../screens/capture/photo_confirmation_screen.dart';
+import '../services/app_notification_service.dart';
 import '../services/photo_stitching_service.dart';
 import '../widgets/capture/location_selection_modal.dart';
 import 'package:talker/talker.dart';
@@ -19,6 +20,8 @@ class DailyPhotoCaptureService {
   final DailyEntryController _controller = Get.find<DailyEntryController>();
   final PhotoStitchingService _stitchingService = PhotoStitchingService();
   final LocationService _locationService = Get.find<LocationService>();
+  final AppNotificationService _notifications =
+      Get.find<AppNotificationService>();
   final Talker _talker = Get.find<Talker>();
 
   Future<bool> captureDailyPhoto(BuildContext context) async {
@@ -328,25 +331,11 @@ class DailyPhotoCaptureService {
   }
 
   void _showSuccessSnackbar(String message) {
-    Get.snackbar(
-      'Success',
-      message,
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: CupertinoColors.systemGreen,
-      colorText: CupertinoColors.white,
-      duration: const Duration(seconds: 3),
-    );
+    _notifications.showSuccess('Success', message);
   }
 
   void _showErrorSnackbar(String message) {
-    Get.snackbar(
-      'Error',
-      message,
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: CupertinoColors.systemRed,
-      colorText: CupertinoColors.white,
-      duration: const Duration(seconds: 3),
-    );
+    _notifications.showError('Error', message);
   }
 }
 

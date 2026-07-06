@@ -5,6 +5,8 @@ import 'package:talker/talker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../services/app_notification_service.dart';
+
 class BugActionButtons extends StatelessWidget {
   const BugActionButtons({super.key});
 
@@ -40,10 +42,10 @@ class BugActionButtons extends StatelessWidget {
     } catch (e, st) {
       final talker = Get.find<Talker>();
       talker.handle(e, st, 'Failed to share logs');
-      Get.snackbar(
+      Get.find<AppNotificationService>().showError(
         'Error',
         'Failed to share logs: $e',
-        snackPosition: SnackPosition.BOTTOM,
+        position: NotificationPosition.bottom,
       );
     }
   }

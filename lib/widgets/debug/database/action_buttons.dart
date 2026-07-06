@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:talker/talker.dart';
 import '../../../controllers/daily_entry_controller.dart';
 import '../../../models/daily_entry.dart';
+import '../../../services/app_notification_service.dart';
 
 class ActionButtons extends StatefulWidget {
   final List<DailyEntry> entries;
@@ -227,13 +228,11 @@ class _ActionButtonsState extends State<ActionButtons> {
   }
 
   void _showSnackbar(String title, String message, Color backgroundColor) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.TOP,
+    Get.find<AppNotificationService>().show(
+      title: title,
+      message: message,
       backgroundColor: backgroundColor,
-      colorText: CupertinoColors.white,
-      duration: const Duration(seconds: 2),
+      displayDuration: const Duration(seconds: 2),
     );
   }
 }
