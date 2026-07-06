@@ -201,7 +201,7 @@ class _CameraScreenState extends State<CameraScreen> {
       if (_controller?.description == option.camera) {
         await _applyLensZoom();
       } else {
-        await _controller?.dispose();
+        await _disposeActiveController();
         if (!mounted) return;
         await _setupCamera(isBack: true, lensCamera: option.camera);
       }
@@ -257,12 +257,23 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _switchToFrontCamera() async {
-    await _controller?.dispose();
+    await _disposeActiveController();
     await _setupCamera(isBack: false);
     if (mounted) {
       setState(() => _isProcessing = false);
     }
     talker.debug("Switched to front camera");
+  }
+
+  Future<void> _disposeActiveController() async {
+    final controller = _controller;
+    if (controller == null) return;
+
+    _controller = null;
+    if (mounted) {
+      setState(() {});
+    }
+    await controller.dispose();
   }
 
   void _completeCapture() {
@@ -300,7 +311,8 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Widget _buildCameraPreview() {
-    if (_controller == null || !_controller!.value.isInitialized) {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
       return const Center(
         child: CupertinoActivityIndicator(
           radius: 20,
@@ -312,7 +324,7 @@ class _CameraScreenState extends State<CameraScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = MediaQuery.of(context).size;
-        var scale = size.aspectRatio * _controller!.value.aspectRatio;
+        var scale = size.aspectRatio * controller.value.aspectRatio;
 
         if (scale < 1) {
           scale = 1 / scale;
@@ -321,7 +333,7 @@ class _CameraScreenState extends State<CameraScreen> {
         Widget cameraPreview = ClipRect(
           child: Transform.scale(
             scale: scale,
-            child: Center(child: CameraPreview(_controller!)),
+            child: Center(child: CameraPreview(controller)),
           ),
         );
 
